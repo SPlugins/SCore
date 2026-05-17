@@ -53,7 +53,10 @@ public class UnsafeTeleportOnCursor extends MixedCommand {
                 Location toTeleport = lastAirBlock.getLocation();
                 toTeleport.setPitch(receiver.getLocation().getPitch());
                 toTeleport.setYaw(receiver.getLocation().getYaw());
-                receiver.teleport(toTeleport);
+                if (SCore.isFolia())
+                    receiver.teleportAsync(toTeleport);
+                else
+                    receiver.teleport(toTeleport);
             }
 
         } catch (Exception ignored) {

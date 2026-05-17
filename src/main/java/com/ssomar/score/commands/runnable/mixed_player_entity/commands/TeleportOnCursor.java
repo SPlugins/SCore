@@ -64,10 +64,10 @@ public class TeleportOnCursor extends MixedCommand {
 
             if (validTp && isAirBlock(checkLoc.clone().add(0, 1, 0).getBlock()) && isAirBlock(checkLoc.clone().add(0, 2, 0).getBlock())) {
                 if (TeleportOnCursorManager.getInstance().canTp(receiver.getUniqueId())) {
-                    if(SCore.isFolia()){
-                     receiver.teleportAsync(checkLoc.add(0, 1, 0));
-                    }
-                    else receiver.teleport(checkLoc.add(0, 1, 0));
+                    if(SCore.isFolia())
+                        receiver.teleportAsync(checkLoc.add(0, 1, 0));
+                    else
+                        receiver.teleport(checkLoc.add(0, 1, 0));
                     SsomarDev.testMsg("TeleportOnCursor command executed on entity: " + receiver.getType() + " at location: " + checkLoc, true);
                 }
 

@@ -1,5 +1,6 @@
 package com.ssomar.score.commands.runnable.entity.commands;
 
+import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.entity.EntityCommand;
 import org.bukkit.ChatColor;
@@ -21,7 +22,10 @@ public class TeleportEntityToPlayer extends EntityCommand {
         Location pLoc = p.getLocation();
 
         if (!entity.isDead() && p.isOnline() && !p.isDead())
-            entity.teleport(new Location(p.getWorld(), pLoc.getX(), pLoc.getY(), pLoc.getZ()));
+            if (SCore.isFolia())
+                entity.teleportAsync(new Location(p.getWorld(), pLoc.getX(), pLoc.getY(), pLoc.getZ()));
+            else
+                entity.teleport(new Location(p.getWorld(), pLoc.getX(), pLoc.getY(), pLoc.getZ()));
     }
 
     @Override

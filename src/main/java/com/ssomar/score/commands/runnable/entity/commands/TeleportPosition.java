@@ -1,5 +1,6 @@
 package com.ssomar.score.commands.runnable.entity.commands;
 
+import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.CommandSetting;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.entity.EntityCommand;
@@ -34,7 +35,10 @@ public class TeleportPosition extends EntityCommand {
         List<String> args = sCommandToExec.getOtherArgs();
         if (args.size() == 3) {
             if (!entity.isDead())
-                entity.teleport(new Location(entity.getWorld(), x, y, z));
+                if (SCore.isFolia())
+                    entity.teleportAsync(new Location(entity.getWorld(), x, y, z));
+                else
+                    entity.teleport(new Location(entity.getWorld(), x, y, z));
         }
     }
 

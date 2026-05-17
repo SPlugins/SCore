@@ -1,5 +1,6 @@
 package com.ssomar.score.commands.runnable.player.commands;
 
+import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.CommandSetting;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.player.PlayerCommand;
@@ -38,7 +39,10 @@ public class FlyOff extends PlayerCommand {
                 }
                 if (!isVoid) {
                     playerLocation.add(0, 1, 0);
-                    receiver.teleport(playerLocation);
+                    if (SCore.isFolia())
+                        receiver.teleportAsync(playerLocation);
+                    else
+                        receiver.teleport(playerLocation);
                 }
             }
         }

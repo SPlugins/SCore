@@ -1,5 +1,6 @@
 package com.ssomar.score.commands.runnable.mixed_player_entity.commands;
 
+import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.ArgumentChecker;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.mixed_player_entity.MixedCommand;
@@ -40,7 +41,10 @@ public class Teleport extends MixedCommand {
         Location loc = new Location(world, x, y, z);
         loc.setPitch(pitch);
         loc.setYaw(yaw);
-        receiver.teleport(loc);
+        if (SCore.isFolia())
+            receiver.teleportAsync(loc);
+        else
+            receiver.teleport(loc);
         if(keepVelocity) receiver.setVelocity(velocity);
     }
 

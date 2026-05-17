@@ -36,7 +36,11 @@ public class Spin extends MixedCommand {
                     task.get().cancel();
                     return;
                 }
-                receiver.teleport(receiver.getLocation().setDirection(receiver.getLocation().getDirection()
+                if (SCore.isFolia())
+                    receiver.teleportAsync(receiver.getLocation().setDirection(receiver.getLocation().getDirection()
+                            .rotateAroundY(Math.toRadians(velocity))));
+                else
+                    receiver.teleport(receiver.getLocation().setDirection(receiver.getLocation().getDirection()
                         .rotateAroundY(Math.toRadians(velocity))));
                 ticks++;
             }

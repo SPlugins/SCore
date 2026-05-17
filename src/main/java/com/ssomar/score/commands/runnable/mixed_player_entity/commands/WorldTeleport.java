@@ -56,7 +56,10 @@ public class WorldTeleport extends MixedCommand {
                                 break;
                             }
                             newLoc.add(0, 1, 0);
-                            receiver.teleport(newLoc);
+                            if (SCore.isFolia())
+                                receiver.teleportAsync(newLoc);
+                            else
+                                receiver.teleport(newLoc);
                             teleport = true;
                             break;
                         } else {
@@ -77,7 +80,10 @@ public class WorldTeleport extends MixedCommand {
                     if (newLoc.getBlock().isEmpty() && newLoc.getY() > 0) continue;
                     else if (!newLoc.getBlock().isEmpty()) {
                         newLoc.add(0, 1, 0);
-                        receiver.teleport(newLoc);
+                        if (SCore.isFolia())
+                            receiver.teleportAsync(newLoc);
+                        else
+                            receiver.teleport(newLoc);
                         teleport = true;
                     }
                 }

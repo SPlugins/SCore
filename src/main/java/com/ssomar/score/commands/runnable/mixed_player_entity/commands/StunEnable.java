@@ -30,7 +30,10 @@ public class StunEnable extends MixedCommand {
             correctAnimation.setPitch(45F);
             livingReceiver.setAI(false);
         }
-        receiver.teleport(correctAnimation);
+        if (SCore.isFolia())
+            receiver.teleportAsync(correctAnimation);
+        else
+            receiver.teleport(correctAnimation);
         StunEvent.stunPlayers.put(receiver.getUniqueId(), false);
         Runnable runnable3 = new Runnable() {
             @Override

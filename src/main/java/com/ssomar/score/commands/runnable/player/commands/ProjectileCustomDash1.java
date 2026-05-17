@@ -30,7 +30,10 @@ public class ProjectileCustomDash1 extends PlayerCommand {
     private static void pullEntityToLocation(Entity e, Location loc) {
         Location entityLoc = e.getLocation();
         entityLoc.setY(entityLoc.getY() + 0.5D);
-        e.teleport(entityLoc);
+        if (SCore.isFolia())
+            e.teleportAsync(entityLoc);
+        else
+            e.teleport(entityLoc);
         double g = -0.08D;
         double v_x = (1.0D + 0.07D * loc.distance(entityLoc)) * (loc.getX() - entityLoc.getX()) / loc.distance(entityLoc);
         double v_y = (1.0D + 0.03D * loc.distance(entityLoc)) * (loc.getY() - entityLoc.getY()) / loc.distance(entityLoc) - 0.5D * g * loc.distance(entityLoc);

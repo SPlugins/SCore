@@ -1,5 +1,6 @@
 package com.ssomar.score.commands.runnable.mixed_player_entity.commands;
 
+import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.ArgumentChecker;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.mixed_player_entity.MixedCommand;
@@ -26,7 +27,10 @@ public class SetPitch extends MixedCommand {
         Vector velocity = receiver.getVelocity().clone();
         Location location = receiver.getLocation();
         location.setPitch(pitch);
-        receiver.teleport(location);
+        if (SCore.isFolia())
+            receiver.teleportAsync(location);
+        else
+            receiver.teleport(location);
         if(keepVelocity) receiver.setVelocity(velocity);
     }
 
