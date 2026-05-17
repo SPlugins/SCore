@@ -145,7 +145,10 @@ public class CooldownFeature extends FeatureWithHisOwnEditor<CooldownFeature, Co
                 SObjectBuildable sObjectBuildable = (SObjectBuildable) sObject;
                 ItemStack item = sObjectBuildable.buildItem(1, Optional.empty());
                 HumanEntity humanEntity = (HumanEntity) entity;
-                humanEntity.setCooldown(item, cooldown.getTimeLeftFlatValue()*20);
+                if (this.isCooldownInTicks.getValue())
+                    humanEntity.setCooldown(item, cooldown.getTimeLeftFlatValue());
+                else
+                    humanEntity.setCooldown(item, cooldown.getTimeLeftFlatValue()*20);
                 //SsomarDev.testMsg("SET COOLDOWN FOR "+entity.getName()+" mat>> "+item+" >> "+cooldown.getTimeLeftFlatValue(), true);
             }
         }
