@@ -3,6 +3,7 @@ package com.ssomar.score.commands.runnable.mixed_player_entity.commands;
 import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.ActionInfo;
 import com.ssomar.score.commands.runnable.ArgumentChecker;
+import com.ssomar.score.commands.runnable.CommandSetting;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.mixed_player_entity.MixedCommand;
 import com.ssomar.score.usedapi.MyhticLibAPI;
@@ -28,9 +29,30 @@ import java.util.Optional;
 
 public class MLibDamage extends MixedCommand {
 
+    public MLibDamage() {
+        CommandSetting damage = new CommandSetting("damage", 0, String.class, 10);
+        CommandSetting type = new CommandSetting("type", 1, String.class, "PHYSICAL");
+        CommandSetting knockback = new CommandSetting("knockback", 2, Boolean.class, false);
+        CommandSetting element = new CommandSetting("element", 3, String.class, "FIRE");
+        CommandSetting crit = new CommandSetting("crit", 4, Boolean.class, false);
+        List<CommandSetting> settings = getSettings();
+        settings.add(damage);
+        settings.add(type);
+        settings.add(knockback);
+        settings.add(element);
+        settings.add(crit);
+        setNewSettingsMode(true);
+    }
+
     public void run(Player p, Entity receiver, SCommandToExec sCommandToExec) {
-        List<String> args = sCommandToExec.getOtherArgs();
         ActionInfo aInfo = sCommandToExec.getActionInfo();
+
+        String damageArg = (String) sCommandToExec.getSettingValue("damage");
+        // MAGIC, PHYSICAL, WEAPON, SKILL, PROJECTILE, UNARMED, ON_HIT, MINION, DOT;
+        String damageType = (String) sCommandToExec.getSettingValue("type");
+        boolean knockback = (boolean) sCommandToExec.getSettingValue("knockback");
+        String element = (String) sCommandToExec.getSettingValue("element");
+        boolean crit = (boolean) sCommandToExec.getSettingValue("crit");
 
         if(!(receiver instanceof LivingEntity)) return;
         LivingEntity livingReceiver = (LivingEntity) receiver;
@@ -38,11 +60,8 @@ public class MLibDamage extends MixedCommand {
         /* When target a NPC it can occurs */
         if (receiver == null) return;
 
-        double damage = getDamage(p, livingReceiver, args, aInfo);
-        // MAGIC, PHYSICAL, WEAPON, SKILL, PROJECTILE, UNARMED, ON_HIT, MINION, DOT;
-        String damageType = args.get(1).toUpperCase();
-        String element = null;
-        if (args.size() >= 4) element = args.get(3);
+
+        double damage = getDamage(p, livingReceiver, damageArg, aInfo);
 
         if (damage > 0 && !receiver.isDead()) {
             int maximumNoDmg = livingReceiver.getNoDamageTicks();
@@ -54,9 +73,9 @@ public class MLibDamage extends MixedCommand {
                     /* To avoid looping damage */
                     if(aInfo.isActionRelatedToDamageEvent()) p.setMetadata("cancelDamageEvent", (MetadataValue) new FixedMetadataValue((Plugin) SCore.plugin, Integer.valueOf(7772)));
                     p.setMetadata("damageFromCustomCommand", (MetadataValue) new FixedMetadataValue((Plugin) SCore.plugin, Integer.valueOf(7773)));
-                    MyhticLibAPI.mlib_damage(p, livingReceiver, damage, damageType, element, Boolean.parseBoolean(args.get(2)));
+                    MyhticLibAPI.mlib_damage(p, livingReceiver, damage, damageType, element, knockback, crit);
                 } else {
-                    MyhticLibAPI.mlib_damage(null, livingReceiver, damage, damageType, element, Boolean.parseBoolean(args.get(2)));
+                    MyhticLibAPI.mlib_damage(null, livingReceiver, damage, damageType, element, knockback, crit);
                 }
             }
 
@@ -65,18 +84,8 @@ public class MLibDamage extends MixedCommand {
     }
 
     @SuppressWarnings("deprecation")
-    public static double getDamage(Player launcher, LivingEntity receiver, List<String> args, ActionInfo actionInfo) {
+    public static double getDamage(Player launcher, LivingEntity receiver, String damage, ActionInfo actionInfo) {
         double amount;
-        String damage = args.get(0);
-
-        boolean potionAmplification = false;
-        if (args.size() >= 2) {
-            potionAmplification = Boolean.valueOf(args.get(1));
-        }
-        boolean attributeAmplification = false;
-        if (args.size() >= 3) {
-            attributeAmplification = Boolean.valueOf(args.get(2));
-        }
 
         /* percentage damage */
         if (damage.contains("%")) {
@@ -92,36 +101,6 @@ public class MLibDamage extends MixedCommand {
             amount = NTools.reduceDouble(amount, 2);
         } else amount = Double.parseDouble(damage);
 
-        if (launcher != null) {
-            if (potionAmplification) {
-                PotionEffectType incDamage = SCore.is1v20v5Plus() ? PotionEffectType.STRENGTH : PotionEffectType.getByName("INCREASE_DAMAGE");
-                PotionEffect pE = launcher.getPotionEffect(incDamage);
-                if (pE != null) {
-                    amount = amount + (pE.getAmplifier() + 1) * 3;
-                }
-            }
-
-            //SsomarDev.testMsg("boost attribute: "+ attributeAmplification);
-            if (attributeAmplification) {
-                Attribute att = null;
-                if(SCore.is1v21v2Plus()) att = Attribute.ATTACK_DAMAGE;
-                else att = AttributeUtils.getAttribute("GENERIC_ATTACK_DAMAGE");
-                AttributeInstance aI = launcher.getAttribute(att);
-                double bonusAmount = 0;
-                if (aI != null) {
-                    //SsomarDev.testMsg("damage value: "+aI.getValue());
-                    for (AttributeModifier aM : aI.getModifiers()) {
-                        //SsomarDev.testMsg("passe 2:  "+aM.getOperation());
-                        if (aM.getOperation().equals(AttributeModifier.Operation.MULTIPLY_SCALAR_1)) {
-                            //SsomarDev.testMsg("passe 3: "+(amount * aM.getAmount())+ " >> "+aM.getAmount());
-                            bonusAmount = bonusAmount + amount * aM.getAmount();
-                        }
-                    }
-                }
-                //SsomarDev.testMsg("boost attribute bonus: "+ bonusAmount);
-                amount = amount + bonusAmount;
-            }
-        }
         return amount;
     }
 
