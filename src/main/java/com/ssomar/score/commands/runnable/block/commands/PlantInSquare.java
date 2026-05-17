@@ -109,7 +109,8 @@ public class PlantInSquare extends BlockCommand {
         }
         // #7
         else{
-            // random resources
+            // Side Comment: If the user does not specify any crops and takeFromInventory is false, this custom command
+            // will inevitably place random crops.
             int slot = 0;
             while(resourcesNeeded > 0){
                 // get random index of validMaterial
@@ -200,6 +201,16 @@ public class PlantInSquare extends BlockCommand {
         }
     }
 
+    /**
+     * An ItemStack can have an amount value of 0 or less and still be a non-null value. <br/><br/>
+     * Under the context of PLANT_IN_SQUARE, the logic requires an ItemStack that has a value
+     * of greater than 0. <br/>
+     * <br/>
+     * <b>Additional Info: Later down in the code execution, if a crop is placed successfully, its
+     * amount value will be reduced by 1, making the null statement of this method reachable.</b>
+     * @param disposal
+     * @return
+     */
     private ItemStack getValidItem(Map<Integer, ItemStack> disposal){
         for(ItemStack item : disposal.values()){
             if(item.getAmount() > 0) return item;

@@ -8,10 +8,20 @@ import org.bukkit.Material;
 import javax.annotation.Nullable;
 import java.util.*;
 
+/**
+ * The purpose of this class is to help developers attempt to get the material id of a specific item. Because sometimes
+ * when Minecraft updates, the material id of an item changes, which breaks logic when used in various versions.<br/><br/>
+ * With the help of the flexibility of this logic, fetching the material id of an item would be less of a hassle.
+ *
+ */
 @Getter @Setter
 public class ToolsListMaterial {
 
     private static ToolsListMaterial instance;
+    /**
+     * Key = Block Material Enum value <br/>
+     * Value = ItemStack Material Enum value
+     */
     private static Map<Material, Material> blockAndItemMaterial;
     private List<Material> plantWithGrowth;
 
@@ -40,6 +50,8 @@ public class ToolsListMaterial {
         plantWithGrowthOnlyJungleWood = new ArrayList<>();
         oneUsageMaterial = new ArrayList<>();
         validJungleBlockMaterials = new ArrayList<>();
+
+        // Associate each crop towards their place of growth
 
         addWithoutProblem(plantWithGrowth, FixedMaterial.getMaterial(Arrays.asList("WHEAT", "CROPS")));
         addWithoutProblem(plantWithGrowth, FixedMaterial.getMaterial(Arrays.asList("CARROTS", "CARROT")));
@@ -76,6 +88,9 @@ public class ToolsListMaterial {
         addWithoutProblem(validJungleBlockMaterials, FixedMaterial.getMaterial(Collections.singletonList("STRIPPED_JUNGLE_LOG")));
 
         blockAndItemMaterial = new HashMap<>();
+
+        // Link a crop block towards their seed material
+
         if (SCore.is1v12Less()) {
             blockAndItemMaterial.put(Material.valueOf("CROPS"), Material.valueOf("SEEDS"));
             blockAndItemMaterial.put(Material.valueOf("POTATO"), Material.valueOf("POTATO_ITEM"));
@@ -96,6 +111,7 @@ public class ToolsListMaterial {
         blockAndItemMaterial.put(FixedMaterial.getMaterial(Arrays.asList("TORCHFLOWER_CROP")), FixedMaterial.getMaterial(Arrays.asList("TORCHFLOWER_SEEDS")));
         blockAndItemMaterial.put(FixedMaterial.getMaterial(Arrays.asList("TORCHFLOWER")), FixedMaterial.getMaterial(Arrays.asList("TORCHFLOWER_SEEDS")));
         blockAndItemMaterial.put(FixedMaterial.getMaterial(Arrays.asList("COCOA")), FixedMaterial.getMaterial(Arrays.asList("COCOA_BEANS")));
+        blockAndItemMaterial.put(FixedMaterial.getMaterial(Arrays.asList("SWEET_BERRY_BUSH")), FixedMaterial.getMaterial(Arrays.asList("SWEET_BERRIES")));
         blockAndItemMaterial.put(Material.TRIPWIRE, Material.STRING);
         blockAndItemMaterial.put(Material.REDSTONE_WIRE, Material.REDSTONE);
 
@@ -113,6 +129,12 @@ public class ToolsListMaterial {
 
     }
 
+    /**
+     * To safely add materials to a {@code List<Material>} variable.
+     * @param list the list where the material will be stored at
+     * @param material in the context of {@link FixedMaterial#getMaterial(List)}, if an invalid entry is written in {@link ToolsListMaterial#ToolsListMaterial()}, it will default
+     *                 into {@code Material.BARRIER} which means, "ignore this entry". Otherwise, just add it normally.
+     */
     public void addWithoutProblem(List<Material> list, Material material) {
         if (material == Material.BARRIER) return;
 
@@ -124,6 +146,13 @@ public class ToolsListMaterial {
         return instance;
     }
 
+    /**
+     * Used to fetch the {@link Material} seed of a crop block. <br/><br/>
+     * Essential for checking if you have enough crops for
+     * if {@code takeFromInv} is enabled in the context of {@code PLANT_IN_SQUARE}
+     * @param material
+     * @return
+     */
     @Nullable
     public Material getRealMaterialOfBlock(Material material) {
         if (blockAndItemMaterial.containsKey(material)) {
@@ -131,6 +160,11 @@ public class ToolsListMaterial {
         } else return material;
     }
 
+    /**
+     * Used to fetch the {@link Material} id of a crop block
+     * @param material
+     * @return
+     */
     @Nullable
     public Material getBlockMaterialOfItem(Material material) {
         for (Material key : blockAndItemMaterial.keySet()) {

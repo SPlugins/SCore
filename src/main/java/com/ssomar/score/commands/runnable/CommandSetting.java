@@ -42,6 +42,14 @@ public class CommandSetting {
     @Setter
     private boolean acceptUnderScoreForLongText = false;
 
+    /**
+     *
+     * Old System refers to back when SCore custom commands are made, the command arguments rely on the position of values.
+     * @param name argument prefix name.
+     * @param oldSystemIndex for example, in {@code FRONTDASH 3 true}, {@code 3} represents index 0 and so on. If you want your custom argument to ignore this system, just enter {@code -1}.
+     * @param type the datatype. For example: {@code Integer.class}.
+     * @param defaultValue the default value for this argument if ever it's not filled by the user.
+     */
     public CommandSetting(String name, int oldSystemIndex, Object type, Object defaultValue) {
         this.names = Collections.singletonList(name);
         this.oldSystemIndex = oldSystemIndex;
