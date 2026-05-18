@@ -38,7 +38,7 @@ public class PlaceLiquid extends BlockCommand {
 
     @Override
     public String getTemplate() {
-        return "PLACELIQUID";
+        return "PLACELIQUID type:WATER";
     }
 
     @Override
