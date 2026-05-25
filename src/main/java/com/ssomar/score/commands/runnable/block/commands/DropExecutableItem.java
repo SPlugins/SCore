@@ -10,6 +10,7 @@ import com.ssomar.score.commands.runnable.block.BlockCommand;
 import com.ssomar.score.utils.strings.StringSetting;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +71,10 @@ public class DropExecutableItem extends BlockCommand {
 
                 if (eiOpt.isPresent()) {
                     ExecutableItemInterface ei = eiOpt.get();
-                    block.getWorld().dropItem(block.getLocation(), ei.buildItem(amount, playerOwner, settings));
+                    // Create a new Location object because if you try to drop the item with whole number coords, it will drop it in the corner
+                    Location dropLoc = new Location(block.getWorld(), block.getX()+0.5, block.getY(), block.getZ()+0.5);
+
+                    block.getWorld().dropItem(dropLoc, ei.buildItem(amount, playerOwner, settings));
                 }
             }
         }
