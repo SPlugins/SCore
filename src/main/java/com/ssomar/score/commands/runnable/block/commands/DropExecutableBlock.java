@@ -7,6 +7,7 @@ import com.ssomar.score.api.executableblocks.config.ExecutableBlockInterface;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.block.BlockCommand;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,10 @@ public class DropExecutableBlock extends BlockCommand {
                 Optional<ExecutableBlockInterface> eiOpt = ExecutableBlocksAPI.getExecutableBlocksManager().getExecutableBlock(args.get(0));
                 if (eiOpt.isPresent()) {
                     ExecutableBlock ei = (ExecutableBlock) eiOpt.get();
-                    block.getWorld().dropItem(block.getLocation(), ei.buildItem(amount, Optional.ofNullable(p)));
+                    // Create a new Location object because if you try to drop the item with whole number coords, it will drop it in the corner
+                    Location dropLoc = new Location(block.getWorld(), block.getX()+0.5, block.getY(), block.getZ()+0.5);
+                    
+                    block.getWorld().dropItem(dropLoc, ei.buildItem(amount, Optional.ofNullable(p)));
                 }
             }
         }
