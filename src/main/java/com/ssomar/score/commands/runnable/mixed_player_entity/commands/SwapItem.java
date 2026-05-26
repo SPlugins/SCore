@@ -142,13 +142,13 @@ public class SwapItem extends MixedCommand {
     @Override
     public List<String> getNames() {
         List<String> names = new ArrayList<>();
-        names.add("TRANSFER_ITEM");
+        names.add("SWAP_ITEM");
         return names;
     }
 
     @Override
     public String getTemplate() {
-        return "TRANSFER_ITEM {slot of launcher} {slot of receiver} [boolean drop]";
+        return "SWAP_ITEM {slot of launcher} {slot of receiver} [boolean drop]";
     }
 
     @Override

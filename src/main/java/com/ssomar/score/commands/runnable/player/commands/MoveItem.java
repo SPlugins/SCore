@@ -11,10 +11,15 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MoveItem extends PlayerCommand {
 
+    /**
+     * The difference between MOVE_ITEM and SWAP_ITEM is that MOVE_ITEM moves items one-way. This can also be used
+     * as wireless give method
+     */
     public MoveItem() {
         CommandSetting yourSlot = new CommandSetting("yourSlot", 0, Integer.class, 0);
         CommandSetting theirSlot = new CommandSetting("theirSlot", 1, Integer.class, -1);
@@ -77,7 +82,10 @@ public class MoveItem extends PlayerCommand {
                 targetPlayer.getInventory().setItem(theirSlot, itemFromLauncher);
                 launcher.getInventory().setItem(yourSlot, new ItemStack(Material.AIR));
             } else {
-                targetPlayer.getInventory().addItem(itemFromLauncher);
+                HashMap<Integer, ItemStack> failedToGive = targetPlayer.getInventory().addItem(itemFromLauncher);
+                if (!failedToGive.isEmpty()) {
+                    targetPlayer.getWorld().dropItem(targetPlayer.getLocation(), itemFromLauncher);
+                }
                 launcher.getInventory().setItem(yourSlot, new ItemStack(Material.AIR));
             }
         } else {
