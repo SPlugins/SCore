@@ -22,7 +22,7 @@ import java.util.Optional;
 public class SwapItem extends MixedCommand {
 
     /**
-     * Best executed in target / entity commands. Executing it in player commands will practically do nothing.
+     * Best executed in target / entity commands. Executing it in player commands will just move the items around in the caster's inv
      * @param p (The user of the item)
      * @param receiver (The victim of the command. Typecast it to player via (Player) when needed. Check spigot api for the finer details)
      * @param sCommandToExec (The list of arguments after the custom command)
