@@ -64,7 +64,7 @@ public class MoveItem extends PlayerCommand {
 
         Player targetPlayer;
 
-        if (receiver == null) {
+        if (!who.equals("null") || receiver == null) {
             targetPlayer = Bukkit.getPlayer(who);
             if (targetPlayer == null) return;
         } else {
