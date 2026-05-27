@@ -239,6 +239,8 @@
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
                                               tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.11\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="E:\Razer\Documents\Server Files\FOLIA 1.21.11\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
                                               tofile="/Users/josefmikourquico/Documents/Server Files/PAPERSPIGOT 1.21.4/plugins/SCore.jar"/>
                                     </target>
                                 </configuration>
