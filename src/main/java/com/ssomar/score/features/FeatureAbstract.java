@@ -26,7 +26,7 @@ public abstract class FeatureAbstract<FINAL_VALUE_CLASS, FEATURE_CLASS> implemen
     @Setter
     private boolean isPremium;
 
-    private boolean saveLaunched;
+    private volatile boolean saveLaunched;
 
     public FeatureAbstract(FeatureParentInterface parent, FeatureSettingsInterface featureSettings) {
         this.parent = parent;

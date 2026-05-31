@@ -68,7 +68,7 @@ public class Variable extends SObjectWithFileEditable<Variable, SProjectileEdito
             for (String key : config.getConfigurationSection("values").getKeys(false)) {
                 if (type.getValue().get().equals(VariableType.LIST)) {
                     this.values.put(key, config.getStringList("values." + key));
-                } else this.values.put(key, Arrays.asList(config.getString("values." + key)));
+                } else this.values.put(key, new ArrayList<>(Collections.singletonList(config.getString("values." + key))));
             }
         }
 
@@ -86,12 +86,15 @@ public class Variable extends SObjectWithFileEditable<Variable, SProjectileEdito
         /* clear values*/
         config.set("values", null);
 
-        for (String key : this.values.keySet()) {
-            //SsomarDev.testMsg("key: " + key, true);
-            if (type.getValue().get().equals(VariableType.LIST) && !this.values.get(key).isEmpty()) {
-                config.set("values." + key, this.values.get(key));
-            } else if (!this.values.get(key).isEmpty())
-                config.set("values." + key, this.values.get(key).get(0));
+        Map<String, List<String>> valuesSnapshot = new HashMap<>(this.values);
+        for (Map.Entry<String, List<String>> entry : valuesSnapshot.entrySet()) {
+            List<String> vals = entry.getValue();
+            if (vals == null || vals.isEmpty()) continue;
+            if (type.getValue().get().equals(VariableType.LIST)) {
+                config.set("values." + entry.getKey(), new ArrayList<>(vals));
+            } else {
+                config.set("values." + entry.getKey(), vals.get(0));
+            }
         }
     }
 
@@ -114,7 +117,7 @@ public class Variable extends SObjectWithFileEditable<Variable, SProjectileEdito
         defaultValue = new ColoredStringFeature(this, Optional.empty(), FeatureSettingsSCore.default_string);
         type = new VariableTypeFeature(this, Optional.of(VariableType.NUMBER), FeatureSettingsSCore.type, false);
         forFeature = new VariableForFeature(this, Optional.empty(), FeatureSettingsSCore.for_);
-        values = new HashMap<>();
+        values = new java.util.concurrent.ConcurrentHashMap<>();
         parsePlaceholders = new BooleanFeature(this, false, FeatureSettingsSCore.parsePlaceholders);
         icon = new MaterialFeature(this, Optional.of(Material.PAPER), FeatureSettingsSCore.icon);
     }
@@ -126,7 +129,11 @@ public class Variable extends SObjectWithFileEditable<Variable, SProjectileEdito
         clone.setForFeature(forFeature.clone(clone));
         clone.setDefaultValue(defaultValue.clone(clone));
         clone.setParsePlaceholders(parsePlaceholders.clone(clone));
-        clone.setValues(new HashMap<>(values));
+        Map<String, List<String>> deepCopy = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : values.entrySet()) {
+            deepCopy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+        }
+        clone.setValues(deepCopy);
         clone.setIcon(icon.clone(clone));
         return clone;
     }
@@ -305,12 +312,12 @@ public class Variable extends SObjectWithFileEditable<Variable, SProjectileEdito
 
         if (forFeature.getValue().get().equals(VariableForEnum.PLAYER)) {
             if (optPlayer.isPresent()) {
-                values.put(optPlayer.get().getUniqueId() + "", Arrays.asList(value));
+                values.put(optPlayer.get().getUniqueId() + "", new ArrayList<>(Collections.singletonList(value)));
             } else {
                 return Optional.of("§cYou need to attribute the value of this variable to a player");
             }
         } else {
-            values.put("global", Arrays.asList(value));
+            values.put("global", new ArrayList<>(Collections.singletonList(value)));
         }
 
         this.save(false);
@@ -325,6 +332,7 @@ public class Variable extends SObjectWithFileEditable<Variable, SProjectileEdito
                 if (optPlayer.isPresent()) {
                     List<String> actualValues = values.get(optPlayer.get().getUniqueId() + "");
                     if (actualValues == null) actualValues = new ArrayList<>();
+                    else actualValues = new ArrayList<>(actualValues);
                     actualValues.add(indexOpt.orElse(actualValues.size()), value);
                     values.put(optPlayer.get().getUniqueId() + "", actualValues);
                 } else {
@@ -333,6 +341,7 @@ public class Variable extends SObjectWithFileEditable<Variable, SProjectileEdito
             } else {
                 List<String> actualValues = values.get("global");
                 if (actualValues == null) actualValues = new ArrayList<>();
+                else actualValues = new ArrayList<>(actualValues);
                 actualValues.add(indexOpt.orElse(actualValues.size()), value);
                 values.put("global", actualValues);
             }
@@ -351,23 +360,29 @@ public class Variable extends SObjectWithFileEditable<Variable, SProjectileEdito
             if (forFeature.getValue().get().equals(VariableForEnum.PLAYER)) {
                 if (optPlayer.isPresent()) {
                     List<String> actualValues = values.get(optPlayer.get().getUniqueId() + "");
-                    try {
-                        if (valueOpt.isPresent()) actualValues.remove(valueOpt.get());
-                        else actualValues.remove((int) indexOpt.orElse(actualValues.size() - 1));
-                    } catch (Exception ignored) {
+                    if (actualValues != null) {
+                        actualValues = new ArrayList<>(actualValues);
+                        try {
+                            if (valueOpt.isPresent()) actualValues.remove(valueOpt.get());
+                            else actualValues.remove((int) indexOpt.orElse(actualValues.size() - 1));
+                        } catch (Exception ignored) {
+                        }
+                        values.put(optPlayer.get().getUniqueId() + "", actualValues);
                     }
-                    values.put(optPlayer.get().getUniqueId() + "", actualValues);
                 } else {
                     return Optional.of("§cYou need to attribute the remove of this variable to a player");
                 }
             } else {
                 List<String> actualValues = values.get("global");
-                try {
-                    if (valueOpt.isPresent()) actualValues.remove(valueOpt.get());
-                    else actualValues.remove((int) indexOpt.orElse(actualValues.size() - 1));
-                } catch (Exception ignored) {
+                if (actualValues != null) {
+                    actualValues = new ArrayList<>(actualValues);
+                    try {
+                        if (valueOpt.isPresent()) actualValues.remove(valueOpt.get());
+                        else actualValues.remove((int) indexOpt.orElse(actualValues.size() - 1));
+                    } catch (Exception ignored) {
+                    }
+                    values.put("global", actualValues);
                 }
-                values.put("global", actualValues);
             }
         } else {
             return Optional.of("§cTo remove something your variable must be a list");
