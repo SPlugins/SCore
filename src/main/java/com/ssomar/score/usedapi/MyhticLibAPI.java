@@ -30,7 +30,8 @@ public class MyhticLibAPI {
     public static void mlib_damage(@Nullable LivingEntity attacker, LivingEntity entity, double damageInput, String damageType, @Nullable String element, boolean knockback, boolean crit) {
 
         Element elementEnum = null;
-        if (element != null){
+        assert element != null; // Default: "NULL"
+        if (!element.equals("NULL")){
             try {
                 elementEnum = Element.valueOf(element);
             } catch (IllegalArgumentException e) {

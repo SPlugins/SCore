@@ -33,7 +33,7 @@ public class MLibDamage extends MixedCommand {
         CommandSetting damage = new CommandSetting("damage", 0, String.class, 10);
         CommandSetting type = new CommandSetting("type", 1, String.class, "PHYSICAL");
         CommandSetting knockback = new CommandSetting("knockback", 2, Boolean.class, false);
-        CommandSetting element = new CommandSetting("element", 3, String.class, "FIRE");
+        CommandSetting element = new CommandSetting("element", 3, String.class, "NULL");
         CommandSetting crit = new CommandSetting("crit", 4, Boolean.class, false);
         List<CommandSetting> settings = getSettings();
         settings.add(damage);
