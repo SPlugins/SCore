@@ -361,7 +361,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
                         sb.append(s).append("\n");
                     }
                     if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
-                    textDisplay.setText(sb.toString());
+                    SCore.schedulerHook.runEntityTask(()->{textDisplay.setText(sb.toString());}, ()->{}, textDisplay, 0);
                     return location;
                 }
             }

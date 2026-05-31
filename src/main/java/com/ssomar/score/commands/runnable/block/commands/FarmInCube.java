@@ -148,7 +148,7 @@ public class FarmInCube extends BlockCommand {
                                 playerUuid, p, eventFinal, slot, validMaterials);
                     }
                 };
-                SCore.schedulerHook.runTask(batchTask, 1);
+                SCore.schedulerHook.runLocationTask(batchTask, block.getLocation(), 1);
             }
 
             SsomarDev.testMsg("OldMaterial : " + oldMaterial.toString(), DEBUG);

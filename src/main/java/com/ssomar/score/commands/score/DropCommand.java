@@ -1,5 +1,6 @@
 package com.ssomar.score.commands.score;
 
+import com.ssomar.score.SCore;
 import com.ssomar.score.sobject.SObject;
 import com.ssomar.score.sobject.SObjectBuildable;
 import com.ssomar.score.sobject.SObjectManager;
@@ -86,8 +87,11 @@ public class DropCommand<X extends SPlugin, Y extends SObjectManager<Z>, Z exten
                     return;
                 }
 
-                objectOpt.get().dropItem(new Location(world, xOpt.get(), yOpt.get(), zOpt.get()), qty.get(), Optional.empty(), settings);
-                getSm().sendMessage(sender, "&c"+getSPlugin().getNameDesign() + " &7Successfully run &e/" + getSPlugin().getShortName().toLowerCase() + " drop " + arguments.get(0) + " " + qty + " " + world.getName() + " " + xOpt.get() + " " + yOpt.get() + " " + zOpt.get());
+                SCore.schedulerHook.runLocationTask(()->{
+                    objectOpt.get().dropItem(new Location(world, xOpt.get(), yOpt.get(), zOpt.get()), qty.get(), Optional.empty(), settings);
+                    getSm().sendMessage(sender, "&c"+getSPlugin().getNameDesign() + " &7Successfully run &e/" + getSPlugin().getShortName().toLowerCase() + " drop " + arguments.get(0) + " " + qty + " " + world.getName() + " " + xOpt.get() + " " + yOpt.get() + " " + zOpt.get());
+                },new Location(world, xOpt.get(), yOpt.get(), zOpt.get()),0);
+
                 break;
         }
     }

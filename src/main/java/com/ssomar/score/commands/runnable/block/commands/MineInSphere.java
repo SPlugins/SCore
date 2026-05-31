@@ -136,7 +136,7 @@ public class MineInSphere extends BlockCommand {
                 }
             }
         };
-        SCore.schedulerHook.runTask(runnable3, 1L);
+        SCore.schedulerHook.runLocationTask(runnable3, block.getLocation(), 1L);
     }
 
     @Override
