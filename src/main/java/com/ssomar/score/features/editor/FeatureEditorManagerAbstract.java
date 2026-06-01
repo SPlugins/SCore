@@ -342,6 +342,9 @@ public abstract class FeatureEditorManagerAbstract<T extends FeatureEditorInterf
             if (feature instanceof FeatureRequireMultipleMessageInEditor) {
                 if (feature.getEditorName().equals(requestWriting.get(interact.player))) {
                     ((FeatureRequireMultipleMessageInEditor) feature).finishEditInEditor(interact.player, this, null);
+                    currentWriting.remove(interact.player);
+                    requestWriting.remove(interact.player);
+                    disableTextEditor(interact.player);
                     interact.gui.openGUISync(interact.player);
                 }
             } else if (feature instanceof FeatureRequireSubTextEditorInEditor) {
