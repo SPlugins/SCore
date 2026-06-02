@@ -79,6 +79,21 @@ public class RegionisedSchedulerHook implements SchedulerHook {
     }
 
     @Override
+    public ScheduledTask runEntityRepeatingTask(Runnable runnable, Runnable retired, Entity entity, long initDelay, long period) {
+        if(plugin == null || !plugin.isEnabled()) return null;
+        if(initDelay <= 0) initDelay = 1;
+        EntityScheduler scheduler;
+        try {
+            scheduler = (EntityScheduler) Entity.class.getMethod("getScheduler").invoke(entity);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        io.papermc.paper.threadedregions.scheduler.ScheduledTask scheduledTask =
+                scheduler.runAtFixedRate(plugin, task -> runnable.run(), retired, initDelay, period);
+        return scheduledTask == null ? null : new RegionisedScheduledTask(scheduledTask);
+    }
+
+    @Override
     public ScheduledTask runEntityTaskAsap(Runnable runnable, Runnable retired, Entity entity) {
         if(plugin == null || !plugin.isEnabled()) return null;
 

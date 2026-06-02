@@ -153,7 +153,7 @@ public class Bossbar extends PlayerCommand {
                         } else bossBar.setTitle(StringConverter.coloredString(finalMessage + " " + countText));
                     }
                 };
-                task.set(SCore.schedulerHook.runRepeatingTask(runnable, 0, countTicks ? 1 : 20));
+                task.set(SCore.schedulerHook.runEntityRepeatingTask(runnable, () -> removeBossBar(bossBar, receiver), receiver, 0, countTicks ? 1 : 20));
 
                 // Register bossbar with task
                 if(cache.containsKey(receiver)) {
@@ -170,7 +170,7 @@ public class Bossbar extends PlayerCommand {
                         removeBossBar(bossBar, receiver);
                     }
                 };
-                SCore.schedulerHook.runTask(runnable, time);
+                SCore.schedulerHook.runEntityTask(runnable, () -> removeBossBar(bossBar, receiver), receiver, time);
             }
         }
     }
