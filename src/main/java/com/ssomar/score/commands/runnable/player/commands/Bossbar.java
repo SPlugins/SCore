@@ -102,76 +102,87 @@ public class Bossbar extends PlayerCommand {
 
 
         if(!coloredMessage.isEmpty()) {
-
-            BossBar bossBar = Bukkit.createBossBar(NamespacedKey.randomKey(), coloredMessage, color, BarStyle.SOLID);
-            bossBar.addPlayer(receiver);
-
-            if(barProgress < 1.0) {
-                bossBar.setProgress((double) barProgress);
-            }
-
-            // Register bossbar without task
-            if(cache.containsKey(receiver)) {
-                cache.get(receiver).put(bossBar, null);
-            } else {
-                Map<org.bukkit.boss.BossBar, ScheduledTask> map = new HashMap<>();
-                map.put(bossBar, null);
-                cache.put(receiver, map);
-            }
-
             final String finalMessage = message.toString();
+            // On Folia, Bukkit.createBossBar registers into the server's CustomBossEvents
+            // HashMap, which is iterated on player connect from a different region thread —
+            // causing ConcurrentModificationException (SCore #173). Dispatch creation (and
+            // later server.removeBossBar) exclusively through GlobalRegionScheduler so they
+            // never race with onPlayerConnect. On Bukkit the runnable runs inline (delay=0
+            // maps to synchronous in BukkitSchedulerHook when on primary thread).
+            Runnable setupBossBar = () -> {
+                BossBar bossBar = Bukkit.createBossBar(NamespacedKey.randomKey(), coloredMessage, color, BarStyle.SOLID);
+                bossBar.addPlayer(receiver);
 
-            if (count > 0) {
-                AtomicReference<ScheduledTask> task = new AtomicReference<>();
-                Runnable runnable = new Runnable() {
-                    int counter = isAscending ? 0 : Math.round(count * barProgress);
+                if(barProgress < 1.0) {
+                    bossBar.setProgress((double) barProgress);
+                }
 
-                    @Override
-                    public void run() {
-
-                        if (isAscending) {
-                            if (counter >= count) {
-                                removeBossBar(bossBar, receiver);
-                                return;
-                            }
-                            counter++;
-                        } else {
-                            if (counter <= 0) {
-                                removeBossBar(bossBar, receiver);
-                                return;
-                            }
-                            counter--;
-                        }
-
-                        String countText = String.valueOf(counter);
-                        if (!countTicks) {
-                            countText += "s";
-                        }
-                        bossBar.setProgress((double) counter / count);
-                        if (hideCount) {
-                            bossBar.setTitle(StringConverter.coloredString(finalMessage));
-                        } else bossBar.setTitle(StringConverter.coloredString(finalMessage + " " + countText));
-                    }
-                };
-                task.set(SCore.schedulerHook.runEntityRepeatingTask(runnable, () -> removeBossBar(bossBar, receiver), receiver, 0, countTicks ? 1 : 20));
-
-                // Register bossbar with task
+                // Register bossbar without task
                 if(cache.containsKey(receiver)) {
-                    cache.get(receiver).put(bossBar, task.get());
+                    cache.get(receiver).put(bossBar, null);
                 } else {
                     Map<org.bukkit.boss.BossBar, ScheduledTask> map = new HashMap<>();
-                    map.put(bossBar, task.get());
+                    map.put(bossBar, null);
                     cache.put(receiver, map);
                 }
-            } else {
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        removeBossBar(bossBar, receiver);
+
+                if (count > 0) {
+                    AtomicReference<ScheduledTask> task = new AtomicReference<>();
+                    Runnable runnable = new Runnable() {
+                        int counter = isAscending ? 0 : Math.round(count * barProgress);
+
+                        @Override
+                        public void run() {
+
+                            if (isAscending) {
+                                if (counter >= count) {
+                                    removeBossBar(bossBar, receiver);
+                                    return;
+                                }
+                                counter++;
+                            } else {
+                                if (counter <= 0) {
+                                    removeBossBar(bossBar, receiver);
+                                    return;
+                                }
+                                counter--;
+                            }
+
+                            String countText = String.valueOf(counter);
+                            if (!countTicks) {
+                                countText += "s";
+                            }
+                            bossBar.setProgress((double) counter / count);
+                            if (hideCount) {
+                                bossBar.setTitle(StringConverter.coloredString(finalMessage));
+                            } else bossBar.setTitle(StringConverter.coloredString(finalMessage + " " + countText));
+                        }
+                    };
+                    task.set(SCore.schedulerHook.runEntityRepeatingTask(runnable, () -> removeBossBar(bossBar, receiver), receiver, 0, countTicks ? 1 : 20));
+
+                    // Register bossbar with task
+                    if(cache.containsKey(receiver)) {
+                        cache.get(receiver).put(bossBar, task.get());
+                    } else {
+                        Map<org.bukkit.boss.BossBar, ScheduledTask> map = new HashMap<>();
+                        map.put(bossBar, task.get());
+                        cache.put(receiver, map);
                     }
-                };
-                SCore.schedulerHook.runEntityTask(runnable, () -> removeBossBar(bossBar, receiver), receiver, time);
-            }
+                } else {
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            removeBossBar(bossBar, receiver);
+                        }
+                    };
+                    SCore.schedulerHook.runEntityTask(runnable, () -> removeBossBar(bossBar, receiver), receiver, time);
+                }
+            };
+
+            // Route through global region scheduler on Folia to serialise registry writes
+            // with onPlayerConnect; on Bukkit run directly (BukkitSchedulerHook.runTask with
+            // delay=0 on primary thread calls runnable.run() synchronously).
+            SCore.schedulerHook.runTask(setupBossBar, 0);
         }
     }
 
@@ -179,7 +190,8 @@ public class Bossbar extends PlayerCommand {
         bossBar.removeAll();
         if(bossBar instanceof KeyedBossBar){
             NamespacedKey key = ((KeyedBossBar) bossBar).getKey();
-            Bukkit.getServer().removeBossBar(key);
+            // Must run on GlobalRegionScheduler to avoid racing with onPlayerConnect (#173)
+            SCore.schedulerHook.runTask(() -> Bukkit.getServer().removeBossBar(key), 0);
         }
         Map<org.bukkit.boss.BossBar, ScheduledTask> tasks = this.cache.get(p);
         if (tasks == null) return;
