@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
 
 public class VariableRealString extends VariableReal<String> implements Serializable {
 
@@ -124,7 +125,11 @@ public class VariableRealString extends VariableReal<String> implements Serializ
 
         String toReplace = "%var_" + getConfig().getVariableName().getValue().get() + "%";
         if (s.contains(toReplace)) {
-            s = s.replaceAll(toReplace, optTag + StringConverter.coloredString(getValue()) + (isRefreshable ? getPlaceholderTag(toReplace) : "")+ optTag);
+            // Matcher.quoteReplacement prevents '$' and '\' in the variable value
+            // from being interpreted as regex back-references in the replacement string,
+            // which would corrupt values like "$50" or "C:\path" (EI #50).
+            String replacement = Matcher.quoteReplacement(optTag + StringConverter.coloredString(getValue()) + (isRefreshable ? getPlaceholderTag(toReplace) : "") + optTag);
+            s = s.replaceAll(toReplace, replacement);
         }
         return s;
     }
