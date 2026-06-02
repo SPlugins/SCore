@@ -56,7 +56,7 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
     @Override
     public void reset() {
         enable = new BooleanFeature(this, false, FeatureSettingsSCore.enable);
-        slot = new SlotFeature(this, Optional.of(AttributeSlot.BODY), FeatureSettingsSCore.slot);
+        slot = new SlotFeature(this, Optional.of(AttributeSlot.CHEST), FeatureSettingsSCore.slot);
         slot.setOnlyArmorSlots(true);
         enableSound = new BooleanFeature(this, false, FeatureSettingsSCore.enableSound);
         sound = new SoundFeature(this, Optional.of(Sound.ITEM_ARMOR_EQUIP_DIAMOND), FeatureSettingsSCore.sound);
