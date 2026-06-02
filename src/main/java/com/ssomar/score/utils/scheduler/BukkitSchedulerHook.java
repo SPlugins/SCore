@@ -102,6 +102,11 @@ public class BukkitSchedulerHook implements SchedulerHook {
     }
 
     @Override
+    public ScheduledTask runEntityRepeatingTask(Runnable runnable, Runnable retired, Entity entity, long initDelay, long period) {
+        return runRepeatingTask(runnable, initDelay, period);
+    }
+
+    @Override
     public ScheduledTask runEntityTaskAsap(Runnable runnable, Runnable retired, Entity entity) {
         if (Bukkit.isPrimaryThread()) {
             runnable.run();
