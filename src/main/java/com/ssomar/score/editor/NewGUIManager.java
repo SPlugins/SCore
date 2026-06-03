@@ -69,6 +69,13 @@ public abstract class NewGUIManager<T extends GUI> {
         suggestionPage.remove(player);
     }
 
+    public void clearPlayerEditorState(Player player) {
+        requestWriting.remove(player);
+        currentWriting.remove(player);
+        suggestions.remove(player);
+        disableTextEditor(player);
+    }
+
     public void clicked(Player p, ItemStack item, ClickType click) {
         NewInteractionClickedGUIManager<T> interact = new NewInteractionClickedGUIManager<>();
         interact.player = p;

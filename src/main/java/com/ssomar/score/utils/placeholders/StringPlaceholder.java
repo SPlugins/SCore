@@ -56,6 +56,11 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
     @Setter(AccessLevel.NONE)
     private final OwnerPlaceholders ownerPlch = new OwnerPlaceholders();
 
+    /* placeholders of the shooter (entity that fired a projectile) */
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private final ShooterPlaceholders shooterPlch = new ShooterPlaceholders();
+
     /* placeholders of the owner */
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -165,6 +170,11 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
         return this;
     }
 
+    public StringPlaceholder setShooterPlcHldr(UUID uuid) {
+        shooterPlch.setPlayerPlcHldr(uuid);
+        return this;
+    }
+
     public StringPlaceholder setProjectilePlcHldr(Projectile proj, String blockFace) {
         projectilePlch.setProjectilePlcHldr(proj, blockFace);
         return this;
@@ -236,6 +246,7 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
         playerPlch.reloadPlayerPlcHldr();
         targetPlch.reloadPlayerPlcHldr();
         ownerPlch.reloadPlayerPlcHldr();
+        shooterPlch.reloadPlayerPlcHldr();
         entityPlch.reloadEntityPlcHldr();
         if (targetEntityPlch != null) targetEntityPlch.reloadEntityPlcHldr();
         blockPlch.reloadBlockPlcHldr();
@@ -369,6 +380,9 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
 
         placeholders.putAll(ownerPlch.getPlaceholders());
         s = ownerPlch.replacePlaceholder(s);
+
+        placeholders.putAll(shooterPlch.getPlaceholders());
+        s = shooterPlch.replacePlaceholder(s);
 
         s = entityPlch.replacePlaceholder(s);
 
