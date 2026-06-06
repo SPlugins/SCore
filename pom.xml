@@ -364,11 +364,6 @@
             <id>inject repo</id>
             <url>https://maven.andante.dev/releases/</url>
         </repository>
-        <repository>
-            <id>nightexpressdev</id>
-            <name>NightExpressDev Repository</name>
-            <url>https://repo.nightexpressdev.com/releases/</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -396,7 +391,7 @@
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-spigot</artifactId>
-            <version>2.11.1-SNAPSHOT</version>
+            <version>2.12.2</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -955,7 +950,16 @@
             <groupId>com.github.nulli0n</groupId>
             <artifactId>ExcellentClaims-spigot</artifactId>
             <version>fd57663fc5</version>
-            <scope>provided</scope>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/ExcellentClaims-spigot-fd57663fc5.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>su.nightexpress.nightcore</groupId>
+            <artifactId>NightCore</artifactId>
+            <version>2.7.12</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/nightcore-2.7.12.jar</systemPath>
         </dependency>
 
         <dependency>

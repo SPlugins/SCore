@@ -27,6 +27,12 @@ public interface SchedulerHook {
      */
     ScheduledTask runEntityTask(Runnable runnable, Runnable retired, Entity entity, long delay);
 
+    /**
+     * Repeating task bound to an entity's scheduler thread (Folia) or the main thread (Bukkit).
+     * On Folia, retires and cancels if the entity is removed.
+     */
+    ScheduledTask runEntityRepeatingTask(Runnable runnable, Runnable retired, Entity entity, long initDelay, long period);
+
     ScheduledTask runEntityTaskAsap(Runnable runnable, Runnable retired, Entity entity);
 
     ScheduledTask runLocationTask(Runnable runnable, Location location, long delay);
