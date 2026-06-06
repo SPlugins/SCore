@@ -19,11 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class TranferItem extends MixedCommand {
+public class SwapItem extends MixedCommand {
 
+    /**
+     * Best executed in target / entity commands. Executing it in player commands will just move the items around in the caster's inv
+     * @param p (The user of the item)
+     * @param receiver (The victim of the command. Typecast it to player via (Player) when needed. Check spigot api for the finer details)
+     * @param sCommandToExec (The list of arguments after the custom command)
+     */
     @Override
     public void run(Player p, Entity receiver, SCommandToExec sCommandToExec) {
-        SsomarDev.testMsg("TranferItem", true);
+        SsomarDev.testMsg("SwapItem", true);
         List<String> args = sCommandToExec.getOtherArgs();
 
         int initalSlot = Double.valueOf(args.get(0)).intValue();
@@ -52,7 +58,7 @@ public class TranferItem extends MixedCommand {
             if (slot == -1)
                 slot = inventory2.getHeldItemSlot();
             toDrop = inventory2.getItem(slot);
-            SsomarDev.testMsg("TranferItem toDrop: " + toDrop, true);
+            SsomarDev.testMsg("SwapItem toDrop: " + toDrop, true);
             inventory2.setItem(slot, toTransfer);
 
             /* Call add event only for player */
@@ -64,13 +70,13 @@ public class TranferItem extends MixedCommand {
             Bukkit.getPluginManager().callEvent(eventToCall3);
         } else {
             if (!(receiver instanceof LivingEntity)) {
-                SsomarDev.testMsg("TranferItem Receiver is not a player or a living entity", true);
+                SsomarDev.testMsg("SwapItem Receiver is not a player or a living entity", true);
                 return;
             }
             LivingEntity livingReceiver = (LivingEntity) receiver;
             EntityEquipment equipment = livingReceiver.getEquipment();
             if (equipment == null) {
-                SsomarDev.testMsg("TranferItem Receiver has no equipment", true);
+                SsomarDev.testMsg("SwapItem Receiver has no equipment", true);
                 return;
             }
             switch (slot) {
@@ -107,7 +113,7 @@ public class TranferItem extends MixedCommand {
             }
         }
         if (toDrop != null){
-            SsomarDev.testMsg("TranferItem toDrop end: " + toDrop, true);
+            SsomarDev.testMsg("SwapItem toDrop end: " + toDrop, true);
             if(drop) receiver.getLocation().getWorld().dropItem(receiver.getLocation(), toDrop);
             else {
                 inventory.setItem(initalSlot, toDrop);
@@ -136,13 +142,13 @@ public class TranferItem extends MixedCommand {
     @Override
     public List<String> getNames() {
         List<String> names = new ArrayList<>();
-        names.add("TRANSFER_ITEM");
+        names.add("SWAP_ITEM");
         return names;
     }
 
     @Override
     public String getTemplate() {
-        return "TRANSFER_ITEM {slot of launcher} {slot of receiver} [boolean drop]";
+        return "SWAP_ITEM {slot of launcher} {slot of receiver} [boolean drop]";
     }
 
     @Override

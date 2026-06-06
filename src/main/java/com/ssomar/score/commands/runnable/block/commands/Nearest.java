@@ -52,7 +52,7 @@ public class Nearest extends BlockCommand {
 
             }
         };
-        SCore.schedulerHook.runTask(runnable, 0);
+        SCore.schedulerHook.runLocationTask(runnable, block.getLocation(), 0);
     }
 
     @Override
