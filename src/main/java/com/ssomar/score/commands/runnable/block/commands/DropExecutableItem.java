@@ -1,7 +1,7 @@
 package com.ssomar.score.commands.runnable.block.commands;
 
 import com.ssomar.score.SCore;
-import com.ssomar.score.SsomarDev;
+import org.bukkit.util.Vector;
 import com.ssomar.score.api.executableitems.ExecutableItemsAPI;
 import com.ssomar.score.api.executableitems.config.ExecutableItemInterface;
 import com.ssomar.score.commands.runnable.CommandSetting;
@@ -30,12 +30,16 @@ public class DropExecutableItem extends BlockCommand {
         CommandSetting id = new CommandSetting("id", 0, String.class, "null");
         CommandSetting amount = new CommandSetting("amount", 1, Integer.class, 1);
         CommandSetting owner = new CommandSetting("owner", 2, String.class, null);
-        CommandSetting itemdata = new CommandSetting("itemdata", 3, String.class, "null");
+        CommandSetting itemData = new CommandSetting("itemdata", 3, String.class, "null");
+        CommandSetting launchDirection = new CommandSetting("launchDirection", -1, String.class, "NONE");
+        CommandSetting launchPower = new CommandSetting("launchPower", -1, Double.class, 0.2);
         List<CommandSetting> settings = getSettings();
         settings.add(id);
         settings.add(amount);
         settings.add(owner);
-        settings.add(itemdata);
+        settings.add(itemData);
+        settings.add(launchDirection);
+        settings.add(launchPower);
         setNewSettingsMode(true);
     }
 
@@ -45,6 +49,8 @@ public class DropExecutableItem extends BlockCommand {
         int amount = (int) sCommandToExec.getSettingValue("amount");
         String owner = (String) sCommandToExec.getSettingValue("owner");
         String itemData = (String) sCommandToExec.getSettingValue("itemdata");
+        String launchDirection = ((String) sCommandToExec.getSettingValue("launchDirection")).toUpperCase();
+        double launchPower = (Double) sCommandToExec.getSettingValue("launchPower");
         
         Map<String, Object> settings = new HashMap<>();
         if (!itemData.equals("null")) settings = StringSetting.getSettings(itemData);
@@ -72,9 +78,41 @@ public class DropExecutableItem extends BlockCommand {
                 if (eiOpt.isPresent()) {
                     ExecutableItemInterface ei = eiOpt.get();
                     // Create a new Location object because if you try to drop the item with whole number coords, it will drop it in the corner
-                    Location dropLoc = new Location(block.getWorld(), block.getX()+0.5, block.getY(), block.getZ()+0.5);
+                    Location dropLoc = new Location(block.getWorld(), block.getX()+0.5, block.getY()+0.5, block.getZ()+0.5);
 
-                    block.getWorld().dropItem(dropLoc, ei.buildItem(amount, playerOwner, settings));
+                    Vector throwVector;
+                    switch (launchDirection) {
+                        case "UP":
+                            throwVector = new Vector(0, launchPower, 0);
+                            dropLoc.setY(dropLoc.getY()+0.5);
+                            break;
+                        case "DOWN":
+                            throwVector = new Vector(0, -1*launchPower, 0);
+                            dropLoc.setY(dropLoc.getY()-0.5);
+                            break;
+                        case "WEST":
+                            throwVector = new Vector(-1*launchPower, 0, 0);
+                            dropLoc.setX(dropLoc.getX()-0.5);
+                            break;
+                        case "EAST":
+                            throwVector = new Vector(launchPower, 0, 0);
+                            dropLoc.setX(dropLoc.getX()+0.5);
+                            break;
+                        case "NORTH":
+                            throwVector = new Vector(0, 0, -1*launchPower);
+                            dropLoc.setZ(dropLoc.getZ()-0.5);
+                            break;
+                        case "SOUTH":
+                            throwVector = new Vector(0, 0, launchPower);
+                            dropLoc.setZ(dropLoc.getZ()+0.5);
+                            break;
+                        case "NONE":
+                        default:
+                            throwVector = new Vector(0, 0, 0);
+                            break;
+                    }
+
+                    block.getWorld().dropItem(dropLoc, ei.buildItem(amount, playerOwner, settings)).setVelocity(throwVector);
                 }
             }
         }
