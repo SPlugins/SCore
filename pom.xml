@@ -898,7 +898,7 @@
             <artifactId>FabledSkyBlock</artifactId>
             <version>4.8.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/FabledSkyBlock-4.8.0.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/fabledskyblock-4.8.0.jar</systemPath>
         </dependency>
 
         <dependency>
