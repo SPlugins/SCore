@@ -3,7 +3,7 @@ author: Ssomar
 version: ${project.version}
 main: com.ssomar.score.SCore
 api-version: 1.13
-softdepend: [ProtocolLib, NBTAPI, PolymartHelper, Polymart, Vault, Multiverse-Core, WorldGuard, PlaceholderAPI, DecentHolograms, HolographicDisplaysAPI, HolographicDisplays, MyWorlds, ExcellentClaims]
+softdepend: [ProtocolLib, NBTAPI, PolymartHelper, Polymart, Vault, Multiverse-Core, WorldGuard, PlaceholderAPI, DecentHolograms, HolographicDisplaysAPI, HolographicDisplays, MyWorlds, ExcellentClaims, FabledSkyBlock]
 loadbefore: [ExecutableItems, SParkour, ExecutableBlocks, ExecutableEvents, CustomPiglinsTrades]
 commands:
   score:

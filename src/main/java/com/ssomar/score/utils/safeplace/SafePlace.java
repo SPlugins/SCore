@@ -105,6 +105,9 @@ public class SafePlace {
         if (SCore.hasBentoBox)
             if (!BentoBoxAPI.playerCanPlaceIslandBlock(playerUUID, location)) return false;
 
+        if (SCore.hasFabledSkyblock)
+            if (!FabledSkyblockTool.playerCanPlaceIslandBlock(playerUUID, location)) return false;
+
         SsomarDev.testMsg("DEBUG SAFE BREAK CDT 3", DEBUG);
 
         if (SCore.hasLands)

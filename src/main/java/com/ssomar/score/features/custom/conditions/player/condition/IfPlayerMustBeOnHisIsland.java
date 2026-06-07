@@ -7,6 +7,7 @@ import com.ssomar.score.features.custom.conditions.player.PlayerConditionFeature
 import com.ssomar.score.features.custom.conditions.player.PlayerConditionRequest;
 import com.ssomar.score.features.types.BooleanFeature;
 import com.ssomar.score.usedapi.BentoBoxAPI;
+import com.ssomar.score.usedapi.FabledSkyblockTool;
 import com.ssomar.score.usedapi.IridiumSkyblockTool;
 import com.ssomar.score.usedapi.SuperiorSkyblockTool;
 import org.bukkit.entity.Player;
@@ -38,6 +39,13 @@ public class IfPlayerMustBeOnHisIsland extends PlayerConditionFeature<BooleanFea
         } else if (SCore.hasBentoBox) {
             if (hasCondition()) {
                 if (!BentoBoxAPI.playerIsOnHisIsland(player)) {
+                    runInvalidCondition(request);
+                    return false;
+                }
+            }
+        } else if (SCore.hasFabledSkyblock) {
+            if (hasCondition()) {
+                if (!FabledSkyblockTool.playerIsOnHisIsland(player)) {
                     runInvalidCondition(request);
                     return false;
                 }

@@ -38,6 +38,9 @@ public class SafeOpen {
         if (SCore.hasBentoBox)
             if (!BentoBoxAPI.playerCanOpenIslandBlock(playerUUID, location)) return false;
 
+        if (SCore.hasFabledSkyblock)
+            if (!FabledSkyblockTool.playerCanOpenIslandBlock(playerUUID, location)) return false;
+
         SsomarDev.testMsg("DEBUG SAFE BREAK CDT 3", DEBUG);
 
         if (SCore.hasLands)
