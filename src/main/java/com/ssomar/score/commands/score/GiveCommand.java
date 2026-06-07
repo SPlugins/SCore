@@ -233,7 +233,7 @@ public class GiveCommand<X extends SPlugin, Y extends SObjectManager<Z>, Z exten
             quantity = quantity - maxStack;
         }
         if (outInventory > 0) {
-            getSm().sendMessage(player, StringConverter.replaceVariable(MessageMain.getInstance().getMessage(getSPlugin().getPlugin(), Message.FULL_INVENTORY), player.getName(), object.getItemName(), outInventory + "", 0));
+            getSm().sendMessage(player, StringConverter.replaceVariable(MessageMain.getInstance().getMessage(getSPlugin().getPlugin(), Message.FULL_INVENTORY), player.getName(), StringConverter.coloredString(object.getItemName()), outInventory + "", 0));
             inInventory = inInventory - outInventory;
         }
 
@@ -244,7 +244,7 @@ public class GiveCommand<X extends SPlugin, Y extends SObjectManager<Z>, Z exten
         }
 
         if (!getSPlugin().getPluginConfig().getBooleanSetting("silentGive"))
-            getSm().sendMessage(player, StringConverter.replaceVariable(MessageMain.getInstance().getMessage(getSPlugin().getPlugin(), Message.RECEIVE_ITEM), player.getName(), object.getItemName(), inInventory + "", 0));
+            getSm().sendMessage(player, StringConverter.replaceVariable(MessageMain.getInstance().getMessage(getSPlugin().getPlugin(), Message.RECEIVE_ITEM), player.getName(), StringConverter.coloredString(object.getItemName()), inInventory + "", 0));
     }
 
 
