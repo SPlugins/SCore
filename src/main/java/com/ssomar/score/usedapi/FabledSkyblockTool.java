@@ -3,7 +3,9 @@ package com.ssomar.score.usedapi;
 import com.songoda.skyblock.api.SkyBlockAPI;
 import com.songoda.skyblock.api.island.Island;
 import com.songoda.skyblock.api.island.IslandRole;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,9 +21,10 @@ public class FabledSkyblockTool {
         Island island = SkyBlockAPI.getIslandManager().getIslandAtLocation(location);
         if (island != null) {
             if (pUUID.equals(island.getOwnerUUID())) return true;
-            if (island.getRole(IslandRole.Operator).contains(pUUID)) return true;
-            if (island.getRole(IslandRole.Member).contains(pUUID)) return true;
-            if (island.getRole(IslandRole.Coop).contains(pUUID)) return true;
+            OfflinePlayer offP = Bukkit.getOfflinePlayer(pUUID);
+            if (island.getRole(offP) == IslandRole.OPERATOR) return true;
+            if ((island.getRole(offP) == IslandRole.MEMBER)) return true;
+            if ((island.getRole(offP) == IslandRole.COOP)) return true;
             return false;
         }
 

@@ -896,9 +896,9 @@
         <dependency>
             <groupId>com.songoda</groupId>
             <artifactId>FabledSkyBlock</artifactId>
-            <version>2.6.10</version>
+            <version>4.8.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/FabledSkyBlock.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/FabledSkyBlock-4.8.0.jar</systemPath>
         </dependency>
 
         <dependency>
