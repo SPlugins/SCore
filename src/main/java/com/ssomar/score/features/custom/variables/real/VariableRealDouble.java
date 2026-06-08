@@ -5,6 +5,7 @@ import com.ssomar.score.SCore;
 import com.ssomar.score.SsomarDev;
 import com.ssomar.score.features.custom.variables.base.variable.VariableFeature;
 import com.ssomar.score.features.custom.variables.update.variable.VariableUpdateFeature;
+import com.ssomar.score.features.types.UncoloredStringFeature;
 import com.ssomar.score.utils.DynamicMeta;
 import com.ssomar.score.utils.emums.VariableUpdateType;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
@@ -146,7 +147,30 @@ public class VariableRealDouble extends VariableReal<Double> implements Serializ
         if (s.contains(toReplace)) {
             s = StringPlaceholder.replaceCalculPlaceholder(s, toReplace, (getValue().intValue())+"", optTag,  (isRefreshable ? getPlaceholderTag(toReplace) : ""), true, true);
         }
+        toReplace = "%var_" + getConfig().getVariableName().getValue().get() + "_papi%";
+        if (s.contains(toReplace)) {
+            s = StringPlaceholder.replaceCalculPlaceholder(s, toReplace,  prepareValueAssemblyWithPAPI(getValue()+""), optTag, (isRefreshable ? getPlaceholderTag(toReplace) : ""), false);
+        }
         return s;
+    }
+
+    /**
+     * In order to properly have PlaceholderAPI placeholders work with item variables when being displayed in the
+     * ItemStack's lore, the string-to-be-parsed has to be assembled at this level first.
+     * <br/><br/>
+     * The reason why this logic has to be made because if {@code isRefreshableClean} is enabled, the variable value in lore
+     * would be wrapped in chinese color codes (Details why in <a href="https://ssomar-developement.github.io/SCore-Documentation/docs/executableitems/processes/refreshing_variable_value_in_item_lore">Documentation Website</a>)
+     * and then would break if used alongside <a href="https://api.extendedclip.com/expansions/math/">Math Placeholders</a>.
+     * @param varVal
+     * @return
+     */
+    private String prepareValueAssemblyWithPAPI(String varVal) {
+        UncoloredStringFeature papiParse = getConfig().getPapiParser();
+        if (papiParse.getValue().isPresent() && !papiParse.getValue().get().isEmpty()) {
+            return papiParse.getValue().get().replaceAll("<VAR>", varVal);
+        } else {
+            return varVal;
+        }
     }
 
     @Override
@@ -165,6 +189,7 @@ public class VariableRealDouble extends VariableReal<Double> implements Serializ
         tags.put("§汉", "%var_" + getConfig().getVariableName().getValue().get() + "%");
         tags.put("§九", "%var_" + getConfig().getVariableName().getValue().get() + "_int%");
         tags.put("§六", "%var_" + getConfig().getVariableName().getValue().get() + "_roman%");
+        tags.put("§六", "%var_" + getConfig().getVariableName().getValue().get() + "_papi%");
         return tags;
     }
 
