@@ -146,8 +146,8 @@ public class VariableRealString extends VariableReal<String> implements Serializ
      * The reason why this logic has to be made because if {@code isRefreshableClean} is enabled, the variable value in lore
      * would be wrapped in chinese color codes (Details why in <a href="https://ssomar-developement.github.io/SCore-Documentation/docs/executableitems/processes/refreshing_variable_value_in_item_lore">Documentation Website</a>)
      * and then would break if used alongside <a href="https://api.extendedclip.com/expansions/math/">Math Placeholders</a>.
-     * @param varVal
-     * @return
+     * @param varVal variable value
+     * @return variable value combined with papiParse value
      */
     private String prepareValueAssemblyWithPAPI(String varVal) {
         UncoloredStringFeature papiParse = getConfig().getPapiParser();
