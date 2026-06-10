@@ -167,7 +167,7 @@ public class VariableRealString extends VariableReal<String> implements Serializ
     public Map<String, String> getTranscoPlaceholders() {
         Map<String, String> tags = new HashMap<>();
         tags.put("§汉", "%var_" + getConfig().getVariableName().getValue().get() + "%");
-        tags.put("§汉", "%var_" + getConfig().getVariableName().getValue().get() + "_papi%");
+        tags.put("§火", "%var_" + getConfig().getVariableName().getValue().get() + "_papi%");
         return tags;
     }
 

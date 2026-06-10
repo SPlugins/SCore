@@ -189,7 +189,7 @@ public class VariableRealDouble extends VariableReal<Double> implements Serializ
         tags.put("§汉", "%var_" + getConfig().getVariableName().getValue().get() + "%");
         tags.put("§九", "%var_" + getConfig().getVariableName().getValue().get() + "_int%");
         tags.put("§六", "%var_" + getConfig().getVariableName().getValue().get() + "_roman%");
-        tags.put("§六", "%var_" + getConfig().getVariableName().getValue().get() + "_papi%");
+        tags.put("§品", "%var_" + getConfig().getVariableName().getValue().get() + "_papi%");
         return tags;
     }
 
