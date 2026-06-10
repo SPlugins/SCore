@@ -894,6 +894,14 @@
         </dependency>
 
         <dependency>
+            <groupId>com.songoda</groupId>
+            <artifactId>FabledSkyBlock</artifactId>
+            <version>4.8.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/fabledskyblock-4.8.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.brcdev-minecraft</groupId>
             <artifactId>shopgui-api</artifactId>
             <version>3.0.0</version>

@@ -87,6 +87,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
     public static boolean hasIridiumSkyblock = false;
     public static boolean hasSuperiorSkyblock2 = false;
     public static boolean hasBentoBox = false;
+    public static boolean hasFabledSkyblock = false;
     public static boolean hasMultiverse = false;
     public static boolean hasLands = false;
     public static boolean hasTowny = false;
@@ -647,6 +648,8 @@ public final class SCore extends JavaPlugin implements SPlugin {
         hasSuperiorSkyblock2 = Dependency.SUPERIOR_SKYBLOCK2.hookSoftDependency();
 
         hasBentoBox = Dependency.BENTO_BOX.hookSoftDependency();
+
+        hasFabledSkyblock = Dependency.FABLED_SKYBLOCK.hookSoftDependency();
 
         hasMultiverse = Dependency.MULTIVERSE_CORE.hookSoftDependency();
 

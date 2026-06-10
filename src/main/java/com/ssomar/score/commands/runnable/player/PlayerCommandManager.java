@@ -75,6 +75,7 @@ public class PlayerCommandManager extends CommandManager<SCommand> {
         commands.add(new SetPlayerWeather());
         commands.add(new SetPlayerTime());
         commands.add(new OpenWorkbench());
+        commands.add(new OpenAnvil());
         commands.add(new MinecartBoost());
         commands.add(new Steal());
         commands.add(new PickupMagnet());

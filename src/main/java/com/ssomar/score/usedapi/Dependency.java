@@ -33,6 +33,8 @@ public enum Dependency {
 
     BENTO_BOX("BentoBox"),
 
+    FABLED_SKYBLOCK("FabledSkyBlock"),
+
     MULTIVERSE_CORE("Multiverse-Core"),
 
     LANDS("Lands"),
