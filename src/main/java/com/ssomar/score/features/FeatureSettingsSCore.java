@@ -673,7 +673,9 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
     ifLineOfSight(getFeatureSettings("ifLineOfSight", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     ifPlayerSpeed(getFeatureSettings("ifPlayerSpeed", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     ifNearbyPlayerCount(getFeatureSettings("ifNearbyPlayerCount", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
-    suspiciousBlockLoot(getFeatureSettings("suspiciousBlockLoot"))
+    suspiciousBlockLoot(getFeatureSettings("suspiciousBlockLoot")),
+    papiParser(getFeatureSettings("papiParser"))
+
     ;
 
     private FeatureSettingsInterface settingsInterface;

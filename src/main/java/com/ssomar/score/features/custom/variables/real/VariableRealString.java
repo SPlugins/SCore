@@ -4,6 +4,7 @@ import com.ssomar.executableitems.ExecutableItems;
 import com.ssomar.score.SCore;
 import com.ssomar.score.features.custom.variables.base.variable.VariableFeature;
 import com.ssomar.score.features.custom.variables.update.variable.VariableUpdateFeature;
+import com.ssomar.score.features.types.UncoloredStringFeature;
 import com.ssomar.score.utils.DynamicMeta;
 import com.ssomar.score.utils.emums.VariableUpdateType;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
@@ -21,6 +22,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
 
 public class VariableRealString extends VariableReal<String> implements Serializable {
 
@@ -124,9 +126,36 @@ public class VariableRealString extends VariableReal<String> implements Serializ
 
         String toReplace = "%var_" + getConfig().getVariableName().getValue().get() + "%";
         if (s.contains(toReplace)) {
-            s = s.replaceAll(toReplace, optTag + StringConverter.coloredString(getValue()) + (isRefreshable ? getPlaceholderTag(toReplace) : "")+ optTag);
+            // Matcher.quoteReplacement prevents '$' and '\' in the variable value
+            // from being interpreted as regex back-references in the replacement string,
+            // which would corrupt values like "$50" or "C:\path" (EI #50).
+            String replacement = Matcher.quoteReplacement(optTag + StringConverter.coloredString(getValue()) + (isRefreshable ? getPlaceholderTag(toReplace) : "") + optTag);
+            s = s.replaceAll(toReplace, replacement);
+        }
+        toReplace = "%var_" + getConfig().getVariableName().getValue().get() + "_papi%";
+        if (s.contains(toReplace)) {
+            s = StringPlaceholder.replaceCalculPlaceholder(s, toReplace,  prepareValueAssemblyWithPAPI(getValue()), optTag, (isRefreshable ? getPlaceholderTag(toReplace) : ""), false);
         }
         return s;
+    }
+
+    /**
+     * In order to properly have PlaceholderAPI placeholders work with item variables when being displayed in the
+     * ItemStack's lore, the string-to-be-parsed has to be assembled at this level first.
+     * <br/><br/>
+     * The reason why this logic has to be made because if {@code isRefreshableClean} is enabled, the variable value in lore
+     * would be wrapped in chinese color codes (Details why in <a href="https://ssomar-developement.github.io/SCore-Documentation/docs/executableitems/processes/refreshing_variable_value_in_item_lore">Documentation Website</a>)
+     * and then would break if used alongside <a href="https://api.extendedclip.com/expansions/math/">Math Placeholders</a>.
+     * @param varVal variable value
+     * @return variable value combined with papiParse value
+     */
+    private String prepareValueAssemblyWithPAPI(String varVal) {
+        UncoloredStringFeature papiParse = getConfig().getPapiParser();
+        if (papiParse.getValue().isPresent() && !papiParse.getValue().get().isEmpty()) {
+            return papiParse.getValue().get().replaceAll("<VAR>", varVal);
+        } else {
+            return varVal;
+        }
     }
 
     @Override
@@ -143,6 +172,7 @@ public class VariableRealString extends VariableReal<String> implements Serializ
     public Map<String, String> getTranscoPlaceholders() {
         Map<String, String> tags = new HashMap<>();
         tags.put("§汉", "%var_" + getConfig().getVariableName().getValue().get() + "%");
+        tags.put("§火", "%var_" + getConfig().getVariableName().getValue().get() + "_papi%");
         return tags;
     }
 

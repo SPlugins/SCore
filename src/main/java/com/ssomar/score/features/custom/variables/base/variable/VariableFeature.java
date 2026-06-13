@@ -36,6 +36,7 @@ public class VariableFeature<T> extends FeatureWithHisOwnEditor<VariableFeature,
 
     private BooleanFeature isRefreshableClean;
     private ColoredStringFeature refreshTag;
+    private UncoloredStringFeature papiParser;
 
     public VariableFeature(FeatureParentInterface parent, String id) {
         super(parent, FeatureSettingsSCore.variable);
@@ -52,6 +53,8 @@ public class VariableFeature<T> extends FeatureWithHisOwnEditor<VariableFeature,
         this.listValue = new ListColoredStringFeature(this,  new ArrayList<>(), FeatureSettingsSCore.default_list, Optional.empty());
         this.isRefreshableClean = new BooleanFeature(this, false, FeatureSettingsSCore.isRefreshableClean);
         this.refreshTag = new ColoredStringFeature(this, Optional.of(""), FeatureSettingsSCore.refreshTag);
+        this.papiParser = new UncoloredStringFeature(this, Optional.of(""), FeatureSettingsSCore.papiParser, true);
+
     }
 
     @Override
@@ -73,6 +76,7 @@ public class VariableFeature<T> extends FeatureWithHisOwnEditor<VariableFeature,
             if(isRefreshableClean.getValue() && refreshTag.getValue().get().isEmpty()) {
                refreshTag.setValue(generateTag());
             }
+            this.papiParser.load(plugin, enchantmentConfig, isPremiumLoading);
         } else {
             errors.add("&cERROR, Couldn't load the Variable with its options because there is not section with the good ID: " + id + " &7&o" + getParent().getParentInfo());
         }
@@ -146,6 +150,7 @@ public class VariableFeature<T> extends FeatureWithHisOwnEditor<VariableFeature,
         }
         this.isRefreshableClean.save(attributeConfig);
         this.refreshTag.save(attributeConfig);
+        this.papiParser.save(attributeConfig);
     }
 
     @Override
@@ -185,6 +190,7 @@ public class VariableFeature<T> extends FeatureWithHisOwnEditor<VariableFeature,
         eF.setListValue(listValue.clone(eF));
         eF.setIsRefreshableClean(isRefreshableClean.clone(eF));
         eF.setRefreshTag(refreshTag.clone(eF));
+        eF.setPapiParser(papiParser.clone(eF));
         return eF;
     }
 
@@ -199,6 +205,7 @@ public class VariableFeature<T> extends FeatureWithHisOwnEditor<VariableFeature,
             featureInterfaces.add(doubleValue);
         }
         featureInterfaces.add(isRefreshableClean);
+        featureInterfaces.add(papiParser);
         return featureInterfaces;
     }
 
@@ -233,6 +240,7 @@ public class VariableFeature<T> extends FeatureWithHisOwnEditor<VariableFeature,
                     if(isRefreshableClean.getValue() && refreshTag.getValue().get().isEmpty()) {
                         refreshTag.setValue(generateTag());
                     }
+                    aFOF.setPapiParser(papiParser);
                     break;
                 }
             }

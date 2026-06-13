@@ -2,6 +2,8 @@ package com.ssomar.score.utils.placeholders;
 
 import com.ssomar.score.utils.numbers.RomanNumber;
 
+import java.util.regex.Matcher;
+
 public abstract class PlaceholdersInterface {
 
     public static boolean isNumeric(String strNum) {
@@ -34,8 +36,11 @@ public abstract class PlaceholdersInterface {
             // it may not be a number, example: https://discord.com/channels/701066025516531753/1311795346157994146/1437107585554583664
             //Utils.sendConsoleMsg(SCore.NAME_COLOR+" &cInvalid value &6"+value+" &c used in placeholder calculation. String : &6"+s);
 
+            // Matcher.quoteReplacement: prevents '$' / '\' in the value from being treated
+            // as regex back-references in the replacement string (EI #50).
+            String safeReplacement = Matcher.quoteReplacement(optionalTagSurroundValue + value + optionalTagEndBeforeSurround + optionalTagSurroundValue);
             while (result.contains(placeholder)) {
-                result = result.replaceAll(placeholder, optionalTagSurroundValue+value+optionalTagEndBeforeSurround+optionalTagSurroundValue);
+                result = result.replaceAll(placeholder, safeReplacement);
             }
             return result;
         }
