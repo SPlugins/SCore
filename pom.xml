@@ -469,7 +469,7 @@
         <dependency>
             <groupId>com.github.Ssomar-Developement</groupId>
             <artifactId>SEvents</artifactId>
-            <version>-92e5e6e409-1</version>
+            <version>main-bc3afd40ba-1</version>
             <scope>compile</scope>
         </dependency>
 
