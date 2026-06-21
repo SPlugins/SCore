@@ -173,6 +173,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
     private static boolean is1v21v11 = false;
 
     private static boolean is26v1 = false;
+    private static boolean is26v2 = false;
 
 
 
@@ -376,6 +377,10 @@ public final class SCore extends JavaPlugin implements SPlugin {
         return is26v1;
     }
 
+    public static boolean is26v2() {
+        return is26v2;
+    }
+
 
     /* The server is in 1.10 or - ? */
     public static boolean is1v10Less() {
@@ -474,7 +479,11 @@ public final class SCore extends JavaPlugin implements SPlugin {
     }
 
     public static boolean is26v1Plus() {
-        return is26v1() ;
+        return is26v1() || is26v2Plus();
+    }
+
+    public static boolean is26v2Plus() {
+        return is26v2() ;
     }
 
     public static boolean isVersionBetween(String version1, String version2) {
@@ -916,6 +925,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
     }
 
     public static void initVersion() {
+        is26v2 = Bukkit.getServer().getVersion().contains("26.2");
         is26v1 = Bukkit.getServer().getVersion().contains("26.1");
         is1v21v11 = Bukkit.getServer().getVersion().contains("1.21.11");
         is1v21v10 = Bukkit.getServer().getVersion().contains("1.21.10");
@@ -1018,6 +1028,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v21v10 &6" + SCore.is1v21v10() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v21v11 &6" + SCore.is1v21v11() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v1 &6" + SCore.is26v1() + " &7!");
+            Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v2 &6" + SCore.is26v2() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v10Less &6" + SCore.is1v10Less() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v11Less &6" + SCore.is1v11Less() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v12Less &6" + SCore.is1v12Less() + " &7!");
@@ -1040,6 +1051,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v21v6Plus &6" + SCore.is1v21v6Plus() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v21v7Plus &6" + SCore.is1v21v7Plus() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v1Plus &6" + SCore.is26v1Plus() + " &7!");
+            Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v2Plus &6" + SCore.is26v2Plus() + " &7!");
         }
     }
 
