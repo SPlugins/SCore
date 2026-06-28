@@ -100,6 +100,8 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
     damagePerAttack(getFeatureSettings("damagePerAttack")),
     detailedBlocks(getFeatureSettings("detailedBlocks")),
     weaponFeatures(getFeatureSettings("weaponFeatures")),
+    sulfurCubeContentFeatures(getFeatureSettings("sulfurCubeContentFeatures")),
+    absorbedItem(getFeatureSettings("absorbedItem")),
     detailedEffects(getFeatureSettings("detailedEffects")),
     detailedItems(getFeatureSettings("detailedItems")),
     detailedTargetItems(getFeatureSettings("detailedTargetItems")),
