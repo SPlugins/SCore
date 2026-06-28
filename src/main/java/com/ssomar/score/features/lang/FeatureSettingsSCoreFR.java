@@ -642,6 +642,8 @@ public enum FeatureSettingsSCoreFR implements FeatureSettingsInterface {
     disableBlockingTime("disableBlockingTime", "Désactiver le temps de blocage", new String[]{"&7&oLe temps pour désactiver le blocage", "&7&oen ticks"}, GUI.CLOCK),
     damagePerAttack("damagePerAttack", "Dégâts par attaque", new String[]{"&7&oLes dégâts infligés par attaque"}, GUI.CLOCK),
     weaponFeatures("weaponFeatures", "Fonctionnalités de l'arme", new String[]{"&7&oLes fonctionnalités de l'arme"}, Material.DIAMOND_SWORD),
+    sulfurCubeContentFeatures("sulfurCubeContentFeatures", "Contenu du Sulfur Cube", new String[]{"&7&oL'item absorbé par un sulfur cube (26.2+)"}, FixedMaterial.getMaterial(Arrays.asList("BUCKET"))),
+    absorbedItem("absorbedItem", "Item Absorbé", new String[]{"&7&oL'item stocké dans le sulfur cube"}, FixedMaterial.getMaterial(Arrays.asList("BUCKET"))),
     ifUseCooldown("ifUseCooldown", "Utiliser un délai de recharge", new String[]{}, Material.ANVIL),
     input1("input1", "Entrée 1", new String[]{}, Material.GLASS),
     input2("input2", "Entrée 2", new String[]{}, Material.GLASS),
