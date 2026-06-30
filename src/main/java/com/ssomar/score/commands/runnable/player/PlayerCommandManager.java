@@ -110,6 +110,7 @@ public class PlayerCommandManager extends CommandManager<SCommand> {
         if (!SCore.is1v8())
             commands.add(new FireworkBoost());
         commands.add(new MoveItem());
+        commands.add(new AddItemNBT());
 
         /* Sort by priority */
         commands.sort((c1, c2) -> {
