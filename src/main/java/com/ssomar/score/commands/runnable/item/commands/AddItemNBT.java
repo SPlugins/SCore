@@ -64,7 +64,7 @@ public class AddItemNBT extends ItemCommand {
 
         // Check input if it's valid
         if (processedKeyValue.length != 2 || processedKeyValue[0].isEmpty() || processedKeyValue[1].isEmpty()) {
-            Utils.sendConsoleMsg("WARNING: Your keyValue arg value in the ADD_ITEM_NBT execution is incorrect. Reference value: "+keyValue);
+            SCore.plugin.getLogger().warning("WARNING: Your keyValue arg value in the ADD_ITEM_NBT execution is incorrect. Reference value: "+keyValue);
             return;
         }
 
@@ -83,14 +83,14 @@ public class AddItemNBT extends ItemCommand {
                         try {
                             pdc.set(nsKey, PersistentDataType.DOUBLE, Double.parseDouble(processedKeyValue[1]));
                         } catch (Exception e) {
-                            Utils.sendConsoleMsg("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
+                            SCore.plugin.getLogger().warning("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
                         }
                         break;
-                    case "int": {
+                    case "int": case "integer": {
                         try {
                             pdc.set(nsKey, PersistentDataType.INTEGER, Integer.parseInt(processedKeyValue[1]));
                         } catch (Exception e) {
-                            Utils.sendConsoleMsg("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
+                            SCore.plugin.getLogger().warning("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
                         }
                         break;
                     }
@@ -100,7 +100,7 @@ public class AddItemNBT extends ItemCommand {
                         try {
                             pdc.set(nsKey, PersistentDataType.BOOLEAN, Boolean.parseBoolean(processedKeyValue[1]));
                         } catch (Exception e) {
-                            Utils.sendConsoleMsg("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
+                            SCore.plugin.getLogger().warning("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
                         }
                         break;
                     }
@@ -108,7 +108,7 @@ public class AddItemNBT extends ItemCommand {
                 }
                 item.setItemMeta(meta);
             } else {
-                Utils.sendConsoleMsg("WARNING: You are trying to execute PDC mode in ADD_ITEM_NBT at the wrong version. This feature is only available at 1.14+");
+                SCore.plugin.getLogger().warning("WARNING: You are trying to execute PDC mode in ADD_ITEM_NBT at the wrong version. This feature is only available at 1.14+");
             }
         } else if (mode.equals("nbtapi")) {
             if (SCore.hasNBTAPI) {
@@ -121,7 +121,7 @@ public class AddItemNBT extends ItemCommand {
                             try {
                                 nbtItem.setDouble(processedKeyValue[0], Double.parseDouble(processedKeyValue[1]));
                             } catch (Exception e) {
-                                Utils.sendConsoleMsg("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
+                                SCore.plugin.getLogger().warning("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
                             }
                             return;
                         }
@@ -129,7 +129,7 @@ public class AddItemNBT extends ItemCommand {
                             try {
                                 nbtItem.setInteger(processedKeyValue[0], Integer.valueOf(processedKeyValue[1]));
                             } catch (Exception e) {
-                                Utils.sendConsoleMsg("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
+                                SCore.plugin.getLogger().warning("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
                             }
                             return;
                         }
@@ -137,14 +137,14 @@ public class AddItemNBT extends ItemCommand {
                             try {
                                 nbtItem.setBoolean(processedKeyValue[0], Boolean.valueOf(processedKeyValue[1]));
                             } catch (Exception e) {
-                                Utils.sendConsoleMsg("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
+                                SCore.plugin.getLogger().warning("WARNING: Your keyValue arg value is not suitable for your provided mode. Reference value: "+keyValue+" | "+mode);
                             }
                             return;
                         }
                     }
                 });
             } else {
-                Utils.sendConsoleMsg("WARNING: You are trying to use mode \"nbtapi\" while having NBT API plugin not installed. Please install NBT API before using this mode.");
+                SCore.plugin.getLogger().warning("WARNING: You are trying to use mode \"nbtapi\" while having NBT API plugin not installed. Please install NBT API before using this mode.");
             }
         }
     }
