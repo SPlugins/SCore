@@ -1,15 +1,10 @@
 package com.ssomar.score.commands.runnable.item.commands;
 
-import com.ssomar.executableitems.ExecutableItems;
 import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.CommandSetting;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.item.ItemCommand;
-import com.ssomar.score.features.custom.nbttags.NBTTag;
-import com.ssomar.score.features.custom.nbttags.NBTTagNBTAPIApplier;
-import com.ssomar.score.utils.logging.Utils;
 import de.tr7zw.nbtapi.NBT;
-import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
