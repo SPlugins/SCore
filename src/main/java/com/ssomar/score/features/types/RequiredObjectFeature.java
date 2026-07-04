@@ -217,8 +217,15 @@ public class RequiredObjectFeature extends FeatureAbstract<Optional<RequiredObje
     }
 
     public void updateRequiredObject(RequiredObject rO, GUI gui, boolean previous) {
-        if ((rO.equals(RequiredObject.REQUIRE_ITEM_FROM_EXECUTABLEITEMS) && !SCore.hasExecutableItems)
-                || (rO.equals(RequiredObject.REQUIRE_ITEM_FROM_ITEMADDERS) && !SCore.hasItemsAdder)) {
+        if
+        (
+                (rO.equals(RequiredObject.REQUIRE_ITEM_FROM_EXECUTABLEITEMS) && !SCore.hasExecutableItems
+                        || (rO.equals(RequiredObject.REQUIRE_ITEM_FROM_ITEMADDERS) && !SCore.hasItemsAdder)
+                        || (rO.equals(RequiredObject.REQUIRE_ITEM_FROM_ORAXEN) && !SCore.hasOraxen)
+                        || (rO.equals(RequiredObject.REQUIRE_ITEM_FROM_NEXO) && !SCore.hasNexo)
+                )
+        )
+        {
             if (previous) {
                 updateRequiredObject(prevRequiredObject(rO), gui, previous);
             } else {

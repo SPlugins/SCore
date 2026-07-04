@@ -88,7 +88,7 @@ public class ExecutableItemFeature extends FeatureAbstract<Optional<ExecutableIt
         finalDescription[finalDescription.length - 4] = GUI.CLICK_HERE_TO_CHANGE;
         finalDescription[finalDescription.length - 3] = "&8>> &6DOUBLE CLICK : &bOPEN EDITOR";
         finalDescription[finalDescription.length - 2] = "&8>> &6SHIFT : &eBOOST SCROLL";
-        finalDescription[finalDescription.length - 1] = "&8>> &6UP: &eRIGHT | &6DOWN: &eLEFT";
+        finalDescription[finalDescription.length - 1] = "&8>> &6UP: &eRIGHT | &6DOWN: &eLEFT TEST GAU GAU";
 
 
         ItemStack item = new ItemStack(getEditorMaterial());
