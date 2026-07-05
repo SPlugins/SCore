@@ -491,7 +491,7 @@ public enum FeatureSettingsSCoreEN implements FeatureSettingsInterface {
     option("option", "Option", new String[]{"&7&oOption"}, Material.COMPASS),
     oraxen("oraxen", "Oraxen", new String[]{"&7&oThe item required to", "&7&oexecute this trade"}, Material.DIAMOND),
     oraxenID("oraxenID", "Oraxen", new String[]{"&7&oThe Oraxen ID"}, Material.DIAMOND_BLOCK),
-    nexo("nexo", "Nexo", new String[]{"&7&oThe item required to", "&7&oexecute this trade"}, Material.DIAMOND),
+    nexo("nexo", "Nexo", new String[]{"&7&oThe item required to", "&7&oexecute this trade"}, Material.BRICK_STAIRS),
     nexoID("nexoID", "Nexo", new String[]{"&7&oThe Nexo ID"}, Material.DIAMOND_BLOCK),
     otherEICooldowns("otherEICooldowns", "Other EI Cooldowns", new String[]{"&7&oTo add cooldown", "&7&oto another EI"}, Material.ANVIL),
     ownerCommands("ownerCommands", "Owner Commands", new String[]{"&7&oThe owner commands to execute"}, FixedMaterial.getMaterial(Arrays.asList("COMMAND_BLOCK", "COMMAND"))),
