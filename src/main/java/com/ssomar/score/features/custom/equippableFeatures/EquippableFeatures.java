@@ -48,6 +48,14 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
 
     private ListEntityTypeFeature allowedEntities;
 
+    /**
+     * 1.21.6
+     **/
+    private BooleanFeature canBeSheared;
+    private BooleanFeature enableShearingSound;
+    private SoundFeature shearingSound;
+    private BooleanFeature equipOnInteract;
+
     public EquippableFeatures(FeatureParentInterface parent) {
         super(parent, FeatureSettingsSCore.equippableFeatures);
         reset();
@@ -66,6 +74,10 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
         isDispensable = new BooleanFeature(this, true, FeatureSettingsSCore.dispensable);
         isSwappable = new BooleanFeature(this, true, FeatureSettingsSCore.swappable);
         allowedEntities = new ListEntityTypeFeature(this, new ArrayList<>(Collections.singleton(EntityType.PLAYER)), FeatureSettingsSCore.allowedEntities);
+        canBeSheared = new BooleanFeature(this, false, FeatureSettingsSCore.canBeSheared);
+        enableShearingSound = new BooleanFeature(this, false, FeatureSettingsSCore.enableShearingSound);
+        shearingSound = new SoundFeature(this, Optional.of(Sound.ENTITY_SHEEP_SHEAR), FeatureSettingsSCore.shearingSound);
+        equipOnInteract = new BooleanFeature(this, false, FeatureSettingsSCore.equipOnInteract);
     }
 
     @Override
@@ -106,7 +118,7 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
 
     @Override
     public EquippableFeatures initItemParentEditor(GUI gui, int slot) {
-        int len = 11;
+        int len = 15;
         String[] finalDescription = new String[getEditorDescription().length + len];
         System.arraycopy(getEditorDescription(), 0, finalDescription, 0, getEditorDescription().length);
         finalDescription[finalDescription.length - len] = GUI.CLICK_HERE_TO_CHANGE;
@@ -132,6 +144,14 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
         len--;
         finalDescription[finalDescription.length - len] = "&7Allowed Entities: &e" + allowedEntities.getValue();
         len--;
+        finalDescription[finalDescription.length - len] = "&7Can Be Sheared: &e" + (canBeSheared.getValue() ? "&a&l✔" : "&c&l✘");
+        len--;
+        finalDescription[finalDescription.length - len] = "&7Enable Shearing Sound: &e" + (enableShearingSound.getValue() ? "&a&l✔" : "&c&l✘");
+        len--;
+        finalDescription[finalDescription.length - len] = "&7Shearing Sound: &e" + SoundUtils.getSounds().get(shearingSound.getValue().get());
+        len--;
+        finalDescription[finalDescription.length - len] = "&7Equip On Interact: &e" + (equipOnInteract.getValue() ? "&a&l✔" : "&c&l✘");
+        len--;
 
         gui.createItem(getEditorMaterial(), 1, slot, GUI.TITLE_COLOR + getEditorName(), false, false, finalDescription);
         return this;
@@ -155,6 +175,10 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
         dropFeatures.setIsDispensable(isDispensable.clone(dropFeatures));
         dropFeatures.setIsSwappable(isSwappable.clone(dropFeatures));
         dropFeatures.setAllowedEntities(allowedEntities.clone(dropFeatures));
+        dropFeatures.setCanBeSheared(canBeSheared.clone(dropFeatures));
+        dropFeatures.setEnableShearingSound(enableShearingSound.clone(dropFeatures));
+        dropFeatures.setShearingSound(shearingSound.clone(dropFeatures));
+        dropFeatures.setEquipOnInteract(equipOnInteract.clone(dropFeatures));
 
         return dropFeatures;
     }
@@ -172,6 +196,10 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
         features.add(isDispensable);
         features.add(isSwappable);
         features.add(allowedEntities);
+        features.add(canBeSheared);
+        features.add(enableShearingSound);
+        features.add(shearingSound);
+        features.add(equipOnInteract);
         return features;
     }
 
@@ -205,6 +233,10 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
                 hiders.setIsDispensable(isDispensable);
                 hiders.setIsSwappable(isSwappable);
                 hiders.setAllowedEntities(allowedEntities);
+                hiders.setCanBeSheared(canBeSheared);
+                hiders.setEnableShearingSound(enableShearingSound);
+                hiders.setShearingSound(shearingSound);
+                hiders.setEquipOnInteract(equipOnInteract);
             }
         }
     }
@@ -252,6 +284,17 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
                 if (allowedEntities.getValue().isEmpty()) equippable.setAllowedEntities(EntityType.PLAYER);
                 else equippable.setAllowedEntities(allowedEntities.getValue());
 
+                if (SCore.is1v21v6Plus()) {
+                    equippable.setEquipOnInteract(equipOnInteract.getValue());
+                }
+                // can_be_sheared / shearing_sound only exist in the 26.x API
+                if (SCore.is26v1Plus()) {
+                    equippable.setCanBeSheared(canBeSheared.getValue());
+                    if (enableShearingSound.getValue() && shearingSound.getValue().isPresent()) {
+                        equippable.setShearingSound(shearingSound.getValue().get());
+                    }
+                }
+
                 meta.setEquippable(equippable);
             }
         }
@@ -276,6 +319,15 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
                 isSwappable.setValue(equippable.isSwappable());
                 if (equippable.getAllowedEntities() != null)
                     allowedEntities.setValues(new ArrayList<>(equippable.getAllowedEntities()));
+                if (SCore.is1v21v6Plus()) {
+                    equipOnInteract.setValue(equippable.isEquipOnInteract());
+                }
+                // can_be_sheared / shearing_sound only exist in the 26.x API
+                if (SCore.is26v1Plus()) {
+                    canBeSheared.setValue(equippable.canBeSheared());
+                    enableShearingSound.setValue(equippable.getShearingSound() != null);
+                    shearingSound.setValue(Optional.ofNullable(equippable.getShearingSound()));
+                }
             }
         }
     }
