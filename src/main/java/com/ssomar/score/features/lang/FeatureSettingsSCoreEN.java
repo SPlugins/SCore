@@ -178,6 +178,8 @@ public enum FeatureSettingsSCoreEN implements FeatureSettingsInterface {
     detailedClick("detailedClick", "Detailed Click", new String[]{"&7&oThe specific click"}, Material.COMPASS),
     detailedInput("detailedInput", "Detailed Input", new String[]{"&7&oThe specific input"}, Material.COMPASS),
     weaponFeatures("weaponFeatures", "Weapon Features", new String[]{"&7&oThe weapon features"}, Material.DIAMOND_SWORD),
+    dyeFeatures("dyeFeatures", "Dye Features", new String[]{"&7&oMake the item usable as a dye (26.1+)"}, FixedMaterial.getMaterial(Arrays.asList("PINK_DYE", "INK_SACK"))),
+    dyeColor("dyeColor", "Dye Color", new String[]{"&7&oThe dye color of the item"}, FixedMaterial.getMaterial(Arrays.asList("PINK_DYE", "INK_SACK"))),
     detailedCommands("detailedCommands", "Detailed Commands", new String[]{"&7&oSpecify a list of commands that", "&7&ocan be affected", "&7&oempty = no command", "&7Example: &agamemode creative"}, GUI.WRITABLE_BOOK),
     detailedDamageCauses("detailedDamageCauses", "Detailed DamageCauses", new String[]{"&7&oSpecify a list of damageCauses that", "&7&ocan be affected", "&7&oempty = all causes"}, Material.BONE),
     detailedEffects("detailedEffects", "Detailed Effects", new String[]{"&7&oMake the activator run", "&7&oonly for certain effects", "&7&oempty = all effects"}, FixedMaterial.getMaterial(Arrays.asList("POTION", "REDSTONE"))),
