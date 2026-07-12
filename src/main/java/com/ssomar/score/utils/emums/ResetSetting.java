@@ -27,6 +27,9 @@ public enum ResetSetting {
     WEAPON,
     BLOCK_ATTACKS,
     TOOLTIP_MODEL,
+    ATTACK_RANGE,
+    PIERCING_WEAPON,
+    KINETIC_WEAPON,
     DYE,
     SULFUR_CUBE_CONTENT
 

@@ -480,7 +480,11 @@ public final class SCore extends JavaPlugin implements SPlugin {
     }
 
     public static boolean is1v21v7Plus() {
-        return  is1v21v7() || is1v21v8() || is1v21v9() || is1v21v10() || is1v21v11() || is26v1Plus();
+        return  is1v21v7() || is1v21v8() || is1v21v9() || is1v21v10() || is1v21v11Plus();
+    }
+
+    public static boolean is1v21v11Plus() {
+        return is1v21v11() || is26v1Plus();
     }
 
     public static boolean is26v1Plus() {
