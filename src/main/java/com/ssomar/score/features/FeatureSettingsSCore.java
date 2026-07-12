@@ -102,6 +102,8 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
     weaponFeatures(getFeatureSettings("weaponFeatures")),
     dyeFeatures(getFeatureSettings("dyeFeatures")),
     dyeColor(getFeatureSettings("dyeColor")),
+    sulfurCubeContentFeatures(getFeatureSettings("sulfurCubeContentFeatures")),
+    absorbedItem(getFeatureSettings("absorbedItem")),
     detailedEffects(getFeatureSettings("detailedEffects")),
     detailedItems(getFeatureSettings("detailedItems")),
     detailedTargetItems(getFeatureSettings("detailedTargetItems")),

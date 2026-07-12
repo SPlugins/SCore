@@ -27,7 +27,8 @@ public enum ResetSetting {
     WEAPON,
     BLOCK_ATTACKS,
     TOOLTIP_MODEL,
-    DYE
+    DYE,
+    SULFUR_CUBE_CONTENT
 
 
 }
