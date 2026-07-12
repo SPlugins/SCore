@@ -12,6 +12,7 @@ import com.ssomar.score.features.types.SoundFeature;
 import com.ssomar.score.menu.GUI;
 import com.ssomar.score.splugin.SPlugin;
 import com.ssomar.score.utils.backward_compatibility.SoundUtils;
+import net.kyori.adventure.key.Key;
 import com.ssomar.score.utils.emums.ResetSetting;
 import com.ssomar.score.utils.logging.Utils;
 import com.ssomar.score.utils.strings.StringConverter;
@@ -233,8 +234,14 @@ public class KineticWeaponFeatures extends FeatureWithHisOwnEditor<KineticWeapon
                 loadCondition(kineticWeapon.dismountConditions(), dismountMaxDurationTicks, dismountMinSpeed, dismountMinRelativeSpeed);
                 loadCondition(kineticWeapon.knockbackConditions(), knockbackMaxDurationTicks, knockbackMinSpeed, knockbackMinRelativeSpeed);
                 loadCondition(kineticWeapon.damageConditions(), damageMaxDurationTicks, damageMinSpeed, damageMinRelativeSpeed);
-                enableSound.setValue(kineticWeapon.sound() != null);
-                enableHitSound.setValue(kineticWeapon.hitSound() != null);
+                Key soundKey = kineticWeapon.sound();
+                enableSound.setValue(soundKey != null);
+                Sound loadedSound = SoundUtils.getSoundFromKey(soundKey);
+                if (loadedSound != null) sound.setValue(Optional.of(loadedSound));
+                Key hitSoundKey = kineticWeapon.hitSound();
+                enableHitSound.setValue(hitSoundKey != null);
+                Sound loadedHitSound = SoundUtils.getSoundFromKey(hitSoundKey);
+                if (loadedHitSound != null) hitSound.setValue(Optional.of(loadedHitSound));
             }
         }
     }
