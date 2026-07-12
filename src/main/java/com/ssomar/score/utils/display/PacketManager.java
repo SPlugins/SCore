@@ -21,6 +21,13 @@ public class PacketManager {
         SCore.protocolManager.addPacketListener(new PacketAdapter(params) {
             @Override
             public void onPacketSending(PacketEvent event) {
+                /* If no display module has loaded IDs, no item can be modified:
+                 * skip the expensive per-item rebuild (item clone + inventory scan).
+                 * Same guard as the repeating refresh task in SCore (Display.isSomethingToModify()).
+                 * Fixes lag with plugins that resend inventories/items in packets
+                 * (e.g. InteractiveChat [item]) https://discord.com/channels/701066025516531753/1522499028795916310 */
+                if (!Display.isSomethingToModify()) return;
+
                 PacketContainer packet = event.getPacket();
 
                 /* if (event.getPacketType() == PacketType.Play.Server.SET_SLOT && event.getPlayer().getGameMode() != GameMode.CREATIVE) {

@@ -2,6 +2,7 @@ package com.ssomar.score.features.types;
 
 import com.nexomc.nexo.api.NexoBlocks;
 import com.nexomc.nexo.api.NexoItems;
+import com.nexomc.nexo.items.ItemBuilder;
 import com.nexomc.nexo.utils.drops.Drop;
 import com.ssomar.score.SCore;
 import com.ssomar.score.SsomarDev;
@@ -333,8 +334,9 @@ public class NexoFeature extends FeatureAbstract<Optional<String>, NexoFeature> 
     public List<String> getSortNexo() {
         SortedMap<String, String> map = new TreeMap<String, String>();
         if (SCore.hasNexo) {
-            for (String c : NexoBlocks.blockIDs()) {
-                map.put(c, c);
+            for (ItemBuilder itemBuilder : NexoItems.items()) {
+                String itemId = NexoItems.idFromItem(itemBuilder);
+                map.put(itemId, itemId);
             }
         }
         return new ArrayList<>(map.values());

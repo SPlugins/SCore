@@ -1,6 +1,5 @@
 package com.ssomar.score.api.executableblocks.events;
 
-import com.ssomar.executableblocks.executableblocks.placedblocks.ExecutableBlockPlaced;
 import lombok.Getter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -10,8 +9,26 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Fired when a placed ExecutableBlock is broken.
+ * Cancelling the event prevents the break.
+ */
 @Getter
 public class ExecutableBlockBreakEvent extends Event implements Cancellable {
+
+    /**
+     * How the ExecutableBlock was broken.
+     */
+    public enum BreakMethod {
+        /**
+         * Broken like a vanilla block (mining, explosion, ...).
+         */
+        NATURAL,
+        /**
+         * Broken by an ExecutableBlocks mechanic (command, api, ...).
+         */
+        CUSTOM
+    }
 
     private static final HandlerList handlers = new HandlerList();
 
@@ -19,13 +36,19 @@ public class ExecutableBlockBreakEvent extends Event implements Cancellable {
 
     private final Block block;
 
-    private final ExecutableBlockPlaced.BreakMethod breakMethod;
+    private final BreakMethod breakMethod;
 
     private final Event sourceEvent;
 
     private boolean cancelled = false;
 
-    public ExecutableBlockBreakEvent(@Nullable Player player, Block block, @Nullable Event sourceEvent, ExecutableBlockPlaced.BreakMethod breakMethod) {
+    /**
+     * @param player      the player who broke the block, or null if not broken by a player
+     * @param block       the broken block
+     * @param sourceEvent the Bukkit event at the origin of the break, if any
+     * @param breakMethod how the block was broken
+     */
+    public ExecutableBlockBreakEvent(@Nullable Player player, Block block, @Nullable Event sourceEvent, BreakMethod breakMethod) {
         this.player = player;
         this.block = block;
         this.sourceEvent = sourceEvent;

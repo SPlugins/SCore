@@ -7,17 +7,23 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Fired when an ExecutableItem is removed from a player's inventory
+ * (for example when a consumable ExecutableItem runs out of usage).
+ */
 public class RemoveItemInPlayerInventoryEvent extends PlayerEvent {
 
     private static final HandlerList handlers = new HandlerList();
     @Getter
-    private ItemStack item;
+    private final ItemStack item;
     @Getter
-    private int slot;
+    private final int slot;
 
 
     /**
-     * @param player The player who put on / removed the armor.
+     * @param player the player whose inventory lost the item
+     * @param item   the item removed from the inventory
+     * @param slot   the inventory slot the item was removed from
      */
     public RemoveItemInPlayerInventoryEvent(final Player player, ItemStack item, int slot) {
         super(player);

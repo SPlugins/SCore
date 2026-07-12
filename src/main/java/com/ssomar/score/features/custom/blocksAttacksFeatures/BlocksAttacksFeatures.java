@@ -188,12 +188,22 @@ public class BlocksAttacksFeatures extends FeatureWithHisOwnEditor<BlocksAttacks
                 BlocksAttacks blocksAttacks = item.getData(DataComponentTypes.BLOCKS_ATTACKS);
                 enable.setValue(true);
                 blockDelay.setValue(Optional.of((int) blocksAttacks.blockDelaySeconds()));
-                blockSound.setValue(Optional.ofNullable(SoundUtils.getSound(blocksAttacks.blockSound().value())));
-                disableSound.setValue(Optional.ofNullable(SoundUtils.getSound(blocksAttacks.disableSound().value())));
+                // blockSound() / disableSound() are nullable (e.g. custom blocks_attacks components without sounds)
+                net.kyori.adventure.key.Key blockSoundKey = blocksAttacks.blockSound();
+                blockSound.setValue(blockSoundKey == null ? Optional.empty() : Optional.ofNullable(SoundUtils.getSound(blockSoundKey.value())));
+                net.kyori.adventure.key.Key disableSoundKey = blocksAttacks.disableSound();
+                disableSound.setValue(disableSoundKey == null ? Optional.empty() : Optional.ofNullable(SoundUtils.getSound(disableSoundKey.value())));
                 disableCooldownScale.setValue(Optional.of((double) blocksAttacks.disableCooldownScale()));
                 damageReductions.setValues(blocksAttacks.damageReductions());
-                // bypassedBy() returns RegistryKeySet on new Paper, TagKey on old Paper
-                Object bypassedByValue = blocksAttacks.bypassedBy();
+                // bypassedBy() returns RegistryKeySet on new Paper, TagKey on old Paper (1.21.5 - 1.21.x).
+                // The return type is part of the compiled method descriptor, so a direct call compiled against
+                // one API throws NoSuchMethodError on the other -> it must be invoked via reflection.
+                Object bypassedByValue = null;
+                try {
+                    bypassedByValue = BlocksAttacks.class.getMethod("bypassedBy").invoke(blocksAttacks);
+                } catch (Exception e) {
+                    SsomarDev.testMsg("Could not read bypassedBy from the blocks_attacks component: " + e.getMessage(), true);
+                }
                 if (bypassedByValue instanceof io.papermc.paper.registry.set.RegistryKeySet) {
                     bypassedBy.setValue((io.papermc.paper.registry.set.RegistryKeySet<DamageType>) bypassedByValue);
                 } else if (bypassedByValue instanceof io.papermc.paper.registry.tag.TagKey) {

@@ -1,5 +1,9 @@
 package com.ssomar.score.utils.emums;
 
+/**
+ * The parts of an item that can be reset to their configuration value
+ * when an item is refreshed.
+ */
 public enum ResetSetting {
     MATERIAL,
     NAME,
@@ -22,7 +26,9 @@ public enum ResetSetting {
     CONTAINER, HEAD, BANNER, FOOD, CONSUMABLE, BUNDLE, BLOCK_STATE, CHARGED_PROJECTILES, MYFURNITURE, SPAWNER,
     WEAPON,
     BLOCK_ATTACKS,
-    TOOLTIP_MODEL
+    TOOLTIP_MODEL,
+    DYE,
+    SULFUR_CUBE_CONTENT
 
 
 }
