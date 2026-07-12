@@ -10,6 +10,7 @@ import com.ssomar.score.features.types.SoundFeature;
 import com.ssomar.score.menu.GUI;
 import com.ssomar.score.splugin.SPlugin;
 import com.ssomar.score.utils.backward_compatibility.SoundUtils;
+import net.kyori.adventure.key.Key;
 import com.ssomar.score.utils.emums.ResetSetting;
 import com.ssomar.score.utils.logging.Utils;
 import com.ssomar.score.utils.strings.StringConverter;
@@ -167,8 +168,14 @@ public class PiercingWeaponFeatures extends FeatureWithHisOwnEditor<PiercingWeap
                 enable.setValue(true);
                 dealsKnockback.setValue(piercingWeapon.dealsKnockback());
                 dismounts.setValue(piercingWeapon.dismounts());
-                enableSound.setValue(piercingWeapon.sound() != null);
-                enableHitSound.setValue(piercingWeapon.hitSound() != null);
+                Key soundKey = piercingWeapon.sound();
+                enableSound.setValue(soundKey != null);
+                Sound loadedSound = SoundUtils.getSoundFromKey(soundKey);
+                if (loadedSound != null) sound.setValue(Optional.of(loadedSound));
+                Key hitSoundKey = piercingWeapon.hitSound();
+                enableHitSound.setValue(hitSoundKey != null);
+                Sound loadedHitSound = SoundUtils.getSoundFromKey(hitSoundKey);
+                if (loadedHitSound != null) hitSound.setValue(Optional.of(loadedHitSound));
             }
         }
     }

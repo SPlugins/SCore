@@ -42,6 +42,19 @@ public class SoundUtils {
         return MapUtil.sortByValue(list);
     }
 
+    /**
+     * Resolve the org.bukkit.Sound matching an Adventure key (as returned by the
+     * item data-component API, e.g. PiercingWeapon#sound()). Returns null if the
+     * key is null or no matching sound exists.
+     */
+    public static Sound getSoundFromKey(net.kyori.adventure.key.Key key) {
+        if (key == null) return null;
+        if (SCore.is1v21v2Plus()) {
+            return Registry.SOUNDS.get(new NamespacedKey(key.namespace(), key.value()));
+        }
+        return getSound(key.value());
+    }
+
     public static Sound getSound(String string) {
         string = string.replace("minecraft:", "");
         for(Map.Entry<Object, String> entry : getSounds().entrySet()) {
