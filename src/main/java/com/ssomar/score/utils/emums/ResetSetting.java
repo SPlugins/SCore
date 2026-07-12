@@ -1,5 +1,9 @@
 package com.ssomar.score.utils.emums;
 
+/**
+ * The parts of an item that can be reset to their configuration value
+ * when an item is refreshed.
+ */
 public enum ResetSetting {
     MATERIAL,
     NAME,
@@ -25,7 +29,9 @@ public enum ResetSetting {
     TOOLTIP_MODEL,
     ATTACK_RANGE,
     PIERCING_WEAPON,
-    KINETIC_WEAPON
+    KINETIC_WEAPON,
+    DYE,
+    SULFUR_CUBE_CONTENT
 
 
 }

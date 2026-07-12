@@ -195,6 +195,28 @@ public class CooldownFeature extends FeatureWithHisOwnEditor<CooldownFeature, Co
         CooldownsManager.getInstance().addCooldown(cooldown);
     }
 
+    /**
+     * Check whether an entity currently has this cooldown active.
+     *
+     * @param entity the entity to check
+     * @return true if the cooldown is currently running for this entity
+     */
+    public boolean isInCooldown(@NotNull Entity entity) {
+        return CooldownsManager.getInstance().getCooldown(sPlugin, cooldownId, entity.getUniqueId(), isGlobal).isPresent();
+    }
+
+    /**
+     * Get the remaining time of this cooldown for an entity.
+     *
+     * @param entity the entity to check
+     * @return the remaining time in seconds, or 0 if the entity is not in cooldown
+     */
+    public double getCooldownRemaining(@NotNull Entity entity) {
+        Optional<Cooldown> cooldownOpt = CooldownsManager.getInstance().getCooldown(sPlugin, cooldownId, entity.getUniqueId(), isGlobal);
+        if (cooldownOpt.isPresent()) return cooldownOpt.get().getTimeLeft();
+        return 0;
+    }
+
     public boolean hasNoCDPerm(Permissible p, SObject sObject) {
         String id = sObject.getId();
 

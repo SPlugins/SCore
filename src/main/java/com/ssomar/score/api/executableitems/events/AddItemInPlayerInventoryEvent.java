@@ -7,17 +7,23 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Fired when an ExecutableItem is added to a player's inventory
+ * (through the give command or an EI mechanic).
+ */
 public class AddItemInPlayerInventoryEvent extends PlayerEvent {
 
     private static final HandlerList handlers = new HandlerList();
     @Getter
-    private ItemStack item;
+    private final ItemStack item;
     @Getter
-    private int slot;
+    private final int slot;
 
 
     /**
-     * @param player The player who put on / removed the armor.
+     * @param player the player who received the item
+     * @param item   the item added to the inventory
+     * @param slot   the inventory slot the item was added to
      */
     public AddItemInPlayerInventoryEvent(final Player player, ItemStack item, int slot) {
         super(player);
