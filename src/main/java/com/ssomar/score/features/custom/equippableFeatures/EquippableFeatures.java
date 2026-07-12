@@ -285,11 +285,14 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
                 else equippable.setAllowedEntities(allowedEntities.getValue());
 
                 if (SCore.is1v21v6Plus()) {
+                    equippable.setEquipOnInteract(equipOnInteract.getValue());
+                }
+                // can_be_sheared / shearing_sound only exist in the 26.x API
+                if (SCore.is26v1Plus()) {
                     equippable.setCanBeSheared(canBeSheared.getValue());
                     if (enableShearingSound.getValue() && shearingSound.getValue().isPresent()) {
                         equippable.setShearingSound(shearingSound.getValue().get());
                     }
-                    equippable.setEquipOnInteract(equipOnInteract.getValue());
                 }
 
                 meta.setEquippable(equippable);
@@ -317,10 +320,13 @@ public class EquippableFeatures extends FeatureWithHisOwnEditor<EquippableFeatur
                 if (equippable.getAllowedEntities() != null)
                     allowedEntities.setValues(new ArrayList<>(equippable.getAllowedEntities()));
                 if (SCore.is1v21v6Plus()) {
+                    equipOnInteract.setValue(equippable.isEquipOnInteract());
+                }
+                // can_be_sheared / shearing_sound only exist in the 26.x API
+                if (SCore.is26v1Plus()) {
                     canBeSheared.setValue(equippable.canBeSheared());
                     enableShearingSound.setValue(equippable.getShearingSound() != null);
                     shearingSound.setValue(Optional.ofNullable(equippable.getShearingSound()));
-                    equipOnInteract.setValue(equippable.isEquipOnInteract());
                 }
             }
         }
