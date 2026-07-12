@@ -66,7 +66,7 @@ public class AddItemNBT extends ItemCommand {
         String type = ((String) sCommandToExec.getSettingValue("type")).toLowerCase();
         String mode = ((String) sCommandToExec.getSettingValue("mode")).toLowerCase();
         if (mode.equals("pdc")) {
-            if (SCore.is1v14() || SCore.is1v15() || SCore.is1v16Plus()) {
+            if (SCore.is1v14Plus()) {
                 ItemMeta meta = item.getItemMeta();
                 PersistentDataContainer pdc = meta.getPersistentDataContainer();
                 NamespacedKey nsKey = new NamespacedKey(SCore.plugin, processedKeyValue[0]);
