@@ -197,13 +197,8 @@ public interface CommmandThatRunsCommand {
         return s;
     }
 
-    /* True > an entity has been hit
-     *  False > no entity hit */
-    static boolean runEntityCommands(Collection<? extends Entity> entities, List<String> argsCommands, ActionInfo aInfo) {
-
-        ListDetailedEntityFeature whiteList = null;
-        ListDetailedEntityFeature blackList = null;
-
+    /* Regroups the args that are split parts of a quoted string ("...") into a single arg */
+    static List<String> mergeQuotedArgs(List<String> argsCommands) {
         List<String> verifyArgs = new ArrayList<>();
         boolean concatNext = false;
         StringBuilder toConcat = new StringBuilder();
@@ -233,30 +228,73 @@ public interface CommmandThatRunsCommand {
             }
         }
         if (toConcat.length() > 0) verifyArgs.add(toConcat.toString());
+        return verifyArgs;
+    }
 
+    /* Parses the content of a WHITELIST(...) or BLACKLIST(...) arg into a ListDetailedEntityFeature */
+    static ListDetailedEntityFeature parseEntityListFilter(String arg, String keyword) {
+        String[] split = arg.split(keyword + "\\(");
+        String listString = split[1].split("\\)")[0];
+        listString = listString.replaceAll("\"", "");
+        split = listString.split(",");
+        ListDetailedEntityFeature list = new ListDetailedEntityFeature(new MobAround(), new ArrayList<>(), null, false);
+        list.load(SCore.plugin, Arrays.asList(split), true);
+        return list;
+    }
+
+    /**
+     * Filters out the entities that don't pass the WHITELIST( / BLACKLIST( args if present.
+     * Commands that support sort/limit settings (e.g. {@link MobAround}) must call this BEFORE
+     * sorting and applying the limit, so that the limit only counts valid entities.
+     * https://discord.com/channels/701066025516531753/1522946590715936842
+     */
+    static List<Entity> filterEntitiesWithWhiteListBlackList(Collection<? extends Entity> entities, List<String> argsCommands) {
+        ListDetailedEntityFeature whiteList = null;
+        ListDetailedEntityFeature blackList = null;
+
+        for (String s : mergeQuotedArgs(argsCommands)) {
+            try {
+                if (s.contains("BLACKLIST(")) {
+                    blackList = parseEntityListFilter(s, "BLACKLIST");
+                } else if (s.contains("WHITELIST(")) {
+                    whiteList = parseEntityListFilter(s, "WHITELIST");
+                }
+            } catch (Exception e) {
+                Utils.sendConsoleMsg("&cError in the command: &6" + s);
+                Utils.sendConsoleMsg("&cExample of use: &6WHITELIST(HORSE{CustomName:Batimovil+NoAI:1b},PIG)");
+                Utils.sendConsoleMsg("&ce" + e.getMessage());
+            }
+        }
+
+        List<Entity> filtered = new ArrayList<>();
+        for (Entity entity : entities) {
+            if (whiteList != null && whiteList.getValue().size() > 0 && !whiteList.isValidEntity(entity)) continue;
+            if (blackList != null && blackList.getValue().size() > 0 && blackList.isValidEntity(entity)) continue;
+            filtered.add(entity);
+        }
+        return filtered;
+    }
+
+    /* True > an entity has been hit
+     *  False > no entity hit */
+    static boolean runEntityCommands(Collection<? extends Entity> entities, List<String> argsCommands, ActionInfo aInfo) {
+
+        ListDetailedEntityFeature whiteList = null;
+        ListDetailedEntityFeature blackList = null;
+
+        List<String> verifyArgs = mergeQuotedArgs(argsCommands);
 
         int argToRemove = -1;
         int cpt = 0;
         for (String s : verifyArgs) {
             //SsomarDev.testMsg("args: " + s, true);
-            String[] split;
             try {
                 if (s.contains("BLACKLIST(")) {
                     argToRemove = cpt;
-                    split = s.split("BLACKLIST\\(");
-                    String blackListString = split[1].split("\\)")[0];
-                    blackListString = blackListString.replaceAll("\"", "");
-                    split = blackListString.split(",");
-                    blackList = new ListDetailedEntityFeature(new MobAround(), new ArrayList<>(), null, false);
-                    blackList.load(SCore.plugin, Arrays.asList(split), true);
+                    blackList = parseEntityListFilter(s, "BLACKLIST");
                 } else if (s.contains("WHITELIST(")) {
                     argToRemove = cpt;
-                    split = s.split("WHITELIST\\(");
-                    String whiteListString = split[1].split("\\)")[0];
-                    whiteListString = whiteListString.replaceAll("\"", "");
-                    split = whiteListString.split(",");
-                    whiteList = new ListDetailedEntityFeature(new MobAround(), new ArrayList<>(), null, false);
-                    whiteList.load(SCore.plugin, Arrays.asList(split), true);
+                    whiteList = parseEntityListFilter(s, "WHITELIST");
                 }
             } catch (Exception e) {
                 Utils.sendConsoleMsg("&cError in the command: &6" + s);

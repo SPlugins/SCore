@@ -22,6 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Per-instance data attached to a built object (item, placed block, placed furniture):
+ * owner, remaining usage and variable values. Carried inside the ItemStack /
+ * placed object and readable through the API object interfaces.
+ */
 @Getter
 public class InternalData {
 

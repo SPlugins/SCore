@@ -9,6 +9,10 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Fired when an ExecutableBlock is placed in the world.
+ * Cancelling the event prevents the placement.
+ */
 @Getter
 public class ExecutableBlockPlaceEvent extends Event implements Cancellable {
 
@@ -21,6 +25,10 @@ public class ExecutableBlockPlaceEvent extends Event implements Cancellable {
 
     private boolean cancelled = false;
 
+    /**
+     * @param placer                the entity that placed the block, or null
+     * @param executableBlockPlaced the placed ExecutableBlock
+     */
     public ExecutableBlockPlaceEvent(@Nullable Entity placer, ExecutableBlockPlacedInterface executableBlockPlaced) {
         this.placer = placer;
         this.executableBlockPlaced = executableBlockPlaced;
