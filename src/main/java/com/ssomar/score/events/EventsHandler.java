@@ -42,6 +42,12 @@ public class EventsHandler {
 
         main.getServer().getPluginManager().registerEvents(new PlayerQuitListener(), main);
 
+        /* Self-healing cleanup of the SEvents per-player interaction markers
+         * (stuck entries made some players unable to right click entities until restart) */
+        SEventsStuckInteractionCleaner sEventsStuckInteractionCleaner = new SEventsStuckInteractionCleaner();
+        main.getServer().getPluginManager().registerEvents(sEventsStuckInteractionCleaner, main);
+        sEventsStuckInteractionCleaner.startSweepTask();
+
         /* No EntityToggleGlideEvent & EntityPickupItemEvent in 1.11 -*/
         if (!SCore.is1v11Less()) {
             main.getServer().getPluginManager().registerEvents(new StunEvent(), main);
