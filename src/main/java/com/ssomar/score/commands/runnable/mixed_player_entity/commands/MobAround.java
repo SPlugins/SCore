@@ -183,6 +183,12 @@ public class MobAround extends MixedCommand implements FeatureParentInterface {
                         }
                     }
 
+                    /* Filter the WHITELIST/BLACKLIST args BEFORE sorting and applying the limit,
+                     * otherwise the limit can select only invalid entities (e.g. limit:1 selects the
+                     * nearest armor stand which is blacklisted, and the valid zombie behind is never hit)
+                     * https://discord.com/channels/701066025516531753/1522946590715936842 */
+                    entities = CommmandThatRunsCommand.filterEntitiesWithWhiteListBlackList(entities, sCommandToExec.getOtherArgs());
+
                     if (sort.equalsIgnoreCase("NEAREST")) {
                         entities.sort((e1, e2) -> {
                             double d1 = e1.getLocation().distance(finalReceiverLoc);
