@@ -140,6 +140,46 @@
 
 
     <profiles>
+        <!-- Optional: publish the full jar + javadoc to repo.ssomar.com (mvn deploy -Ppublish) -->
+        <profile>
+            <id>publish</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.11.2</version>
+                        <configuration>
+                            <doclint>none</doclint>
+                            <failOnError>false</failOnError>
+                            <quiet>true</quiet>
+                            <notimestamp>true</notimestamp>
+                            <windowtitle>SCore API — SsomarDev plugins</windowtitle>
+                            <doctitle>SCore ${project.version} — public API of the SsomarDev plugins</doctitle>
+                            <groups>
+                                <group>
+                                    <title>Public API — start here (com.ssomar.score.api)</title>
+                                    <packages>com.ssomar.score.api*</packages>
+                                </group>
+                                <group>
+                                    <title>SCore internals (open source, no stability guarantee)</title>
+                                    <packages>com.ssomar*</packages>
+                                </group>
+                            </groups>
+                            <bottom><![CDATA[Copyright &copy; SsomarDev — <a href="https://docs.ssomar.com">docs.ssomar.com</a> &middot; <a href="https://repo.ssomar.com">repo.ssomar.com</a>]]></bottom>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadoc</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <!-- vvv This part is only for me (Ssomar) vvv -->
         <profile>
             <id>Ssomar</id>
@@ -300,6 +340,10 @@
     </profiles>
 
     <repositories>
+        <repository>
+            <id>ssomar-repo</id>
+            <url>https://repo.ssomar.com/releases</url>
+        </repository>
         <repository>
             <id>griefdefender</id>
             <url>https://repo.glaremasters.me/repository/bloodshot/</url>
@@ -475,9 +519,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.Ssomar-Developement</groupId>
+            <groupId>com.ssomar.sevents</groupId>
             <artifactId>SEvents</artifactId>
-            <version>main-bc3afd40ba-1</version>
+            <version>1.26.7.12</version>
             <scope>compile</scope>
         </dependency>
 
@@ -984,4 +1028,11 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>ssomar-repo</id>
+            <url>https://repo.ssomar.com/releases</url>
+        </repository>
+    </distributionManagement>
 </project>

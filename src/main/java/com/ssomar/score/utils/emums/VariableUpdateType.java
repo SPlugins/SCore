@@ -1,5 +1,8 @@
 package com.ssomar.score.utils.emums;
 
+/**
+ * How a variable update is applied to the current value.
+ */
 public enum VariableUpdateType {
 
     LIST_ADD,
