@@ -709,7 +709,7 @@ public enum FeatureSettingsSCoreEN implements FeatureSettingsInterface {
     ifPlayerSpeed("ifPlayerSpeed", "If player speed", new String[]{"&7Compare the player's velocity magnitude"}, Material.ANVIL),
     ifNearbyPlayerCount("ifNearbyPlayerCount", "If nearby player count", new String[]{"&7Compare the count of nearby players"}, Material.ANVIL),
     suspiciousBlockLoot("suspiciousBlockLoot", "Suspicious Block Loot", new String[]{"&7The loot the ExecutableBlock will have","&7when brushed.","&cREQUIRED BY PLAYER_BRUSH_BLOCK"}, FixedMaterial.getMaterial(Arrays.asList("BRUSH"))),
-    papiParser("papiParser", "PlaceholderAPI Parser", new String[]{"&7The text you want to use along with the", "&7variable value in order for it to work", "&7with PlaceholderAPI placeholders.", "", "&7Check wiki for further details"}, Material.LEAD)
+    papiParser("papiParser", "PlaceholderAPI Parser", new String[]{"&7The text you want to use along with the", "&7variable value in order for it to work", "&7with PlaceholderAPI placeholders.", "", "&7Check wiki for further details"}, FixedMaterial.getMaterial(Arrays.asList("LEAD", "LEASH")))
     ;
 
 

@@ -3,11 +3,12 @@ package com.ssomar.score.pack.custom;
 import com.ssomar.score.SCore;
 import com.ssomar.score.pack.spigot.InjectSpigot;
 import lombok.Getter;
-import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class PackManager {
 
         // copy the file to the cache folder
         try {
-            FileUtils.copyFile(actualPackFile, cachePackFile);
+            Files.copy(actualPackFile.toPath(), cachePackFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             pack.setFilePath(cachePackFile.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();

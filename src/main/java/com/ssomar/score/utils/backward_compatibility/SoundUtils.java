@@ -19,7 +19,7 @@ public class SoundUtils {
             for (Keyed l : Registry.SOUNDS) {
                 NamespacedKey key = l.getKey();
                 if(key.getNamespace().equals("minecraft")) {
-                    list.put(l, l.getKey().getKey().toUpperCase());
+                    list.put(l, l.getKey().getKey().toUpperCase().replace('.', '_'));
                 }
                 else list.put(l, l.getKey().toString());
             }

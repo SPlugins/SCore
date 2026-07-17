@@ -25,7 +25,6 @@ public class BlockCommandManager extends CommandManager<BlockCommand> {
         references.add(new SendMessage());
         references.add(new Explode());
         references.add(new Break());
-        references.add(new Launch());
         references.add(new ChangeBlockType());
         references.add(new DropItem());
         references.add(new DropExecutableItem());
@@ -33,7 +32,6 @@ public class BlockCommandManager extends CommandManager<BlockCommand> {
         references.add(new InlineMineInCube());
         references.add(new MineInCube());
         references.add(new MineInSphere());
-        references.add(new PlantInSquare());
         references.add(new Smelt());
         references.add(new RemoveBlock());
         references.add(new Around());
@@ -41,12 +39,18 @@ public class BlockCommandManager extends CommandManager<BlockCommand> {
         references.add(new VeinBreaker());
         references.add(new SilkSpawner());
         references.add(new DrainInCube());
-        references.add(new Move());
         references.add(new StrikeLightning());
         references.add(new OpMessageBlock());
         references.add(new ConsoleMessageBlock());
-        /* No BlockData in 1.12 and less */
+        /* No BlockData in 1.12 and less: these commands read/write org.bukkit.block.data.*
+         * (the 1.13 "flattening" API) as their core mechanism, so they can't be offered — and
+         * their classes must not even be loaded (NoClassDefFoundError) — on 1.12 and older. */
         if (!SCore.is1v12Less()) {
+            references.add(new Move());
+            references.add(new Launch());
+            references.add(new PlantInSquare());
+            references.add(new SetTempBlockPos());
+            references.add(new PlaceLiquid());
             references.add(new OpenDoor());
             references.add(new FarmInCube());
             references.add(new FertilizeInCube());
@@ -58,8 +62,6 @@ public class BlockCommandManager extends CommandManager<BlockCommand> {
         }
         references.add(new Nearest());
         references.add(new MobNearest());
-        references.add(new SetTempBlockPos());
-        references.add(new PlaceLiquid());
 
         /* Sort by priority */
         references.sort((c1, c2) -> {

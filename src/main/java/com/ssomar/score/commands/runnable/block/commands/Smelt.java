@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -64,7 +65,7 @@ public class Smelt extends BlockCommand {
     public static void dropItemWithFortune(Block b, Player p, Material blockMat) {
         int amountToDrop = 1;
         // Smelt fortune will only work for ores
-        ArrayList<Material> whitelist = new ArrayList<>(List.of(Material.IRON_INGOT, Material.GOLD_INGOT, Material.getMaterial("COPPER_INGOT")));
+        ArrayList<Material> whitelist = new ArrayList<>(Arrays.asList(Material.IRON_INGOT, Material.GOLD_INGOT, Material.getMaterial("COPPER_INGOT")));
 
         if (whitelist.contains(blockMat)) {
             Enchantment fortune = SCore.is1v20v5Plus() ? Enchantment.FORTUNE : Enchantment.getByName("LOOT_BONUS_BLOCKS");

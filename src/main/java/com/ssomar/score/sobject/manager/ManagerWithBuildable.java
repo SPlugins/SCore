@@ -36,7 +36,7 @@ public interface ManagerWithBuildable<T extends SObject> {
     static Optional<String> checkObjectAmountInInvPlaceholder(ManagerWithBuildable instance, PlayerInventory inv, String placeholder){
         if (!placeholder.startsWith("checkamount")) return Optional.empty();
 
-        List<String> searchObject = List.of(StringArgExtractor.extractArgValue(placeholder, "id"));
+        List<String> searchObject = Arrays.asList(StringArgExtractor.extractArgValue(placeholder, "id"));
         String ownername = StringArgExtractor.extractArgValue(placeholder, "owner").length > 0 ? StringArgExtractor.extractArgValue(placeholder, "owner")[0] : "";
         String owneruuid = StringArgExtractor.extractArgValue(placeholder, "owneruuid").length > 0 ? StringArgExtractor.extractArgValue(placeholder, "owneruuid")[0] : "";
         List<Integer> slotsToCheck = new ArrayList<>();
@@ -146,7 +146,7 @@ public interface ManagerWithBuildable<T extends SObject> {
                     try {
                         totalNumValue += Double.parseDouble(extractedValue);
                     } catch (Exception exception) {
-                        return extractedValue.describeConstable();
+                        return Optional.of(extractedValue);
                     }
                 }
             }
@@ -160,13 +160,13 @@ public interface ManagerWithBuildable<T extends SObject> {
                     try {
                         totalNumValue += Double.parseDouble(extractedValue);
                     } catch (Exception exception) {
-                        return extractedValue.describeConstable();
+                        return Optional.of(extractedValue);
                     }
                 }
             }
         }
 
-        return Double.toString(totalNumValue).describeConstable();
+        return Optional.of(Double.toString(totalNumValue));
     }
 
     /**
