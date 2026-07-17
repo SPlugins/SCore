@@ -9,6 +9,8 @@ import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 class ItemsAdderAPITest {
@@ -23,7 +25,7 @@ class ItemsAdderAPITest {
         JavaClasses classes = new ClassFileImporter()
                 .importPackages("com.ssomar.score.usedapi");
 
-        Set<String> forbidden = Set.of("breakEB", "breakBlock", "runBreakBlockAnimation");
+        Set<String> forbidden = new HashSet<>(Arrays.asList("breakEB", "breakBlock", "runBreakBlockAnimation"));
 
         ArchCondition<JavaMethod> noBreakEBCall =
                 new ArchCondition<JavaMethod>("must not call breakEB") {

@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
-import static java.nio.file.Files.readString;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SsomarDevTest {
@@ -24,7 +24,7 @@ class SsomarDevTest {
             files.filter(f -> f.toString().endsWith(".java"))
                     .forEach(f -> {
                         try {
-                            String code = readString(f);
+                            String code = new String(Files.readAllBytes(f), StandardCharsets.UTF_8);
 
                             // Remove block comments /* ... */
                             code = code.replaceAll("(?s)/\\*.*?\\*/", "");
