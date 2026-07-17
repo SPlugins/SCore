@@ -59,9 +59,6 @@ public class CooldownsQuery {
             stmt = conn.createStatement();
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Creating table &6" + TABLE_COOLDOWNS_NAME + "&7 if not exists...");
 
-            String checkBeforeUpdate = CHECK_BEFORE_UPDATE_4_24_1_4_SQLITE;
-            if (Database.useMySQL) checkBeforeUpdate = CHECK_BEFORE_UPDATE_4_24_1_4;
-
             // Fix a typo 25/02/2025
             try {
                 stmt.execute(RENAME_TABLE_IF_EXIST);
@@ -69,13 +66,35 @@ public class CooldownsQuery {
 
             stmt.execute(CREATE_TABLE);
 
-            PreparedStatement pstmt = conn.prepareStatement(checkBeforeUpdate);
-            ResultSet rs = pstmt.executeQuery();
-            if(!rs.next()) {
+            /* Detect whether the pauseOffline column is already present. Old SQLite drivers
+             * (e.g. the one bundled with legacy servers such as 1.8.x) support neither the
+             * pragma_table_info() table-valued function (SQLite 3.16+) nor TRUE/FALSE literals
+             * (3.23+). The classic "PRAGMA table_info(...)" statement works on every version,
+             * so iterate it for SQLite; keep INFORMATION_SCHEMA for MySQL. */
+            boolean columnUpToDate;
+            if (Database.useMySQL) {
+                PreparedStatement pstmt = conn.prepareStatement(CHECK_BEFORE_UPDATE_4_24_1_4);
+                ResultSet rs = pstmt.executeQuery();
+                columnUpToDate = rs.next();
+                rs.close();
+                pstmt.close();
+            } else {
+                columnUpToDate = false;
+                ResultSet rs = stmt.executeQuery("PRAGMA table_info(" + TABLE_COOLDOWNS + ");");
+                while (rs.next()) {
+                    if (COL_PAUSE_OFFLINE.equalsIgnoreCase(rs.getString("name"))) {
+                        columnUpToDate = true;
+                        break;
+                    }
+                }
+                rs.close();
+            }
+
+            if(!columnUpToDate) {
                 Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Table &6" + TABLE_COOLDOWNS_NAME + " &7exists, but it's not up to date, updating...");
                 stmt.execute("ALTER TABLE "+TABLE_COOLDOWNS+" DROP COLUMN loaded;");
-                stmt.execute("ALTER TABLE "+TABLE_COOLDOWNS+" ADD COLUMN "+COL_PAUSED+" BOOLEAN NOT NULL DEFAULT FALSE;");
-            	stmt.execute("ALTER TABLE "+TABLE_COOLDOWNS+" ADD COLUMN "+COL_PAUSE_OFFLINE+" BOOLEAN NOT NULL DEFAULT FALSE;");
+                stmt.execute("ALTER TABLE "+TABLE_COOLDOWNS+" ADD COLUMN "+COL_PAUSED+" BOOLEAN NOT NULL DEFAULT 0;");
+            	stmt.execute("ALTER TABLE "+TABLE_COOLDOWNS+" ADD COLUMN "+COL_PAUSE_OFFLINE+" BOOLEAN NOT NULL DEFAULT 0;");
             	stmt.execute("ALTER TABLE "+TABLE_COOLDOWNS+" ADD COLUMN "+COL_PAUSE_PLACEHOLDERS_CONDITIONS+" TEXT NOT NULL DEFAULT '';");
             }
 
@@ -192,7 +211,7 @@ public class CooldownsQuery {
 
     public static List<Cooldown> getGlobalCooldowns(Connection conn) {
         if (Database.DEBUG) Utils.sendConsoleMsg("CooldownsQuery getGlobalCooldowns");
-        String sql = "SELECT " + COL_ID + "," + COL_UUID + "," + COL_COOLDOWN + "," + COL_IS_IN_TICK + "," + COL_IS_GLOBAL + "," + COL_TIME + " FROM " + TABLE_COOLDOWNS + " where " + COL_IS_GLOBAL+ "=true";
+        String sql = "SELECT " + COL_ID + "," + COL_UUID + "," + COL_COOLDOWN + "," + COL_IS_IN_TICK + "," + COL_IS_GLOBAL + "," + COL_TIME + " FROM " + TABLE_COOLDOWNS + " where " + COL_IS_GLOBAL + "=1";
 
         List<Cooldown> list = new ArrayList<>();
         PreparedStatement pstmt = null;
@@ -261,7 +280,7 @@ public class CooldownsQuery {
     public static void deleteGlobalCooldowns(Connection conn) {
         if (Database.DEBUG) Utils.sendConsoleMsg("CooldownsQuery deleteGlobalCooldowns");
 
-        String sql = "DELETE FROM " + TABLE_COOLDOWNS + " where " + COL_IS_GLOBAL + "=true";
+        String sql = "DELETE FROM " + TABLE_COOLDOWNS + " where " + COL_IS_GLOBAL + "=1";
 
         PreparedStatement pstmt = null;
 
