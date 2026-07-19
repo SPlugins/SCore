@@ -11,6 +11,7 @@ import com.ssomar.score.editor.NewEditorInteractionsListener;
 import com.ssomar.score.features.custom.cooldowns.CooldownsHandler;
 import com.ssomar.score.pack.listener.ConfigPhasePackListener;
 import com.ssomar.score.pack.listener.JoinQuitListener;
+import com.ssomar.score.usedapi.AuraSkillsLootDropListener;
 import com.ssomar.score.usedapi.Dependency;
 import com.ssomar.score.usedapi.JobsAPI;
 import org.bukkit.plugin.Plugin;
@@ -91,6 +92,9 @@ public class EventsHandler {
         if(SCore.is1v21v4Plus()) main.getServer().getPluginManager().registerEvents(PlayerRideOnEntityManager.getInstance(), main);
 
         if(Dependency.JOBS.isInstalled())  main.getServer().getPluginManager().registerEvents(new JobsAPI(), main);
+
+        /* Smelt the extra drops of AuraSkills abilities (e.g. Mining Luck) when the block was smelted by an EI/EB command */
+        if(Dependency.AURA_SKILLS.isInstalled()) main.getServer().getPluginManager().registerEvents(new AuraSkillsLootDropListener(), main);
 
         main.getServer().getPluginManager().registerEvents(new OpenChestListener(), main);
 
