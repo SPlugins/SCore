@@ -57,13 +57,19 @@ public enum ItemCheckerEnum {
             case DISPLAY_NAME:
                 if(oneOfThemNaNoMeta) return bothNaNoMeta;
 
-                boolean item1HasDisplayName = item1Meta.hasDisplayName();
-                boolean item2HasDisplayName = item2Meta.hasDisplayName();
-                boolean oneOfThemNaNoDisplayName = !item1HasDisplayName || !item2HasDisplayName;
-                boolean bothNaNoDisplayName = !item1HasDisplayName && !item2HasDisplayName;
-                if(oneOfThemNaNoDisplayName) return bothNaNoDisplayName;
+                // The visible name of an item can come from two distinct components:
+                //  - custom_name (display name): set by anvil rename / setDisplayName
+                //  - item_name: set by resource-pack item plugins (Nexo, ItemsAdder)
+                //    and datapacks; hasDisplayName()/getDisplayName() do NOT see it.
+                // Comparing only the display name treated two items whose names differ
+                // solely via item_name as identical, so the name check silently passed.
+                if(item1Meta.hasDisplayName() != item2Meta.hasDisplayName()) return false;
+                if(item1Meta.hasDisplayName() && !item1Meta.getDisplayName().equals(item2Meta.getDisplayName())) return false;
 
-                return item1Meta.getDisplayName().equals(item2Meta.getDisplayName());
+                if(item1Meta.hasItemName() != item2Meta.hasItemName()) return false;
+                if(item1Meta.hasItemName() && !item1Meta.getItemName().equals(item2Meta.getItemName())) return false;
+
+                return true;
             case MATERIAL:
                 return item1.getType() == item2.getType();
             case CUSTOM_MODEL_DATA:
