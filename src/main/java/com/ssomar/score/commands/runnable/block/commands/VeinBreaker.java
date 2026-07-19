@@ -7,6 +7,7 @@ import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.block.BlockCommand;
 import com.ssomar.score.events.BlockBreakEventExtension;
 import com.ssomar.score.features.custom.detailedblocks.DetailedBlocks;
+import com.ssomar.score.usedapi.AuraSkillsSmeltTracker;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
 import com.ssomar.score.utils.safebreak.SafeBreak;
 import org.bukkit.ChatColor;
@@ -94,6 +95,7 @@ public class VeinBreaker extends BlockCommand {
                 if (p != null) pUUID = p.getUniqueId();
                 if (smelt) {
                     Material blockMat = block.getType();
+                    AuraSkillsSmeltTracker.recordSmelt(pUUID, block);
                     boolean safeBreakStatus = SafeBreak.breakBlockWithEvent(block, pUUID, aInfo.getSlot(), false, createBBEvent, true, BlockBreakEventExtension.BreakCause.VEIN_BREAK);
                     if (safeBreakStatus) dropItemWithFortune(block, p, blockMat);
                 } else {
@@ -105,6 +107,7 @@ public class VeinBreaker extends BlockCommand {
                 for (Block b : vein) {
                     ItemStack smeltItem = Smelt.getSmeltedItem(b.getType());
                     if (smelt && smeltItem != null) {
+                        AuraSkillsSmeltTracker.recordSmelt(pUUID, b);
                         boolean safeBreakStatus = SafeBreak.breakBlockWithEvent(b, pUUID, aInfo.getSlot(), false, createBBEvent, true, BlockBreakEventExtension.BreakCause.MINE_IN_CUBE);
                         if (safeBreakStatus) dropItemWithFortune(b, p, smeltItem.getType());
                     } else {
