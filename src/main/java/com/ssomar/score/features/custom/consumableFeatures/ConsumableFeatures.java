@@ -16,6 +16,7 @@ import com.ssomar.score.utils.logging.Utils;
 import com.ssomar.score.utils.strings.StringConverter;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Consumable;
+import io.papermc.paper.datacomponent.item.consumable.ConsumeEffect;
 import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +42,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
     private SoundFeature sound;
     private BooleanFeature consumeParticles;
     private IntegerFeature consumeSeconds;
+    private OnConsumeEffectsFeatures onConsumeEffects;
+    private IntegerFeature teleportRandomly;
+    private SoundFeature onConsumeSound;
 
     public ConsumableFeatures(FeatureParentInterface parent) {
         super(parent, FeatureSettingsSCore.consumableFeatures);
@@ -54,6 +58,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         sound = new SoundFeature(this, Optional.empty(), FeatureSettingsSCore.sound);
         consumeParticles = new BooleanFeature(this, false, FeatureSettingsSCore.hasConsumeParticles);
         consumeSeconds = new IntegerFeature(this, Optional.of(3), FeatureSettingsSCore.consumeSeconds);
+        onConsumeEffects = new OnConsumeEffectsFeatures(this, FeatureSettingsSCore.onConsumeEffects);
+        teleportRandomly = new IntegerFeature(this, Optional.of(0), FeatureSettingsSCore.teleportRandomly);
+        onConsumeSound = new SoundFeature(this, Optional.empty(), FeatureSettingsSCore.onConsumeSound);
     }
 
     @Override
@@ -66,6 +73,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
             errors.addAll(this.sound.load(plugin, section, isPremiumLoading));
             errors.addAll(this.consumeParticles.load(plugin, section, isPremiumLoading));
             errors.addAll(this.consumeSeconds.load(plugin, section, isPremiumLoading));
+            errors.addAll(this.onConsumeEffects.load(plugin, section, isPremiumLoading));
+            errors.addAll(this.teleportRandomly.load(plugin, section, isPremiumLoading));
+            errors.addAll(this.onConsumeSound.load(plugin, section, isPremiumLoading));
 
         }
 
@@ -81,6 +91,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         this.sound.save(section);
         this.consumeParticles.save(section);
         this.consumeSeconds.save(section);
+        this.onConsumeEffects.save(section);
+        this.teleportRandomly.save(section);
+        this.onConsumeSound.save(section);
         if(isSavingOnlyIfDiffDefault() && section.getKeys(false).isEmpty()){
             config.set(getName(), null);
             return;
@@ -97,7 +110,7 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
 
     @Override
     public ConsumableFeatures initItemParentEditor(GUI gui, int slot) {
-        int len = 6;
+        int len = 8;
         String[] finalDescription = new String[getEditorDescription().length + len];
         System.arraycopy(getEditorDescription(), 0, finalDescription, 0, getEditorDescription().length);
         finalDescription[finalDescription.length - len] = GUI.CLICK_HERE_TO_CHANGE;
@@ -110,7 +123,11 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         len--;
         finalDescription[finalDescription.length - len] = "&7Animation: &e" + animation.getValue().orElse(ItemUseAnimation.EAT).name();
         len--;
-        finalDescription[finalDescription.length - len] = "&7Sound: &e" + sound.getValue().orElse(null);
+        if (sound.getValue().isPresent()) {
+            finalDescription[finalDescription.length - len] = "&7Eating Sound: &e" + sound.getValue().get().getKey();
+        } else {
+            finalDescription[finalDescription.length - len] = "&7Eating Sound: &enull";
+        }
         len--;
         if (consumeParticles.getValue())
             finalDescription[finalDescription.length - len] = "&7Consume Particles: &a&l✔";
@@ -118,6 +135,14 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
             finalDescription[finalDescription.length - len] = "&7Consume Particles: &c&l✘";
         len--;
         finalDescription[finalDescription.length - len] = "&7Consume Seconds: &e" + consumeSeconds.getValue().get();
+        len--;
+        finalDescription[finalDescription.length - len] = "&7Chorus FX Val: &e" + teleportRandomly.getValue().get();
+        len--;
+        if (onConsumeSound.getValue().isPresent()) {
+            finalDescription[finalDescription.length - len] = "&7Eating Sound: &e" + onConsumeSound.getValue().get().getKey();
+        } else {
+            finalDescription[finalDescription.length - len] = "&7Eating Sound: &enull";
+        }
 
 
         gui.createItem(getEditorMaterial(), 1, slot, GUI.TITLE_COLOR + getEditorName(), false, false, finalDescription);
@@ -137,6 +162,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         dropFeatures.sound = sound.clone(dropFeatures);
         dropFeatures.consumeParticles = consumeParticles.clone(dropFeatures);
         dropFeatures.consumeSeconds = consumeSeconds.clone(dropFeatures);
+        dropFeatures.onConsumeEffects = onConsumeEffects.clone(dropFeatures);
+        dropFeatures.teleportRandomly = teleportRandomly.clone(dropFeatures);
+        dropFeatures.onConsumeSound = onConsumeSound.clone(dropFeatures);
 
         return dropFeatures;
     }
@@ -149,6 +177,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         features.add(sound);
         features.add(consumeParticles);
         features.add(consumeSeconds);
+        features.add(onConsumeEffects);
+        features.add(teleportRandomly);
+        features.add(onConsumeSound);
         return features;
     }
 
@@ -177,6 +208,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
                 hiders.setSound(sound);
                 hiders.setConsumeParticles(consumeParticles);
                 hiders.setConsumeSeconds(consumeSeconds);
+                hiders.setOnConsumeEffects(onConsumeEffects);
+                hiders.setTeleportRandomly(teleportRandomly);
+                hiders.setOnConsumeSound(onConsumeSound);
             }
         }
     }
@@ -201,6 +235,10 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
             //else consumable.sound();
             consumable.hasConsumeParticles(consumeParticles.getValue());
             consumable.consumeSeconds(consumeSeconds.getValue().get());
+
+            if (teleportRandomly.getValue().isPresent() && teleportRandomly.getValue().get() > 0) consumable.addEffect(ConsumeEffect.teleportRandomlyEffect(teleportRandomly.getValue().get()));
+            if (onConsumeSound.getValue().isPresent()) consumable.addEffect(ConsumeEffect.playSoundConsumeEffect(onConsumeSound.getValue().get().key()));
+
             item.setData(DataComponentTypes.CONSUMABLE, consumable);
         } catch (Exception e) {
             Utils.sendConsoleMsg("&4Error while applying ConsumableFeatures , it's probably due to Paper");
@@ -215,6 +253,13 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
             animation.setValue(Optional.of(consumable.animation()));
             consumeParticles.setValue(consumable.hasConsumeParticles());
             consumeSeconds.setValue(Optional.of(Math.round(consumable.consumeSeconds())));
+
+            /// temp for now. idk what the consume effect values look like
+            for (ConsumeEffect consumeEffect : consumable.consumeEffects()) {
+                System.out.println(consumeEffect);
+            }
+
+
             enable.setValue(true);
         }
 

@@ -709,7 +709,12 @@ public enum FeatureSettingsSCoreEN implements FeatureSettingsInterface {
     ifPlayerSpeed("ifPlayerSpeed", "If player speed", new String[]{"&7Compare the player's velocity magnitude"}, Material.ANVIL),
     ifNearbyPlayerCount("ifNearbyPlayerCount", "If nearby player count", new String[]{"&7Compare the count of nearby players"}, Material.ANVIL),
     suspiciousBlockLoot("suspiciousBlockLoot", "Suspicious Block Loot", new String[]{"&7The loot the ExecutableBlock will have","&7when brushed.","&cREQUIRED BY PLAYER_BRUSH_BLOCK"}, FixedMaterial.getMaterial(Arrays.asList("BRUSH"))),
-    papiParser("papiParser", "PlaceholderAPI Parser", new String[]{"&7The text you want to use along with the", "&7variable value in order for it to work", "&7with PlaceholderAPI placeholders.", "", "&7Check wiki for further details"}, FixedMaterial.getMaterial(Arrays.asList("LEAD", "LEASH")))
+    papiParser("papiParser", "PlaceholderAPI Parser", new String[]{"&7The text you want to use along with the", "&7variable value in order for it to work", "&7with PlaceholderAPI placeholders.", "", "&7Check wiki for further details"}, FixedMaterial.getMaterial(Arrays.asList("LEAD", "LEASH"))),
+    onConsumeEffects("onConsumeEffects", "On Consume Effects", new String[]{"&7Custom effects upon consumption"}, Material.CAKE),
+    teleportRandomly("teleportRandomly", "Chorus Fruit Effect Value", new String[]{"&7Random teleport distance value upon", "&7eating the consumable item. To", "&7ignore, leave the value at 0."}, Material.ENDER_PEARL),
+    onConsumeSound("onConsumeSound", "Consumption Sound", new String[]{"&7Sound to be played upon eating the", "&7consumable item"}, Material.NOTE_BLOCK),
+    clearAllEffects("clearAllEffects", "Clear All Effects", new String[]{"&7If the consumable should clear the player's", "&7current effects"}, Material.MILK_BUCKET),
+    listPotionEffectTypeToRemove("listPotionEffectTypeToRemove", "Effects to clear", new String[]{"&7List of effects to clear upon", "&7consumption"}, Material.GLASS_BOTTLE),
     ;
 
 
