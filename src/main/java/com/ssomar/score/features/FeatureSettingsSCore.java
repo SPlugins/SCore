@@ -710,7 +710,6 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
     ifNearbyPlayerCount(getFeatureSettings("ifNearbyPlayerCount", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     suspiciousBlockLoot(getFeatureSettings("suspiciousBlockLoot")),
     papiParser(getFeatureSettings("papiParser")),
-    onConsumeEffects(getFeatureSettings("onConsumeEffects")),
     teleportRandomly(getFeatureSettings("teleportRandomly")),
     onConsumeSound(getFeatureSettings("onConsumeSound")),
     clearAllEffects(getFeatureSettings("clearAllEffects")),

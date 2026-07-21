@@ -98,17 +98,8 @@ public abstract class FeatureEditorManagerAbstract<T extends FeatureEditorInterf
         //Y parent = interact.gui.getParent();
         //parent.openBackEditor(interact.player);
         Player player = interact.player;
-
-        // First, save and reload the current editor's parent to ensure data consistency
-        interact.gui.getParent().reload();
-        interact.gui.getParent().save();
-
         GUI gui = SaveSessionPathManager.getInstance().getLastBeforePlayerSessionPath(player);
         if (gui != null){
-            // Reload the parent of the previous GUI to ensure it has fresh data
-            if (gui.getParent() instanceof FeatureInterface) {
-                ((FeatureInterface) gui.getParent()).reload();
-            }
             gui.update();
             gui.openGUISync(player);
         }
