@@ -88,7 +88,7 @@ public class ListPotionEffectTypeFeature extends ListFeatureAbstract<PotionEffec
 
     @Override
     public String getTips() {
-        return "&8Example &7&oHEALING";
+        return "&8Example &7&oHEAL";
     }
 
 

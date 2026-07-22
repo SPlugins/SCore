@@ -27,7 +27,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
-import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -50,9 +49,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
 
     private BooleanFeature enable;
     private ItemUseAnimationFeature animation;
-    private SoundFeature sound;
+    private SoundFeature duringEatingSound;
     private BooleanFeature consumeParticles;
-    private IntegerFeature consumeSeconds;
+    private IntegerFeature sound;
     private DoubleFeature teleportRandomly;
     private SoundFeature onConsumeSound;
     private BooleanFeature clearAllEffects;
@@ -68,9 +67,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
     public void reset() {
         enable = new BooleanFeature(this, false, FeatureSettingsSCore.enable);
         animation = new ItemUseAnimationFeature(this, Optional.of(ItemUseAnimation.EAT), FeatureSettingsSCore.animation);
-        sound = new SoundFeature(this, Optional.ofNullable(Registry.SOUNDS.get(NamespacedKey.fromString("entity.generic.eat"))), FeatureSettingsSCore.sound);
+        duringEatingSound = new SoundFeature(this, Optional.ofNullable(Registry.SOUNDS.get(NamespacedKey.fromString("entity.generic.eat"))), FeatureSettingsSCore.sound);
         consumeParticles = new BooleanFeature(this, false, FeatureSettingsSCore.hasConsumeParticles);
-        consumeSeconds = new IntegerFeature(this, Optional.of(3), FeatureSettingsSCore.consumeSeconds);
+        sound = new IntegerFeature(this, Optional.of(3), FeatureSettingsSCore.consumeSeconds);
         teleportRandomly = new DoubleFeature(this, Optional.of(0d), FeatureSettingsSCore.teleportRandomly);
         onConsumeSound = new SoundFeature(this, Optional.ofNullable(Registry.SOUNDS.get(NamespacedKey.fromString("entity.generic.eat"))), FeatureSettingsSCore.onConsumeSound);
         clearAllEffects = new BooleanFeature(this, false, FeatureSettingsSCore.clearAllEffects);
@@ -85,9 +84,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
             ConfigurationSection section = config.getConfigurationSection(getName());
             errors.addAll(this.enable.load(plugin, section, isPremiumLoading));
             errors.addAll(this.animation.load(plugin, section, isPremiumLoading));
-            errors.addAll(this.sound.load(plugin, section, isPremiumLoading));
+            errors.addAll(this.duringEatingSound.load(plugin, section, isPremiumLoading));
             errors.addAll(this.consumeParticles.load(plugin, section, isPremiumLoading));
-            errors.addAll(this.consumeSeconds.load(plugin, section, isPremiumLoading));
+            errors.addAll(this.sound.load(plugin, section, isPremiumLoading));
             errors.addAll(this.teleportRandomly.load(plugin, section, isPremiumLoading));
             errors.addAll(this.onConsumeSound.load(plugin, section, isPremiumLoading));
             errors.addAll(this.clearAllEffects.load(plugin, section, isPremiumLoading));
@@ -105,9 +104,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         ConfigurationSection section = config.createSection(getName());
         this.enable.save(section);
         this.animation.save(section);
-        this.sound.save(section);
+        this.duringEatingSound.save(section);
         this.consumeParticles.save(section);
-        this.consumeSeconds.save(section);
+        this.sound.save(section);
         this.teleportRandomly.save(section);
         this.onConsumeSound.save(section);
         this.clearAllEffects.save(section);
@@ -142,8 +141,8 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         len--;
         finalDescription[finalDescription.length - len] = "&7Animation: &e" + animation.getValue().orElse(ItemUseAnimation.EAT).name();
         len--;
-        if (sound.getValue().isPresent()) {
-            finalDescription[finalDescription.length - len] = "&7Eating Sound: &e" + sound.getValue().get().getKey();
+        if (duringEatingSound.getValue().isPresent()) {
+            finalDescription[finalDescription.length - len] = "&7Eating Sound: &e" + duringEatingSound.getValue().get().getKey();
         } else {
             finalDescription[finalDescription.length - len] = "&7Eating Sound: &enull";
         }
@@ -153,7 +152,7 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         else
             finalDescription[finalDescription.length - len] = "&7Consume Particles: &c&l✘";
         len--;
-        finalDescription[finalDescription.length - len] = "&7Consume Seconds: &e" + consumeSeconds.getValue().get();
+        finalDescription[finalDescription.length - len] = "&7Consume Seconds: &e" + sound.getValue().get();
         len--;
         finalDescription[finalDescription.length - len] = "&7Chorus FX Val: &e" + teleportRandomly.getValue().get();
         len--;
@@ -190,9 +189,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         ConsumableFeatures dropFeatures = new ConsumableFeatures(newParent);
         dropFeatures.enable = enable.clone(dropFeatures);
         dropFeatures.animation = animation.clone(dropFeatures);
-        dropFeatures.sound = sound.clone(dropFeatures);
+        dropFeatures.duringEatingSound = duringEatingSound.clone(dropFeatures);
         dropFeatures.consumeParticles = consumeParticles.clone(dropFeatures);
-        dropFeatures.consumeSeconds = consumeSeconds.clone(dropFeatures);
+        dropFeatures.sound = sound.clone(dropFeatures);
         dropFeatures.teleportRandomly = teleportRandomly.clone(dropFeatures);
         dropFeatures.onConsumeSound = onConsumeSound.clone(dropFeatures);
         dropFeatures.clearAllEffects = clearAllEffects.clone(dropFeatures);
@@ -207,9 +206,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         List<FeatureInterface> features = new ArrayList<>();
         features.add(enable);
         features.add(animation);
-        features.add(sound);
+        features.add(duringEatingSound);
         features.add(consumeParticles);
-        features.add(consumeSeconds);
+        features.add(sound);
         features.add(teleportRandomly);
         features.add(onConsumeSound);
         features.add(clearAllEffects);
@@ -240,9 +239,9 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
                 ConsumableFeatures hiders = (ConsumableFeatures) feature;
                 hiders.setEnable(enable);
                 hiders.setAnimation(animation);
-                hiders.setSound(sound);
+                hiders.setDuringEatingSound(duringEatingSound);
                 hiders.setConsumeParticles(consumeParticles);
-                hiders.setConsumeSeconds(consumeSeconds);
+                hiders.setSound(sound);
                 hiders.setTeleportRandomly(teleportRandomly);
                 hiders.setOnConsumeSound(onConsumeSound);
                 hiders.setClearAllEffects(clearAllEffects);
@@ -268,10 +267,10 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         try {
             if (!enable.getValue()) return;
             Consumable.Builder consumable = Consumable.consumable().animation(animation.getValue().orElse(ItemUseAnimation.EAT));
-            if (sound.getValue().isPresent()) consumable.sound(sound.getValue().get().key());
+            if (duringEatingSound.getValue().isPresent()) consumable.sound(duringEatingSound.getValue().get().key());
             //else consumable.sound();
             consumable.hasConsumeParticles(consumeParticles.getValue());
-            consumable.consumeSeconds(consumeSeconds.getValue().get());
+            consumable.consumeSeconds(sound.getValue().get());
 
             if (teleportRandomly.getValue().isPresent() && teleportRandomly.getValue().get() > 0) consumable.addEffect(ConsumeEffect.teleportRandomlyEffect(Float.valueOf(teleportRandomly.getValue().get().toString())));
             if (onConsumeSound.getValue().isPresent()) consumable.addEffect(ConsumeEffect.playSoundConsumeEffect(onConsumeSound.getValue().get().key()));
@@ -315,7 +314,8 @@ public class ConsumableFeatures extends FeatureWithHisOwnEditor<ConsumableFeatur
         if(consumable != null) {
             animation.setValue(Optional.of(consumable.animation()));
             consumeParticles.setValue(consumable.hasConsumeParticles());
-            consumeSeconds.setValue(Optional.of(Math.round(consumable.consumeSeconds())));
+            sound.setValue(Optional.of(Math.round(consumable.consumeSeconds())));
+            duringEatingSound.setValue(Optional.of(Registry.SOUNDS.get(consumable.sound())));
 
             // ConsumeEffect properties are stored as interfaces that extend to ConsumeEffect
             for (ConsumeEffect consumeEffect : consumable.consumeEffects()) {

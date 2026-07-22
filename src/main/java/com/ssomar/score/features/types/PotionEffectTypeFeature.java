@@ -55,10 +55,8 @@ public class PotionEffectTypeFeature extends FeatureAbstract<Optional<PotionEffe
 
     @Override
     public Optional<PotionEffectType> getValue() {
-        if (value.isPresent())
-            return value;
-        else
-            return defaultValue;
+        if (value.isPresent()) return value;
+        else return defaultValue;
     }
 
     @Override
