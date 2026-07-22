@@ -188,9 +188,6 @@ public class InlineMineInCube extends BlockCommand {
 
                     //SsomarDev.testMsg("initX: " + initX + " initY: " + initY + " initZ: " + initZ, true);
 
-                    final boolean fDrop = drop;
-                    final boolean fCreateBBEvent = createBBEvent;
-
                     if (radius < 10) {
                         for (int y = initY; y < maxY + 1; y++) {
                             for (int x = initX; x < maxX + 1; x++) {
@@ -218,7 +215,7 @@ public class InlineMineInCube extends BlockCommand {
                                                     boolean safeBreakStatus = SafeBreak.breakBlockWithEvent(toBreak, pUUID, aInfo.getSlot(), false, createBBEvent, true, BlockBreakEventExtension.BreakCause.INLINE_MINEINCUBE);
                                                     if (safeBreakStatus) dropItemWithFortune(toBreak, p, smeltItem.getType());
                                                 } else {
-                                                    SafeBreak.breakBlockWithEvent(toBreak, pUUID, aInfo.getSlot(), true, createBBEvent, true, BlockBreakEventExtension.BreakCause.INLINE_MINEINCUBE);
+                                                    SafeBreak.breakBlockWithEvent(toBreak, pUUID, aInfo.getSlot(), drop, createBBEvent, true, BlockBreakEventExtension.BreakCause.INLINE_MINEINCUBE);
                                                 }
                                             }
                                         }
