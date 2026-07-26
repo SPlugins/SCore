@@ -8,6 +8,7 @@ import com.ssomar.score.features.custom.conditions.block.BlockConditionRequest;
 import com.ssomar.score.features.types.BooleanFeature;
 import com.ssomar.score.usedapi.ShopGUIPlusTool;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -28,8 +29,10 @@ public class IfContainerContainsSellableItem extends BlockConditionFeature<Boole
             Optional<Player> playerOpt = request.getPlayerOpt();
             Block b = request.getBlock();
             if(playerOpt.isPresent()) {
-                if (b.getState() instanceof Container) {
-                    Container container = (Container) b.getState();
+                /* Single getState() call: it snapshots the whole container inventory NBT. */
+                BlockState state = b.getState();
+                if (state instanceof Container) {
+                    Container container = (Container) state;
                     Inventory inv = container.getInventory();
                     for (int i = 0; i < inv.getSize(); i++) {
                         ItemStack item = inv.getItem(i);
