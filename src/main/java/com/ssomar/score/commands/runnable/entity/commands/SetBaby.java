@@ -2,6 +2,7 @@ package com.ssomar.score.commands.runnable.entity.commands;
 
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.entity.EntityCommand;
+import com.ssomar.score.utils.FrogTadpoleUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
@@ -19,7 +20,17 @@ public class SetBaby extends EntityCommand {
 
     @Override
     public void run(Player p, Entity entity, SCommandToExec sCommandToExec) {
-        if (!entity.isDead() && entity instanceof Ageable) ((Ageable) entity).setBaby();
+        if (entity.isDead()) return;
+        String type = entity.getType().name();
+        /* Frogs have no baby form, their baby is the tadpole entity */
+        if (type.equals("FROG")) {
+            Entity tadpole = FrogTadpoleUtils.frogToTadpole(entity);
+            if (sCommandToExec.getActionInfo() != null)
+                sCommandToExec.getActionInfo().setEntityUUID(tadpole.getUniqueId());
+        } else if (type.equals("TADPOLE")) {
+            /* Already a baby, we just reset its growth */
+            FrogTadpoleUtils.resetTadpoleAge(entity);
+        } else if (entity instanceof Ageable) ((Ageable) entity).setBaby();
     }
 
     @Override
