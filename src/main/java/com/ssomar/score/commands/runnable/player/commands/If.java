@@ -90,8 +90,11 @@ public class If extends PlayerCommand {
             // If current char is part of a condition, extract and evaluate it
             else {
                 StringBuilder cond = new StringBuilder();
-                while (i < condition.length() && condition.charAt(i) != '(' && condition.charAt(i) != ')' && condition.charAt(i) != '&' && condition.charAt(i) != '|') {
-                    //SsomarDev.testMsg(" IF parsing condition at index <" + i + "> <" + condition.charAt(i)+">", true);
+                while (i < condition.length() && condition.charAt(i) != '(' && condition.charAt(i) != ')' && condition.charAt(i) != '&') {
+                    // SCore's %rand% placeholder uses '|' to separate number ranges, so extra logic is required to properly detect "||" and "&&" char sequences
+                    if (i+1 < condition.length() && (condition.substring(i, i+2).equals("||") || condition.substring(i, i+2).equals("&&"))) {
+                        break;
+                    }
                     cond.append(condition.charAt(i));
                     i++;
                 }
