@@ -87,9 +87,13 @@ public class Smelt extends BlockCommand {
      * smeltable version of the provided Material enum, it will return a null ItemStack.
      */
     public static ItemStack getSmeltedItem(Material material) {
+
         ItemStack result = null;
+
         switch (material) {
             case STONE:
+                // SMOOTH_STONE is added at 1.13
+                if (SCore.is1v12Less()) return result;
                 result = new ItemStack(Material.SMOOTH_STONE);
                 break;
             case WHITE_TERRACOTTA:
@@ -182,6 +186,8 @@ public class Smelt extends BlockCommand {
                 result = new ItemStack(Material.IRON_INGOT);
                 break;
             case CACTUS:
+                // Green Dye received a proper Material enum by 1.13
+                if (SCore.is1v12Less()) return result;
                 result = new ItemStack(Material.GREEN_DYE);
                 break;
             case BAMBOO:
@@ -194,6 +200,8 @@ public class Smelt extends BlockCommand {
                 result = new ItemStack(Material.DRIED_KELP);
                 break;
             case OBSIDIAN:
+                // Crying Obsidian is added in 1.16
+                if (!SCore.is1v16Plus()) return result;
                 result = new ItemStack(Material.CRYING_OBSIDIAN);
                 break;
             case GRAVEL:
