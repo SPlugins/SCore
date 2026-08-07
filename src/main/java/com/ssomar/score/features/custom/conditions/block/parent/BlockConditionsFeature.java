@@ -67,6 +67,7 @@ public class BlockConditionsFeature extends FeatureWithHisOwnEditor<BlockConditi
         conditions.add(new IfBlockLocationX(this));
         conditions.add(new IfBlockLocationY(this));
         conditions.add(new IfBlockLocationZ(this));
+        conditions.add(new IfBlockWorld(this));
         conditions.add(new IfUsage(this));
 
         conditions.add(new AroundBlockConditions(this));

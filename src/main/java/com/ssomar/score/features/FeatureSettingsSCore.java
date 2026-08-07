@@ -190,6 +190,7 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
     ifBlockLocationX(getFeatureSettings("ifBlockLocationX", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     ifBlockLocationY(getFeatureSettings("ifBlockLocationY", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     ifBlockLocationZ(getFeatureSettings("ifBlockLocationZ", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
+    ifBlockWorld(getFeatureSettings("ifBlockWorld")),
     ifBlocking(getFeatureSettings("ifBlocking", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     ifCanBreakTargetedBlock(getFeatureSettings("ifCanBreakTargetedBlock", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     ifContainerContains(getFeatureSettings("ifContainerContains", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
