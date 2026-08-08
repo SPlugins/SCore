@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 
 /* AROUND {distance} {true or false} {Your commands here} */
@@ -46,24 +45,6 @@ public class Around extends BlockCommand {
     }
 
     @Override
-    public Optional<String> verify(List<String> args, boolean isFinalVerification) {
-        String error = "";
-
-        String around = "AROUND {distance} [affectThePlayerThatActivesTheActivator true or false] {Your commands here}";
-
-        if (args.size() < 2) error = notEnoughArgs + around;
-        else if (args.size() > 2) {
-            try {
-                Double.valueOf(args.get(0));
-            } catch (NumberFormatException e) {
-                error = invalidDistance + args.get(0) + " for command: " + around;
-            }
-        }
-
-        return error.isEmpty() ? Optional.empty() : Optional.of(error);
-    }
-
-    @Override
     public List<String> getNames() {
         List<String> names = new ArrayList<>();
         names.add("AROUND");
@@ -72,7 +53,7 @@ public class Around extends BlockCommand {
 
     @Override
     public String getTemplate() {
-        return "AROUND {distance} [affectThePlayerThatActivesTheActivator true or false] {Your commands here}";
+        return "AROUND distance:3.0 affectThePlayerThatActivesTheActivator:true throughBlocks:true limit:-1 sort:NEAREST regionCheck:false {Your commands here}";
     }
 
     @Override
