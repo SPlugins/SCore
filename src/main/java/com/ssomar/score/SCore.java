@@ -835,6 +835,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
 
         Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Clear scheduled tasks...");
         ScheduledTaskManager.getInstance().cancelScheduledTask();
+        LoopManager.getInstance().shutdown();
         Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Clear scheduled tasks done !");
 
         // Unregister all packs
