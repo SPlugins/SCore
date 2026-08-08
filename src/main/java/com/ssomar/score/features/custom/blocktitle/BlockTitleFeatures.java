@@ -280,20 +280,25 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             }
         } else if (SCore.is1v20v4Plus()) {
             UUID cachedUuid = textDisplayCache.remove(location);
-            if (cachedUuid != null) {
-                Entity entity = Bukkit.getEntity(cachedUuid);
-                if (entity instanceof TextDisplay) {
-                    entity.remove();
-                    return;
+            // Entity manipulation (remove()) must happen on the region thread that owns this
+            // location on Folia — this is a void call so we can just dispatch it there, running
+            // synchronously already if we're on the right thread (no behavior change on non-Folia).
+            SCore.schedulerHook.runLocationTaskAsap(() -> {
+                if (cachedUuid != null) {
+                    Entity entity = Bukkit.getEntity(cachedUuid);
+                    if (entity instanceof TextDisplay) {
+                        entity.remove();
+                        return;
+                    }
                 }
-            }
-            // Fallback for cache miss (e.g., after server restart)
-            for (Entity entity : location.getWorld().getNearbyEntities(location, 0.5, 0.5, 0.5)) {
-                if (entity instanceof TextDisplay && entity.getLocation().equals(location)) {
-                    entity.remove();
-                    break;
+                // Fallback for cache miss (e.g., after server restart)
+                for (Entity entity : location.getWorld().getNearbyEntities(location, 0.5, 0.5, 0.5)) {
+                    if (entity instanceof TextDisplay && entity.getLocation().equals(location)) {
+                        entity.remove();
+                        break;
+                    }
                 }
-            }
+            }, location);
         }
     }
 
