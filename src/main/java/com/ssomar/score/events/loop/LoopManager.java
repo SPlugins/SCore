@@ -8,10 +8,13 @@ import com.ssomar.score.sobject.sactivator.EventInfo;
 import com.ssomar.score.sobject.sactivator.OptionGlobal;
 import com.ssomar.score.splugin.SPlugin;
 import com.ssomar.score.usedapi.Dependency;
+import com.ssomar.score.utils.scheduler.ScheduledTask;
 import lombok.Getter;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class LoopManager {
@@ -23,6 +26,7 @@ public class LoopManager {
     private final Map<SActivator, Integer> loopActivators;
     private final List<SActivator> loopActivatorsToAdd;
     private final List<SActivator> loopActivatorsToRemove;
+    private ScheduledTask loopTask;
 
     public LoopManager(Plugin plugin) {
         // If SCore is installed, use it as the plugin otherwise use the provided plugin (probably a plugin that shades SCore)
@@ -31,9 +35,9 @@ public class LoopManager {
         DELAY = 5;
         if(GeneralConfig.getInstance().isLoopKillMode()) DELAY = 1;
 
-        loopActivators = new HashMap<>();
-        loopActivatorsToAdd = new ArrayList<>();
-        loopActivatorsToRemove = new ArrayList<>();
+        loopActivators = new ConcurrentHashMap<>();
+        loopActivatorsToAdd = new CopyOnWriteArrayList<>();
+        loopActivatorsToRemove = new CopyOnWriteArrayList<>();
         this.runLoop();
     }
 
@@ -42,9 +46,9 @@ public class LoopManager {
         DELAY = 5;
         if(GeneralConfig.getInstance().isLoopKillMode()) DELAY = 1;
 
-        loopActivators = new HashMap<>();
-        loopActivatorsToAdd = new ArrayList<>();
-        loopActivatorsToRemove = new ArrayList<>();
+        loopActivators = new ConcurrentHashMap<>();
+        loopActivatorsToAdd = new CopyOnWriteArrayList<>();
+        loopActivatorsToRemove = new CopyOnWriteArrayList<>();
         this.runLoop();
     }
 
@@ -125,6 +129,10 @@ public class LoopManager {
                     List<SActivator> loopActivators = new ArrayList<>();
 
                     for (SActivator sActivator : toActivate) {
+                        // Skip activators whose owning plugin got disabled/reloaded since they were
+                        // scheduled: their classloader may already be closed (IllegalStateException:
+                        // zip file closed), and resetLoopActivators() only runs on the next enable.
+                        if (!sActivator.getSPlugin().getPlugin().isEnabled()) continue;
                         if (sActivator.getOption().isLoopOption())
                             loopActivators.add(sActivator);
                     }
@@ -147,7 +155,15 @@ public class LoopManager {
                 }
             }
         };
-        SCore.getSchedulerHook(plugin).runRepeatingTask(runnable, 0L, DELAY);
+        loopTask = SCore.getSchedulerHook(plugin).runRepeatingTask(runnable, 0L, DELAY);
+    }
+
+    /**
+     * Stops the repeating loop task. Called from SCore#onDisable so the task doesn't keep
+     * invoking activators from plugins whose classloader/jar just got closed.
+     */
+    public void shutdown() {
+        if (loopTask != null && !loopTask.isCancelled()) loopTask.cancel();
     }
 
     public void addLoopActivator(SActivator activator) {
