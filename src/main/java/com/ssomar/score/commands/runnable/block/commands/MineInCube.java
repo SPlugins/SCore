@@ -7,6 +7,7 @@ import com.ssomar.score.commands.runnable.CommandSetting;
 import com.ssomar.score.commands.runnable.block.BlockCommand;
 import com.ssomar.score.events.BlockBreakEventExtension;
 import com.ssomar.score.features.custom.detailedblocks.DetailedBlocks;
+import com.ssomar.score.usedapi.AuraSkillsSmeltTracker;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
 import com.ssomar.score.utils.safebreak.SafeBreak;
 import org.bukkit.ChatColor;
@@ -158,6 +159,7 @@ public class MineInCube extends BlockCommand {
 
                                         ItemStack smeltItem = Smelt.getSmeltedItem(toBreak.getType());
                                         if (smelt && drop && smeltItem != null) {
+                                            AuraSkillsSmeltTracker.recordSmelt(pUUID, toBreak);
                                             boolean safeBreakStatus = SafeBreak.breakBlockWithEvent(toBreak, pUUID, aInfo.getSlot(), false, createBBEvent, true, BlockBreakEventExtension.BreakCause.MINE_IN_CUBE);
                                             if (safeBreakStatus) dropItemWithFortune(toBreak, p, smeltItem.getType());
                                         } else {
