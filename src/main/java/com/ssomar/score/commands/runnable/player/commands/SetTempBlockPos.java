@@ -64,14 +64,6 @@ public class SetTempBlockPos extends PlayerCommand {
         BlockData data = block.getBlockData().clone();
 
 
-        ListDetailedMaterialFeature listDetailedMaterialFeature = new ListDetailedMaterialFeature(true);
-        if (!whitelistCurrentBlock.isEmpty()) {
-            List<String> list = new ArrayList<>();
-            if (whitelistCurrentBlock.contains(",")) list = Arrays.asList(whitelistCurrentBlock.split(","));
-            else list.add(whitelistCurrentBlock);
-            listDetailedMaterialFeature.load(SCore.plugin, list, true);
-        }
-
         UUID uuid = receiver.getUniqueId();
         SsomarDev.testMsg("DEBUG place 0", true);
 
@@ -79,7 +71,7 @@ public class SetTempBlockPos extends PlayerCommand {
         if (data instanceof Bisected || data instanceof Orientable || data instanceof Rotatable || data instanceof Slab || data instanceof Directional || verifDependentBlock(block))
             return;
 
-        if (!listDetailedMaterialFeature.verifBlock(block)) {
+        if (!verifWhitelistCurrentBlock(whitelistCurrentBlock, block)) {
             //SsomarDev.testMsg("DEBUG INVALID BLOCK >> "+data.getMaterial(), true);
             return;
         }
@@ -89,6 +81,21 @@ public class SetTempBlockPos extends PlayerCommand {
 
         SetTempBlockManager.getInstance().runInitTempBlock(block.getLocation(), data, time);
 
+    }
+
+    /**
+     * Shared by SET_BLOCK / SET_BLOCK_POS / SET_TEMP_BLOCK_POS.
+     * @param whitelistCurrentBlock comma separated list of detailed materials, empty = no filter
+     * @return true if the block currently at the position can be replaced
+     */
+    public static boolean verifWhitelistCurrentBlock(String whitelistCurrentBlock, Block block) {
+        if (whitelistCurrentBlock == null || whitelistCurrentBlock.isEmpty()) return true;
+        ListDetailedMaterialFeature listDetailedMaterialFeature = new ListDetailedMaterialFeature(true);
+        List<String> list = new ArrayList<>();
+        if (whitelistCurrentBlock.contains(",")) list = Arrays.asList(whitelistCurrentBlock.split(","));
+        else list.add(whitelistCurrentBlock);
+        listDetailedMaterialFeature.load(SCore.plugin, list, true);
+        return listDetailedMaterialFeature.verifBlock(block);
     }
 
     private static final BlockFace[] BLOCK_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
