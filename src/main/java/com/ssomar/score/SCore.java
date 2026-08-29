@@ -869,6 +869,9 @@ public final class SCore extends JavaPlugin implements SPlugin {
         /* Custom Lists instance part */
         com.ssomar.score.features.custom.customlists.CustomListsManager.getInstance().reload();
 
+        /* The parsed whitelistCurrentBlock arguments depend on the custom lists reloaded above */
+        com.ssomar.score.commands.runnable.player.commands.SetTempBlockPos.clearWhitelistCache();
+
         TM.getInstance().load();
 
         TM.getInstance().loadTexts();

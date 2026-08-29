@@ -19,6 +19,7 @@ import org.bukkit.block.data.type.Slab;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SetTempBlockPos extends PlayerCommand {
 
@@ -90,12 +91,24 @@ public class SetTempBlockPos extends PlayerCommand {
      */
     public static boolean verifWhitelistCurrentBlock(String whitelistCurrentBlock, Block block) {
         if (whitelistCurrentBlock == null || whitelistCurrentBlock.isEmpty()) return true;
-        ListDetailedMaterialFeature listDetailedMaterialFeature = new ListDetailedMaterialFeature(true);
-        List<String> list = new ArrayList<>();
-        if (whitelistCurrentBlock.contains(",")) list = Arrays.asList(whitelistCurrentBlock.split(","));
-        else list.add(whitelistCurrentBlock);
-        listDetailedMaterialFeature.load(SCore.plugin, list, true);
-        return listDetailedMaterialFeature.verifBlock(block);
+        /* Parsed once per distinct argument: SET_BLOCK is typically bound to PLAYER_ALL_CLICK and
+         * the parsing walks the material groups. The feature is only read afterwards. */
+        ListDetailedMaterialFeature feature = WHITELIST_CACHE.computeIfAbsent(whitelistCurrentBlock, raw -> {
+            ListDetailedMaterialFeature loaded = new ListDetailedMaterialFeature(true);
+            List<String> list = new ArrayList<>();
+            if (raw.contains(",")) list = Arrays.asList(raw.split(","));
+            else list.add(raw);
+            loaded.load(SCore.plugin, list, true);
+            return loaded;
+        });
+        return feature.verifBlock(block);
+    }
+
+    private static final Map<String, ListDetailedMaterialFeature> WHITELIST_CACHE = new ConcurrentHashMap<>();
+
+    /** Called on reload: the material groups / custom block lists may have changed. */
+    public static void clearWhitelistCache() {
+        WHITELIST_CACHE.clear();
     }
 
     private static final BlockFace[] BLOCK_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
