@@ -146,6 +146,9 @@ public class InlineMineInCube extends BlockCommand {
                     int maxZ = radius;
                     int maxY = radius;
 
+                    /* The direction is raytraced from the player's eyes: without a player (block
+                     * activator) there is nothing to aim from. */
+                    if (p == null) return;
                     BoundingBox bb = new BoundingBox(block.getX(), block.getY(), block.getZ(), block.getX()+1, block.getY()+1, block.getZ()+1);
                     RayTraceResult rayTraceResult = bb.rayTrace(p.getEyeLocation().toVector(), p.getEyeLocation().getDirection(), 10);
                     //SsomarDev.testMsg("rayTraceResult: " + rayTraceResult.getHitBlockFace(), true);

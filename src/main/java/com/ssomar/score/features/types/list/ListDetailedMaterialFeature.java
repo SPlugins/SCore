@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
@@ -60,6 +61,28 @@ public class ListDetailedMaterialFeature extends ListFeatureAbstract<String, Lis
         //if(SCore.hasOraxen) listOfCustomBlocksPluginSupported.add("ORAXEN");
         this.forBlocks = forBlocks;
         reset();
+    }
+
+    private static final Map<String, ListDetailedMaterialFeature> RAW_LIST_CACHE = new ConcurrentHashMap<>();
+
+    /**
+     * Parses a raw comma separated list (as written in a command argument) once and caches it:
+     * the callers run on every command execution. The returned feature is read-only afterwards.
+     * The cache is cleared by SCore#onReload, after the custom lists it may reference.
+     */
+    public static ListDetailedMaterialFeature getCachedForBlocks(@NotNull String rawList) {
+        return RAW_LIST_CACHE.computeIfAbsent(rawList, raw -> {
+            ListDetailedMaterialFeature feature = new ListDetailedMaterialFeature(true);
+            List<String> list = new ArrayList<>();
+            if (raw.contains(",")) list = Arrays.asList(raw.split(","));
+            else list.add(raw);
+            feature.load(SCore.plugin, list, true);
+            return feature;
+        });
+    }
+
+    public static void clearRawListCache() {
+        RAW_LIST_CACHE.clear();
     }
 
     public ListDetailedMaterialFeature(boolean forBlocks) {

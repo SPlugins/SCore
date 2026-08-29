@@ -19,7 +19,6 @@ import org.bukkit.block.data.type.Slab;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SetTempBlockPos extends PlayerCommand {
 
@@ -85,30 +84,13 @@ public class SetTempBlockPos extends PlayerCommand {
     }
 
     /**
-     * Shared by SET_BLOCK / SET_BLOCK_POS / SET_TEMP_BLOCK_POS.
+     * Shared by SET_BLOCK / SET_BLOCK_POS / SET_TEMP_BLOCK_POS (player and block variants).
      * @param whitelistCurrentBlock comma separated list of detailed materials, empty = no filter
      * @return true if the block currently at the position can be replaced
      */
     public static boolean verifWhitelistCurrentBlock(String whitelistCurrentBlock, Block block) {
         if (whitelistCurrentBlock == null || whitelistCurrentBlock.isEmpty()) return true;
-        /* Parsed once per distinct argument: SET_BLOCK is typically bound to PLAYER_ALL_CLICK and
-         * the parsing walks the material groups. The feature is only read afterwards. */
-        ListDetailedMaterialFeature feature = WHITELIST_CACHE.computeIfAbsent(whitelistCurrentBlock, raw -> {
-            ListDetailedMaterialFeature loaded = new ListDetailedMaterialFeature(true);
-            List<String> list = new ArrayList<>();
-            if (raw.contains(",")) list = Arrays.asList(raw.split(","));
-            else list.add(raw);
-            loaded.load(SCore.plugin, list, true);
-            return loaded;
-        });
-        return feature.verifBlock(block);
-    }
-
-    private static final Map<String, ListDetailedMaterialFeature> WHITELIST_CACHE = new ConcurrentHashMap<>();
-
-    /** Called on reload: the material groups / custom block lists may have changed. */
-    public static void clearWhitelistCache() {
-        WHITELIST_CACHE.clear();
+        return ListDetailedMaterialFeature.getCachedForBlocks(whitelistCurrentBlock).verifBlock(block);
     }
 
     private static final BlockFace[] BLOCK_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
