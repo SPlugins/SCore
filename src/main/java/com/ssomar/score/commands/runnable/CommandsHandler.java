@@ -91,16 +91,14 @@ public class CommandsHandler implements Listener {
 
         //System.out.println("JOIN EVENT 2");
         Player p = e.getPlayer();
-        if (getInstance().getDelayedCommandsSaved().containsKey(p.getUniqueId())) {
-            //System.out.println("JOIN EVENT 3 >>"+getInstance().getDelayedCommandsSaved().get(p.getUniqueId()).size());
-            for (PlayerRunCommand command : new ArrayList<>(getInstance().getDelayedCommandsSaved().get(p.getUniqueId()))) {
-                //System.out.println("JOIN EVENT 4");
-                if (command == null) continue;
-                command.run();
-                Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7SCore will execute the delayed command saved for &a" + p.getName() + " &7: &6" + command.getBrutCommand() + " &7>> delay: &b" + command.getDelay());
-            }
+        /* Atomic take: the commands are consumed here, no containsKey/get/remove sequence */
+        List<PlayerRunCommand> saved = getInstance().getDelayedCommandsSaved().remove(p.getUniqueId());
+        if (saved == null) return;
+        for (PlayerRunCommand command : new ArrayList<>(saved)) {
+            if (command == null) continue;
+            command.run();
+            Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7SCore will execute the delayed command saved for &a" + p.getName() + " &7: &6" + command.getBrutCommand() + " &7>> delay: &b" + command.getDelay());
         }
-        getInstance().getDelayedCommandsSaved().remove(p.getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -139,9 +137,10 @@ public class CommandsHandler implements Listener {
         }
         getInstance().setDelayedCommandsSaved(loaded);
         int cpt = 0;
-        for (UUID uuid : getInstance().getDelayedCommandsSaved().keySet()) {
-            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            for (PlayerRunCommand command : getInstance().getDelayedCommandsSaved().get(uuid)) {
+        for (Map.Entry<UUID, List<PlayerRunCommand>> entry : getInstance().getDelayedCommandsSaved().entrySet()) {
+            OfflinePlayer player = Bukkit.getOfflinePlayer(entry.getKey());
+            for (PlayerRunCommand command : entry.getValue()) {
+                if (command == null) continue;
                 Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7SCore loaded the delayed command for &a" + player.getName() + " &7: &6" + command.getBrutCommand() + " &7>> delay: &b" + command.getDelay());
                 cpt++;
             }
@@ -165,8 +164,8 @@ public class CommandsHandler implements Listener {
     public void onDisable() {
         List<PlayerRunCommand> savedCommands = new ArrayList<>(getInstance().getDelayedPlayerCommands());
 
-        for (UUID uuid : getInstance().getDelayedCommandsSaved().keySet()) {
-            savedCommands.addAll(getInstance().getDelayedCommandsSaved().get(uuid));
+        for (List<PlayerRunCommand> saved : getInstance().getDelayedCommandsSaved().values()) {
+            savedCommands.addAll(saved);
         }
         for (PlayerRunCommand command : savedCommands) {
             OfflinePlayer player = Bukkit.getOfflinePlayer(command.getReceiverUUID());
@@ -215,13 +214,13 @@ public class CommandsHandler implements Listener {
 
     public void removeDelayedCommand(UUID uuid, @Nullable UUID receiverUUID, boolean canceltask) {
         //SsomarDev.testMsg("removeDelayedCommand >> "+uuid, true);
-        if (delayedCommandsByRcUuid.containsKey(uuid)) {
-            ScheduledTask task;
-            if ((task = delayedCommandsByRcUuid.get(uuid).getTask()) != null && canceltask) {
-                //SsomarDev.testMsg("removeDelayedCommand CANCEL>> "+uuid, true);
-                task.cancel();
-            }
-            delayedCommandsByRcUuid.remove(uuid);
+        /* Atomic: removeDelayedCommand runs concurrently (PlayerQuitEvent on the player's region
+         * thread vs insideDelayedCommand() on the global scheduler), a containsKey/get pair lets
+         * the other thread remove the entry in between and get() returns null. */
+        RunCommand removed = delayedCommandsByRcUuid.remove(uuid);
+        if (removed != null && canceltask) {
+            ScheduledTask task = removed.getTask();
+            if (task != null) task.cancel();
         }
 
         /* ==================================== */
@@ -324,28 +323,17 @@ public class CommandsHandler implements Listener {
         long time = System.currentTimeMillis() + (delay * 50);
         //System.out.println("ADD "+p.getDisplayName()+ " time: "+time);
         stopPickup.put(p, time);
-        Runnable runnable = () -> {
-            if (stopPickup.containsKey(p) && stopPickup.get(p) == time) {
-                stopPickup.remove(p);
-            }
-        };
+        Runnable runnable = () -> stopPickup.remove(p, time);
         SCore.schedulerHook.runEntityTask(runnable, null, p, delay);
     }
 
     public void addStopPickup(Player p, Integer delay, Material material) {
         if (p == null) return;
 
-        if (stopPickupMaterial.containsKey(p)) {
-            stopPickupMaterial.get(p).add(material);
-        } else {
-            List<Material> list = new ArrayList<>();
-            list.add(material);
-            stopPickupMaterial.put(p, list);
-        }
+        stopPickupMaterial.computeIfAbsent(p, k -> new CopyOnWriteArrayList<>()).add(material);
         Runnable runnable = () -> {
-            if (stopPickupMaterial.containsKey(p) && stopPickupMaterial.get(p).contains(material)) {
-                stopPickupMaterial.get(p).remove(material);
-            }
+            List<Material> materials = stopPickupMaterial.get(p);
+            if (materials != null) materials.remove(material);
         };
         SCore.schedulerHook.runEntityTask(runnable, null, p, delay);
     }
@@ -355,18 +343,16 @@ public class CommandsHandler implements Listener {
     public boolean hasStopPickup(@NotNull Player p) {
         long time = System.currentTimeMillis();
         //System.out.println("pickup "+CommandsHandler.getInstance().getStopPickup().get(p)+" actual "+time);
-        if(stopPickup.containsKey(p)) {
-            boolean stop = stopPickup.get(p) > time;
-            if (!stop) {
-                stopPickup.remove(p);
-            }
-            return stop;
-        }
-        return false;
+        Long until = stopPickup.get(p);
+        if (until == null) return false;
+        boolean stop = until > time;
+        if (!stop) stopPickup.remove(p, until);
+        return stop;
     }
 
     public boolean hasStopPickup(@NotNull Player p, Material material) {
-        return stopPickupMaterial.containsKey(p) && stopPickupMaterial.get(p).contains(material);
+        List<Material> materials = stopPickupMaterial.get(p);
+        return materials != null && materials.contains(material);
     }
 
 }
