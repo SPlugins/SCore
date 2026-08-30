@@ -40,10 +40,14 @@ public class ProtocolLibAPI {
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
+                    // equip packet
                     PacketContainer packet = SCore.protocolManager.createPacket(PacketType.Play.Server.ENTITY_EQUIPMENT);
+                    // write packet
                     packet.getIntegers().write(0, entity.getEntityId());
+                    // make new arraylist
                     List<Pair<EnumWrappers.ItemSlot, ItemStack>> pairList = new ArrayList<>();
-                    if (slot.equals(EquipmentSlot.HEAD)) pairList.add(new Pair<>(EnumWrappers.ItemSlot.HEAD, item));
+                    if (slot.equals(EquipmentSlot.HEAD))
+                        pairList.add(new Pair<>(EnumWrappers.ItemSlot.HEAD, item));
                     else if (slot.equals(EquipmentSlot.CHEST))
                         pairList.add(new Pair<>(EnumWrappers.ItemSlot.CHEST, item));
                     else if (slot.equals(EquipmentSlot.LEGS))
@@ -56,6 +60,7 @@ public class ProtocolLibAPI {
                         pairList.add(new Pair<>(EnumWrappers.ItemSlot.OFFHAND, item));
                     packet.getSlotStackPairLists().write(0, pairList);
 
+                    // To why it's iterated to all online players is to modify their perception towards the target entity's equipment.
                     for (Player p : Bukkit.getOnlinePlayers()) {
                         try {
                             SCore.protocolManager.sendServerPacket(p, packet);
@@ -68,6 +73,7 @@ public class ProtocolLibAPI {
             tasks.add(SCore.schedulerHook.runAsyncTask(runnable, i));
         }
 
+        // return it back to normal
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -90,6 +96,7 @@ public class ProtocolLibAPI {
                     pairList.add(get(EnumWrappers.ItemSlot.OFFHAND, equipment.getItemInOffHand()));
                 packet.getSlotStackPairLists().write(0, pairList);
 
+                // To why it's iterated to all online players is to modify their perception towards the target entity's equipment.
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     try {
                         SCore.protocolManager.sendServerPacket(p, packet);
@@ -100,7 +107,10 @@ public class ProtocolLibAPI {
                 }
             }
         };
-        tasks.add(SCore.schedulerHook.runTask(runnable, time));
+        // During tests, using longer durations may cause the clear task to run
+        // before the last remaining disguise tasks could finish. To solve that,
+        // 2 more ticks are added to the delay time of the clear task.
+        tasks.add(SCore.schedulerHook.runTask(runnable, time+2));
         return tasks;
     }
 
