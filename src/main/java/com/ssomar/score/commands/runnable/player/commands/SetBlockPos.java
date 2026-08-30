@@ -28,6 +28,7 @@ public class SetBlockPos extends PlayerCommand {
         CommandSetting material = new CommandSetting("material", 3, Material.class, Material.STONE);
         CommandSetting bypassProtection = new CommandSetting("bypassProtection", 4, Boolean.class, false);
         CommandSetting replace = new CommandSetting("replace", -1, Boolean.class, true);
+        CommandSetting whitelistCurrentBlock = new CommandSetting("whitelistCurrentBlock", -1, String.class, "");
         List<CommandSetting> settings = getSettings();
         settings.add(x);
         settings.add(y);
@@ -35,6 +36,7 @@ public class SetBlockPos extends PlayerCommand {
         settings.add(material);
         settings.add(bypassProtection);
         settings.add(replace);
+        settings.add(whitelistCurrentBlock);
         setNewSettingsMode(true);
     }
 
@@ -47,6 +49,7 @@ public class SetBlockPos extends PlayerCommand {
         Material material = (Material) sCommandToExec.getSettingValue("material");
         boolean bypassProtection = (boolean) sCommandToExec.getSettingValue("bypassProtection");
         boolean replace = (boolean) sCommandToExec.getSettingValue("replace");
+        String whitelistCurrentBlock = (String) sCommandToExec.getSettingValue("whitelistCurrentBlock");
 
         Location loc = receiver.getLocation();
         Location blockLoc = new Location(loc.getWorld(), x, y, z);
@@ -56,6 +59,9 @@ public class SetBlockPos extends PlayerCommand {
         block = block.getWorld().getBlockAt(blockLoc);
 
         if(!block.isEmpty() && !replace) return;
+
+        // Same filter as SET_TEMP_BLOCK_POS: only replace the current block if it is whitelisted
+        if (!SetTempBlockPos.verifWhitelistCurrentBlock(whitelistCurrentBlock, block)) return;
 
         if (material != null) {
             SafePlace.placeBlockWithEvent(block, material, Optional.empty(), uuid, false, !bypassProtection);
@@ -81,7 +87,7 @@ public class SetBlockPos extends PlayerCommand {
 
     @Override
     public String getTemplate() {
-        return "SET_BLOCK_POS x:0 y:0 z:0 material:STONE bypassProtection:false replace:true";
+        return "SET_BLOCK_POS x:0 y:0 z:0 material:STONE bypassProtection:false replace:true whitelistCurrentBlock:SAND,DIRT";
     }
 
     @Override

@@ -98,6 +98,8 @@ public class MineInCube extends BlockCommand {
                     int offsetz = 0;
 
                     if(offset) {
+                        /* offset is computed from where the player looks: no player, no offset */
+                        if (p == null) return;
                         Set<Material> transparent = new HashSet<>();
                         transparent.add(Material.WATER);
                         transparent.add(Material.AIR);
