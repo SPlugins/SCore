@@ -41,7 +41,7 @@ public class GetItem {
                 }
             }
         }
-        else if(objectStr.contains("IA") || objectStr.contains("ITEMSADDER")){
+        else if(objectStr.contains("IA:") || objectStr.contains("ITEMSADDER:")){
             if(SCore.hasItemsAdder){
                 objectStr = objectStr.replace("IA:", "");
                 objectStr = objectStr.replace("ITEMSADDER:", "");
