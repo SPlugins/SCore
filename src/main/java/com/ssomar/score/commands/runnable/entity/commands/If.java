@@ -31,12 +31,13 @@ public class If extends EntityCommand {
         StringPlaceholder sp = aInfo.getSp();
         if (sp == null) sp = new StringPlaceholder();
         sp.setEntityPlcHldr(entity.getUniqueId());
+        sp.setPlayerPlcHldr(p.getUniqueId(), aInfo.getSlot());
         sp.reloadAllPlaceholders();
 
         List<Entity> targets = new ArrayList<>();
         targets.add(entity);
 
-        boolean finalResult = evaluateCondition(condition, null, sp);
+        boolean finalResult = evaluateCondition(condition, p, sp);
 
         if (finalResult) {
             CommmandThatRunsCommand.runEntityCommands(targets, args.subList(1, args.size()), aInfo);
