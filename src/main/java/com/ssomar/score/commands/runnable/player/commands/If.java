@@ -51,8 +51,8 @@ public class If extends PlayerCommand {
             SsomarDev.testMsg("IF STOPPED for condition > "+condition, true);
         }
     }
-    
-    private boolean evaluateCondition(String condition, Player receiver, StringPlaceholder sp) {
+
+    public static boolean evaluateCondition(String condition, Player receiver, StringPlaceholder sp) {
         // Remove any whitespace for easier processing
         condition = condition.replaceAll("\\s+", "");
         condition = StringConverter.deconvertColor(condition);
@@ -116,18 +116,18 @@ public class If extends PlayerCommand {
     }
     
     // Apply a logical operator to two boolean values
-    private boolean applyOperator(char operator, boolean b1, boolean b2) {
+    public static boolean applyOperator(char operator, boolean b1, boolean b2) {
         if (operator == '&') return b1 && b2;
         if (operator == '|') return b1 || b2;
         throw new IllegalArgumentException("Invalid operator: " + operator);
     }
     
     // Return true if 'op2' has higher or same precedence as 'op1', false otherwise
-    private boolean hasPrecedence(char op1, char op2) {
+    public static boolean hasPrecedence(char op1, char op2) {
         if (op2 == '(' || op2 == ')') return false;
         return (op1 != '&' || op2 != '|'); // AND has higher precedence than OR
     }
-    private boolean evaluateSingleCondition(String condition, Player receiver, StringPlaceholder sp) {
+    public static boolean evaluateSingleCondition(String condition, Player receiver, StringPlaceholder sp) {
         PlaceholderConditionFeature conditionFeature = PlaceholderConditionFeature.buildNull();
         conditionFeature.setType(PlaceholderConditionTypeFeature.buildNull(PlaceholdersCdtType.PLAYER_PLAYER));
 

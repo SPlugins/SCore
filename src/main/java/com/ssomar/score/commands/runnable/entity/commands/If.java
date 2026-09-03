@@ -5,20 +5,14 @@ import com.ssomar.score.commands.runnable.ActionInfo;
 import com.ssomar.score.commands.runnable.CommmandThatRunsCommand;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.entity.EntityCommand;
-import com.ssomar.score.features.custom.conditions.placeholders.placeholder.PlaceholderConditionFeature;
-import com.ssomar.score.features.types.ColoredStringFeature;
-import com.ssomar.score.features.types.ComparatorFeature;
-import com.ssomar.score.features.types.PlaceholderConditionTypeFeature;
-import com.ssomar.score.utils.emums.Comparator;
-import com.ssomar.score.utils.emums.PlaceholdersCdtType;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static com.ssomar.score.commands.runnable.player.commands.If.evaluateCondition;
 
 public class If extends EntityCommand {
 
@@ -31,32 +25,8 @@ public class If extends EntityCommand {
         ActionInfo aInfo = sCommandToExec.getActionInfo();
         List<String> args = sCommandToExec.getOtherArgs();
 
-        //SsomarDev.testMsg("IF CMD", true);
-        PlaceholderConditionFeature conditionFeature = PlaceholderConditionFeature.buildNull();
-        conditionFeature.setType(PlaceholderConditionTypeFeature.buildNull(PlaceholdersCdtType.PLAYER_PLAYER));
         String condition = args.get(0);
-       // SsomarDev.testMsg("IF condition: " + condition, true);
-
-        boolean conditionContainsPlaceholder = condition.contains("%");
-        String split = conditionContainsPlaceholder ? "%" : "";
-
-        // "%"+c.getSymbol() because the placeholder can also contains comparator so to be sure the comparator is outside the placeholder we need to be sure there is a % before
-        Comparator comparator = null;
-        for (Comparator c : Comparator.values()) {
-            /* Check if it contains placeholder or if its just a direct value */
-            if (condition.contains(split + c.getSymbol())) {
-                conditionFeature.setComparator(ComparatorFeature.buildNull(c));
-                comparator = c;
-                break;
-            }
-        }
-        if (comparator == null) {
-            //SsomarDev.testMsg("IF STOPPED because comparator null ", true);
-            return;
-        }
-        String[] parts = condition.split(split + comparator.getSymbol());
-        conditionFeature.setPart1(ColoredStringFeature.buildNull(parts[0] + split));
-        conditionFeature.setPart2(ColoredStringFeature.buildNull(parts[1]));
+        SsomarDev.testMsg("IF condition: " + condition, true);
 
         StringPlaceholder sp = aInfo.getSp();
         if (sp == null) sp = new StringPlaceholder();
@@ -66,14 +36,12 @@ public class If extends EntityCommand {
         List<Entity> targets = new ArrayList<>();
         targets.add(entity);
 
-         for (String commandToRun: args.subList(1, args.size())){
-            SsomarDev.testMsg("Command to run IF >> "+commandToRun, true);
-        }
+        boolean finalResult = evaluateCondition(condition, null, sp);
 
-        if (conditionFeature.verify(null, null, sp)) {
+        if (finalResult) {
             CommmandThatRunsCommand.runEntityCommands(targets, args.subList(1, args.size()), aInfo);
         } else {
-            //SsomarDev.testMsg("IF STOPPED", true);
+            SsomarDev.testMsg("IF STOPPED for condition > "+condition, true);
         }
     }
 
