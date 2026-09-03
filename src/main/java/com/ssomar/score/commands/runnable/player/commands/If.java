@@ -116,18 +116,18 @@ public class If extends PlayerCommand {
     }
     
     // Apply a logical operator to two boolean values
-    public static boolean applyOperator(char operator, boolean b1, boolean b2) {
+    private static boolean applyOperator(char operator, boolean b1, boolean b2) {
         if (operator == '&') return b1 && b2;
         if (operator == '|') return b1 || b2;
         throw new IllegalArgumentException("Invalid operator: " + operator);
     }
     
     // Return true if 'op2' has higher or same precedence as 'op1', false otherwise
-    public static boolean hasPrecedence(char op1, char op2) {
+    private static boolean hasPrecedence(char op1, char op2) {
         if (op2 == '(' || op2 == ')') return false;
         return (op1 != '&' || op2 != '|'); // AND has higher precedence than OR
     }
-    public static boolean evaluateSingleCondition(String condition, Player receiver, StringPlaceholder sp) {
+    private static boolean evaluateSingleCondition(String condition, Player receiver, StringPlaceholder sp) {
         PlaceholderConditionFeature conditionFeature = PlaceholderConditionFeature.buildNull();
         conditionFeature.setType(PlaceholderConditionTypeFeature.buildNull(PlaceholdersCdtType.PLAYER_PLAYER));
 
