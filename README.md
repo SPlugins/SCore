@@ -209,7 +209,7 @@ This project is licensed under the terms specified in the repository. Please rev
 
 - **Issues / Feature request**: For bug reports and feature requests join our [Discord](https://discord.com/invite/TRmSwJaYNv)
 - **Community**: Join our [Discord](https://discord.com/invite/TRmSwJaYNv) community server for support and discussions
-- **Documentation**: Additional documentation available in the codebase or in the [Wiki](https://docs.ssomar.com)
+- **Documentation**: Additional documentation available in the codebase or in the [Wiki](https://splugins.net/docs/tools-for-all-plugins-score/custom-commands)
 
 ## Related Projects
 
@@ -224,3 +224,4 @@ SCore powers several other plugins in the Ssomar ecosystem:
 ---
 
 *Developed with ❤️ by Ssomar and the contributors*
+
