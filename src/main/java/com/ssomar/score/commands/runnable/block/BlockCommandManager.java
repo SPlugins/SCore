@@ -62,6 +62,8 @@ public class BlockCommandManager extends CommandManager<BlockCommand> {
         }
         references.add(new Nearest());
         references.add(new MobNearest());
+        references.add(new AllPlayers());
+        references.add(new AllMobs());
 
         /* Sort by priority */
         references.sort((c1, c2) -> {
