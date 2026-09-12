@@ -163,9 +163,18 @@ public class RegionisedSchedulerHook implements SchedulerHook {
         return runLocationTask(runnable, location, 0);
     }
 
+    /* The Paper schedulers are singletons: resolve each of them by reflection once instead of
+     * on every scheduled task (this reflection showed up at ~10% of the server thread on a
+     * server scheduling tens of thousands of location tasks). */
+    private final java.util.concurrent.ConcurrentHashMap<String, Object> reflectedBukkitObjects = new java.util.concurrent.ConcurrentHashMap<>();
+
     public Object getReflectedObjectOfBukkit(String methodName) {
+        Object cached = reflectedBukkitObjects.get(methodName);
+        if (cached != null) return cached;
         try {
-            return Bukkit.class.getMethod(methodName).invoke(Bukkit.class);
+            Object value = Bukkit.class.getMethod(methodName).invoke(Bukkit.class);
+            if (value != null) reflectedBukkitObjects.put(methodName, value);
+            return value;
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
