@@ -2,7 +2,9 @@ package com.ssomar.score.commands.runnable;
 
 import com.ssomar.score.SCore;
 import com.ssomar.score.SsomarDev;
+import com.ssomar.score.commands.runnable.block.BlockRunCommandsBuilder;
 import com.ssomar.score.commands.runnable.entity.EntityRunCommandsBuilder;
+import com.ssomar.score.commands.runnable.item.ItemRunCommandsBuilder;
 import com.ssomar.score.commands.runnable.player.PlayerRunCommandsBuilder;
 import com.ssomar.score.commands.runnable.mixed_player_entity.commands.MobAround;
 import com.ssomar.score.commands.runnable.player.commands.If;
@@ -15,9 +17,10 @@ import com.ssomar.score.utils.emums.Comparator;
 import com.ssomar.score.utils.emums.PlaceholdersCdtType;
 import com.ssomar.score.utils.logging.Utils;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
-import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -367,5 +370,110 @@ public interface CommmandThatRunsCommand {
         }
 
         return cpt > 0;
+    }
+
+    static void runBlockCommands(Collection<? extends Block> blocks, List<String> argsCommands, ActionInfo aInfo, Player playerExecutor) {
+
+        for (Block block : blocks) {
+            StringPlaceholder sp = new StringPlaceholder();
+            sp.setBlockPlcHldr(block);
+            if (playerExecutor != null) sp.setPlayerPlcHldr(playerExecutor.getUniqueId(), aInfo.getSlot());
+
+            ActionInfo aInfo2 = aInfo.clone();
+            aInfo2.setBlock(block);
+            if (playerExecutor != null) aInfo2.setReceiverUUID(playerExecutor.getUniqueId());
+            aInfo2.setStep(aInfo.getStep() + 1);
+
+
+            /* regroup the last args that correspond to the commands */
+            StringBuilder prepareCommands = new StringBuilder();
+            for (String s : argsCommands) {
+                prepareCommands.append(s);
+                prepareCommands.append(" ");
+            }
+            prepareCommands.deleteCharAt(prepareCommands.length() - 1);
+
+            String buildCommands = prepareCommands.toString();
+            String[] tab;
+            //SsomarDev.testMsg(">>>>>>>>> GETOR PARTICLE: " + CommmandThatRunsCommand.getOrCommandsParticle(aInfo), true);
+            if (buildCommands.contains(CommmandThatRunsCommand.getOrCommandsParticle(aInfo)))
+                tab = buildCommands.split(CommmandThatRunsCommand.getOrCommandsParticleRegex(aInfo));
+            else {
+                tab = new String[1];
+                tab[0] = buildCommands;
+            }
+            List<String> commands = new ArrayList<>();
+            for (int m = 0; m < tab.length; m++) {
+                String s = tab[m];
+                s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+
+                while (s.startsWith(" ")) {
+                    s = s.substring(1);
+                }
+                while (s.endsWith(" ")) {
+                    s = s.substring(0, s.length() - 1);
+                }
+                if (s.startsWith("/")) s = s.substring(1);
+
+                SsomarDev.testMsg("s: " + s, true);
+                commands.add(s);
+            }
+            commands = sp.replacePlaceholders(commands);
+            BlockRunCommandsBuilder blockBuilder = new BlockRunCommandsBuilder(commands, aInfo2);
+            CommandsExecutor.runCommands(blockBuilder);
+        }
+
+    }
+
+    static void runItemCommands(Collection<? extends ItemStack> items, List<String> argsCommands, ActionInfo aInfo, Player playerExecutor) {
+        // Implementation for running item commands
+        for (ItemStack item : items) {
+            StringPlaceholder sp = new StringPlaceholder();
+            sp.setItem(item.getItemMeta().getDisplayName());
+            sp.setPlayerPlcHldr(playerExecutor.getUniqueId(), aInfo.getSlot());
+
+            ActionInfo aInfo2 = aInfo.clone();
+            aInfo2.setItemStack(item);
+            aInfo2.setStep(aInfo.getStep() + 1);
+
+
+            /* regroup the last args that correspond to the commands */
+            StringBuilder prepareCommands = new StringBuilder();
+            for (String s : argsCommands) {
+                prepareCommands.append(s);
+                prepareCommands.append(" ");
+            }
+            prepareCommands.deleteCharAt(prepareCommands.length() - 1);
+
+            String buildCommands = prepareCommands.toString();
+            String[] tab;
+            //SsomarDev.testMsg(">>>>>>>>> GETOR PARTICLE: " + CommmandThatRunsCommand.getOrCommandsParticle(aInfo), true);
+            if (buildCommands.contains(CommmandThatRunsCommand.getOrCommandsParticle(aInfo)))
+                tab = buildCommands.split(CommmandThatRunsCommand.getOrCommandsParticleRegex(aInfo));
+            else {
+                tab = new String[1];
+                tab[0] = buildCommands;
+            }
+            List<String> commands = new ArrayList<>();
+            for (int m = 0; m < tab.length; m++) {
+                String s = tab[m];
+                s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+
+                while (s.startsWith(" ")) {
+                    s = s.substring(1);
+                }
+                while (s.endsWith(" ")) {
+                    s = s.substring(0, s.length() - 1);
+                }
+                if (s.startsWith("/")) s = s.substring(1);
+
+                SsomarDev.testMsg("s: " + s, true);
+                commands.add(s);
+            }
+            commands = sp.replacePlaceholders(commands);
+            ItemRunCommandsBuilder itemRunCommandsBuilder = new ItemRunCommandsBuilder(commands, aInfo2);
+            CommandsExecutor.runCommands(itemRunCommandsBuilder);
+
+        }
     }
 }
