@@ -178,6 +178,34 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         GenericFeatureParentEditorManager.getInstance().startEditing(player, this);
     }
 
+    /**
+     * Colored title lines with their placeholders resolved. Lines without any placeholder are
+     * only colored: resolving placeholders walks the whole placeholder table per line and was
+     * the main cost of the periodic title refresh on servers with many placed blocks.
+     */
+    public List<String> resolveTitleLines(StringPlaceholder sp) {
+        List<String> lines = new ArrayList<>();
+        List<String> toResolve = null;
+        for (String s : getTitle().getValues()) {
+            s = StringConverter.coloredString(s);
+            if (s.indexOf('%') != -1) {
+                if (toResolve == null) toResolve = new ArrayList<>();
+                toResolve.add(s);
+                lines.add(null);
+            } else lines.add(s);
+        }
+        if (toResolve != null) {
+            List<String> resolved = sp != null ? sp.replacePlaceholders(toResolve) : toResolve;
+            int j = 0;
+            for (int i = 0; i < lines.size(); i++) {
+                if (lines.get(i) != null) continue;
+                lines.set(i, j < resolved.size() ? resolved.get(j) : toResolve.get(j));
+                j++;
+            }
+        }
+        return lines;
+    }
+
     public String getSimpleLocString(Location loc) {
         return loc.getWorld().getName() + "-" + loc.getBlockX() + "-" + loc.getBlockY() + "-" + loc.getBlockZ();
     }
@@ -190,12 +218,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
 
         String pluginToUse = GeneralConfig.getInstance().getHologramsPlugin().toUpperCase();
 
-        List<String> lines = new ArrayList<>();
-        for (String s : getTitle().getValues()) {
-            s = StringConverter.coloredString(s);
-            lines.add(s);
-        }
-        lines = sp.replacePlaceholders(lines);
+        List<String> lines = resolveTitleLines(sp);
         final List<String> finalLines = lines;
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = new CMIHologram(UUID.randomUUID().toString(), location.clone().add(0, 0.5 + getTitleAjustement().getValue().get(), 0));
@@ -345,12 +368,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             return spawn(objectLocation, sp);
         }
 
-        List<String> lines = new ArrayList<>();
-        for (String s : getTitle().getValues()) {
-            s = StringConverter.coloredString(s);
-            lines.add(s);
-        }
-        lines = sp.replacePlaceholders(lines);
+        List<String> lines = resolveTitleLines(sp);
 
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = CMI.getInstance().getHologramManager().getByLoc(location);
