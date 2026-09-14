@@ -18,6 +18,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,7 @@ public class SellContent extends BlockCommand {
                             item.setAmount(0);
                         }
                     }
-                    else if(Dependency.CMI.isEnabled()){
+                    else if(SCore.hasCMI){
                         int quantity = item.getAmount();
                         item.setAmount(1);
                         WorthItem worth = CMI.getInstance().getWorthManager().getWorth(item);
@@ -70,6 +71,11 @@ public class SellContent extends BlockCommand {
                         Double sellPrice = worth.getSellPrice();
                         amount += sellPrice*quantity;
                         item.setAmount(0);
+                    }
+                    else if (SCore.hasExcellentShop) {
+                        int quantity = item.getAmount();
+                        item.setAmount(1);
+
                     }
                     if(deleteUnsellable) item.setAmount(0);
                 }

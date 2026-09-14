@@ -113,6 +113,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
     public static boolean hasRoseLoot = false;
     public static boolean hasCustomFishing = false;
     public static boolean hasFastAsyncWorldEdit = false;
+    public static boolean hasExcellentShop = false;
 
     public static boolean hasRoseStacker = false;
     public static boolean hasMMOCore = false;
@@ -684,6 +685,8 @@ public final class SCore extends JavaPlugin implements SPlugin {
         hasFactionsUUID = Dependency.FACTIONS_UUID.hookSoftDependency();
 
         hasFastAsyncWorldEdit = Dependency.FAST_ASYNC_WORLD_EDIT.hookSoftDependency();
+
+        hasExcellentShop = Dependency.EXCELLENT_SHOP.hookSoftDependency();
 
         Dependency.PACKET_EVENTS.hookSoftDependency();
 
