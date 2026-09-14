@@ -424,6 +424,11 @@
             <id>inject repo</id>
             <url>https://maven.andante.dev/releases/</url>
         </repository>
+
+        <repository>
+            <id>nightexpress-releases</id>
+            <url>https://repo.nightexpressdev.com/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -1034,6 +1039,13 @@
             <artifactId>junit-jupiter</artifactId>
             <version>5.11.4</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>su.nightexpress.excellentshop</groupId>
+            <artifactId>Core</artifactId>
+            <version>5.1.3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
