@@ -91,6 +91,9 @@ public interface CommmandThatRunsCommand {
      * three %): first with the per-target holder, so %player% still means the target, then with the parent
      * action's holder, without PAPI. PAPI keeps running with the target player, and tokens without nesting are
      * left untouched, so they are still resolved when the command runs (after its delay).
+     * <p>
+     * No reload here: the callers reload both holders once per target ({@link #reloadForNested}), so a command with
+     * several nested tokens does not rebuild the player placeholders for each of them.
      */
     static String resolveNestedPlaceholders(String s, StringPlaceholder targetSp, ActionInfo aInfo) {
         if (s == null || aInfo == null || aInfo.getSp() == null) return s;
@@ -100,14 +103,30 @@ public interface CommmandThatRunsCommand {
         for (int i = 0; i < tokens.length; i++) {
             String token = tokens[i];
             if (countPercent(token) < 3) continue;
-            String resolved = targetSp.replacePlaceholder(token, false);
-            if (countPercent(resolved) >= 3) resolved = aInfo.getSp().replacePlaceholder(resolved, false);
+            String resolved = targetSp.replacePlaceholderWithoutReload(token, false);
+            if (countPercent(resolved) >= 3) resolved = aInfo.getSp().replacePlaceholderWithoutReload(resolved, false);
             if (!resolved.equals(token)) {
                 tokens[i] = resolved;
                 changed = true;
             }
         }
         return changed ? String.join(" ", tokens) : s;
+    }
+
+    /** True when a fragment has a nested token, so the holders only get reloaded when there is work to do. */
+    static boolean hasNestedToken(String[] fragments) {
+        for (String fragment : fragments) {
+            if (fragment == null || fragment.indexOf('%') < 0) continue;
+            for (String token : fragment.split(" ")) if (countPercent(token) >= 3) return true;
+        }
+        return false;
+    }
+
+    /** Reloads the two holders used by {@link #resolveNestedPlaceholders} once per target. */
+    static void reloadForNested(String[] fragments, StringPlaceholder targetSp, ActionInfo aInfo) {
+        if (aInfo == null || aInfo.getSp() == null || !hasNestedToken(fragments)) return;
+        targetSp.reloadAllPlaceholders();
+        aInfo.getSp().reloadAllPlaceholders();
     }
 
     static int countPercent(String s) {
@@ -173,6 +192,7 @@ public interface CommmandThatRunsCommand {
 
             String buildCommands = prepareCommands.toString();
             String[] tab = CommmandThatRunsCommand.splitCommands(buildCommands, aInfo);
+            reloadForNested(tab, sp, aInfo);
             List<String> commands = new ArrayList<>();
             boolean passToNextPlayer = false;
             for (int m = 0; m < tab.length; m++) {
@@ -436,6 +456,7 @@ public interface CommmandThatRunsCommand {
 
             String buildCommands = prepareCommands.toString();
             String[] tab = CommmandThatRunsCommand.splitCommands(buildCommands, aInfo);
+            reloadForNested(tab, sp, aInfo);
             List<String> commands = new ArrayList<>();
             for (int m = 0; m < tab.length; m++) {
                 String s = tab[m];
