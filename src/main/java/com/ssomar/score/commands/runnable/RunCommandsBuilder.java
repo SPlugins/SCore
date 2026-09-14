@@ -398,32 +398,20 @@ public abstract class RunCommandsBuilder {
             }
 
             /* The delay for AROUND and MOB_AROUND is catch after */
-            if (DelayTick.checkContains(command) && !command.startsWith("IF") && !AllCommandsManager.getInstance().startsWithCommandThatRunCommands(command)) {
-                /* Verify that there is no multiple commands after DELAYTICK */
-                String delayStr = command;
-                if (command.contains("+++")) {
-                    String[] tab = command.split("\\+\\+\\+");
-                    for (String s : tab) {
-                        if (DelayTick.checkContains(s)) delayStr = s;
-                    }
-                }
-                /* ---------------------- */
-                String secondPart = DelayTick.replaceCommand(delayStr).replaceAll(" ", "");
+            /* A delay is a directive only when it STARTS the command or one of its +++ fragments.
+             * A DELAYTICK/DELAY inside another command's payload (cooldowncommand "... ,, DELAYTICK 3 ,, ...")
+             * is part of that command and must be dispatched with it. */
+            String delayTickStr = DelayTick.delayDirective(command, DelayTick.DELAY_TICK_NAMES);
+            String delaySecStr = delayTickStr == null ? DelayTick.delayDirective(command, DelayTick.DELAY_SECONDS_NAMES) : null;
+            boolean runsCommands = command.startsWith("IF") || AllCommandsManager.getInstance().startsWithCommandThatRunCommands(command);
+            if (delayTickStr != null && !runsCommands) {
+                String secondPart = DelayTick.replaceCommand(delayTickStr).replaceAll(" ", "");
                 if (secondPart.contains("%")) {
                     secondPart = actionInfo.getSp().replacePlaceholder(secondPart, true);
                 }
                 delay = delay + (Integer.parseInt(secondPart));
-            } else if (command.contains("DELAY ") && !command.startsWith("IF") && !AllCommandsManager.getInstance().startsWithCommandThatRunCommands(command)) {
-                /* Verify that there is no multiple commands after DELAY */
-                String delayStr = command;
-                if (command.contains("+++")) {
-                    String[] tab = command.split("\\+\\+\\+");
-                    for (String s : tab) {
-                        if (s.contains("DELAY ")) delayStr = s;
-                    }
-                }
-                /* ----------------------- */
-                String secondPart = delayStr.replaceAll("DELAY ", "").replaceAll(" ", "");
+            } else if (delaySecStr != null && !runsCommands) {
+                String secondPart = delaySecStr.replaceAll("DELAY ", "").replaceAll(" ", "");
                 if (secondPart.contains("%")) {
                     secondPart = actionInfo.getSp().replacePlaceholder(secondPart, true);
                 }

@@ -29,12 +29,7 @@ public class SCommandToExec {
 
     public void extractSettings(String entry) {
 
-        for (String name : sCommand.getNames()) {
-            if (entry.startsWith(name)) {
-                entry = entry.substring(name.length());
-                break;
-            }
-        }
+        entry = sCommand.stripName(entry);
         entry = entry.trim();
         SsomarDev.testMsg("entry: "+entry, true);
         if (entry.equals("")) {
