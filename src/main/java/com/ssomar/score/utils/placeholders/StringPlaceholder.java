@@ -373,9 +373,7 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
 
         /* there are replace with calcul */
         if (withVariables && variables != null) {
-            for (VariableReal var : variables) {
-                s = var.replaceVariablePlaceholder(s);
-            }
+            s = replaceVariablesUntilStable(s);
         }
 
         placeholders.putAll(playerPlch.getPlaceholders());
@@ -442,6 +440,27 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
         }
         //SsomarDev.testMsg("replacePlaceholderWithoutReload4: " + s, true);
 
+        return s;
+    }
+
+    /** Upper bound of the variable passes: a variable whose value contains its own placeholder must not loop. */
+    static final int MAX_VARIABLE_PASSES = 5;
+
+    /**
+     * Replaces the variable placeholders until nothing changes (bounded by {@link #MAX_VARIABLE_PASSES}).
+     * A single pass only resolved a dynamic variable name such as {@code %var_world%var_selection_int%%} when the
+     * inner variable was declared before the outer one. Otherwise the text still read {@code %var_world2%} when
+     * PlaceholderAPI ran, and a PAPI wrapper around it ({@code %stringutils_executein_%var_world%var_selection_int%%%})
+     * was destroyed.
+     */
+    String replaceVariablesUntilStable(String s) {
+        for (int pass = 0; pass < MAX_VARIABLE_PASSES; pass++) {
+            String before = s;
+            for (VariableReal var : variables) {
+                s = var.replaceVariablePlaceholder(s);
+            }
+            if (s.equals(before) || s.indexOf('%') < 0) break;
+        }
         return s;
     }
 
