@@ -157,7 +157,51 @@ public class ToolsListMaterial {
     public Material getRealMaterialOfBlock(Material material) {
         if (blockAndItemMaterial.containsKey(material)) {
             return blockAndItemMaterial.get(material);
-        } else return material;
+        }
+        // Block states that are not items (WALL_TORCH, OAK_WALL_SIGN, HORN_CORAL_WALL_FAN, POTTED_*…):
+        // derive the item the same way the game does, so %block_item_material% gives something usable.
+        try {
+            if (!SCore.is1v13Less() && !material.isItem()) {
+                for (String candidate : itemCandidatesOfBlock(material.name())) {
+                    Material item = Material.matchMaterial(candidate);
+                    if (item != null && item.isItem()) {
+                        blockAndItemMaterial.put(material, item);
+                        return item;
+                    }
+                }
+            }
+        } catch (NoSuchMethodError ignored) {
+            // Material#isItem missing on an old server: keep the block material as before
+        }
+        return material;
+    }
+
+    /**
+     * Item material names to try, in order, for a block-only material name (1.13+ names). Pure helper, unit-tested.
+     * Unknown shapes give an empty list: the caller then keeps the block material.
+     */
+    public static List<String> itemCandidatesOfBlock(String blockName) {
+        List<String> candidates = new ArrayList<>();
+        if (blockName == null) return candidates;
+        String n = blockName.toUpperCase();
+        if (n.startsWith("POTTED_")) candidates.add(n.substring("POTTED_".length()));
+        if (n.contains("WALL_")) candidates.add(n.replace("WALL_", ""));
+        if (n.startsWith("ATTACHED_")) n = n.substring("ATTACHED_".length());
+        if (n.endsWith("_STEM") && (n.startsWith("MELON") || n.startsWith("PUMPKIN"))) candidates.add(n.replace("_STEM", "_SEEDS"));
+        if (n.endsWith("_PLANT")) candidates.add(n.substring(0, n.length() - "_PLANT".length()));
+        if (n.equals("CAVE_VINES") || n.equals("CAVE_VINES_PLANT")) candidates.add("GLOW_BERRIES");
+        if (n.equals("TALL_SEAGRASS")) candidates.add("SEAGRASS");
+        if (n.equals("BAMBOO_SAPLING")) candidates.add("BAMBOO");
+        if (n.equals("BIG_DRIPLEAF_STEM")) candidates.add("BIG_DRIPLEAF");
+        if (n.equals("PISTON_HEAD") || n.equals("MOVING_PISTON")) candidates.add("PISTON");
+        if (n.equals("FROSTED_ICE")) candidates.add("ICE");
+        if (n.equals("POWDER_SNOW")) candidates.add("POWDER_SNOW_BUCKET");
+        if (n.equals("WATER") || n.equals("BUBBLE_COLUMN")) candidates.add("WATER_BUCKET");
+        if (n.equals("LAVA")) candidates.add("LAVA_BUCKET");
+        if (n.equals("PITCHER_CROP")) candidates.add("PITCHER_POD");
+        if (n.equals("CANDLE_CAKE")) candidates.add("CAKE");
+        if (n.endsWith("_CANDLE_CAKE")) candidates.add("CAKE");
+        return candidates;
     }
 
     /**

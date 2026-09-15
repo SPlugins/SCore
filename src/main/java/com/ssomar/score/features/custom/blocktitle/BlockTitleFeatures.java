@@ -56,6 +56,9 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
     private static boolean isPendingSpawn(UUID uuid) {
         return uuid != null && uuid.getMostSignificantBits() == 0L;
     }
+    // DecentHolograms: last rendered lines per hologram key, so a periodic refresh that renders the
+    // same text does not push the lines to the hologram (and to every viewer) again.
+    private static final Map<String, List<String>> dhLastLines = new ConcurrentHashMap<>();
 
     private ListColoredStringFeature title;
     private DoubleFeature titleAjustement;
@@ -234,14 +237,21 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             // One creation sync and one with delay
             // -> When we use SETEXECUTABLEBLOCK on an EB the title of the EB replaced stay and the title of the EB set is not placed
             // Idk why it doesnt update without, it's something in DecentHologram
-            if (DHAPI.getHologram(getSimpleLocString(loc)) != null) remove(loc);
-            DHAPI.createHologram(getSimpleLocString(loc), loc, lines);
+            // The hologram is keyed by getSimpleLocString(loc) ("world-x-y-z") everywhere: spawn, the delayed
+            // re-creation below, update() and remove(). Looking it up with Location.toString() (as update() and
+            // this runnable used to) never matched, so every periodic refresh fell through to spawn() and
+            // destroyed + re-created the hologram twice (reported by requeim with a Spark profile).
+            final String key = getSimpleLocString(loc);
+            if (DHAPI.getHologram(key) != null) remove(loc);
+            DHAPI.createHologram(key, loc, lines);
+            dhLastLines.put(key, lines);
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (DHAPI.getHologram(loc.toString()) != null) {
+                    if (DHAPI.getHologram(key) != null) {
                         remove(loc);
-                        eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.createHologram(getSimpleLocString(loc), loc, finalLines);
+                        eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.createHologram(key, loc, finalLines);
+                        dhLastLines.put(key, finalLines);
                         hologram.updateAll();
                     }
                     // if null it means that the hologram has been removed during the tick and we don't want to recreate/update it
@@ -301,7 +311,9 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
             //SsomarDev.testMsg("Hologram in remove  DecentHolograms, find the placeholder ?>> "+(DHAPI.getHologram(location.toString()) != null), true);
             eu.decentsoftware.holograms.api.holograms.Hologram hologram;
-            if ((hologram = DHAPI.getHologram(getSimpleLocString(location))) != null) {
+            String key = getSimpleLocString(location);
+            dhLastLines.remove(key);
+            if ((hologram = DHAPI.getHologram(key)) != null) {
                 hologram.destroy();
                 //SsomarDev.testMsg("Hologram removed  DecentHolograms", true);
             }
@@ -378,9 +390,13 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
                 return location;
             } else  return  spawn(objectLocation, sp);
         } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
-            eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(location.toString());
+            String key = getSimpleLocString(location);
+            eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(key);
             if (hologram != null) {
-                DHAPI.setHologramLines(hologram, lines);
+                if (!lines.equals(dhLastLines.get(key))) {
+                    DHAPI.setHologramLines(hologram, lines);
+                    dhLastLines.put(key, lines);
+                }
                 return location;
             } else return spawn(objectLocation, sp);
         }
