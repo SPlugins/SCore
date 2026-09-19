@@ -122,6 +122,8 @@ public class PlaceholderConditionGroupFeature extends FeatureWithHisOwnEditor<Pl
                 List<String> subErrors = attribute.load(plugin, enchantmentsSection, isPremiumLoading);
                 if (subErrors.size() > 0) {
                     error.addAll(subErrors);
+                    // The invalid condition is skipped (unchanged behavior): say it, the activator runs without this guard.
+                    error.add("&cWARNING, the placeholder condition &6" + attributeID + " &cis invalid and is &lIGNORED&c: what it protects will run WITHOUT this condition &7&o" + getParentInfo() + " &6>> Fix the condition above to restore the check !");
                     continue;
                 }
                 placeholdersConditions.put(attributeID, attribute);
