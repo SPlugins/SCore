@@ -168,7 +168,7 @@ public class AddTemporaryAttribute extends MixedCommand  {
         Runnable runlater = new Runnable() {
             @Override
             public void run() {
-                if (entity.isValid() && (!entity.isDead() || (entity instanceof Player && ((Player) entity).isOnline()))) {
+                if (shouldRemoveNow(entity)) {
                     AttributeUtils.removeSpecificAttribute((LivingEntity) entity, finalAttrTypeID1, finalAttrKeyString);
                     if (entity instanceof Player) {
                         SCore.schedulerHook.runAsyncTask(
@@ -181,6 +181,17 @@ public class AddTemporaryAttribute extends MixedCommand  {
 
         if (!(entity instanceof Player)) SCore.schedulerHook.runEntityTask(runlater, null, entity, Long.parseLong(sCommandToExec.getSettingValue("timeinticks").toString()));
         else SCore.schedulerHook.runTask(runlater, Long.parseLong(sCommandToExec.getSettingValue("timeinticks").toString()));
+    }
+
+    /**
+     * Whether the expired modifier can be removed right now.
+     * A connected player is handled even when dead: on the death screen isValid() is false,
+     * the removal used to be skipped and the modifier stayed until the next reconnection.
+     * An offline player keeps the database record, cleaned up on join or respawn.
+     */
+    static boolean shouldRemoveNow(Entity entity) {
+        if (entity instanceof Player) return ((Player) entity).isOnline();
+        return entity.isValid() && !entity.isDead();
     }
 
 }
