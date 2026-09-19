@@ -32,11 +32,15 @@ import java.util.Optional;
 
 public class Damage extends MixedCommand {
 
+    /** Default damage type: the launcher's attack when there is a player, magic otherwise. */
+    public static final String AUTO_DAMAGE_TYPE = "auto";
+    private static final java.util.Set<String> warnedUnknownTypes = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
     public Damage() {
         CommandSetting amount = new CommandSetting("amount", 0, String.class, "0");
         CommandSetting ifStrength = new CommandSetting("ifStr", 1, String.class, "false");
         CommandSetting ifAttribute = new CommandSetting("ifAttr", 2, String.class, "false");
-        CommandSetting damageType = new CommandSetting("type", 3, String.class, "INDIRECT_MAGIC");
+        CommandSetting damageType = new CommandSetting("type", 3, String.class, AUTO_DAMAGE_TYPE);
         List<CommandSetting> settings = getSettings();
         settings.add(amount);
         settings.add(ifStrength);
@@ -64,12 +68,19 @@ public class Damage extends MixedCommand {
 
         Object damageSource = null;
         if(SCore.is1v20v5Plus()) {
-            DamageType damageType = DamageType.INDIRECT_MAGIC;
-            // To display the good death message
-            if(p != null) damageType = DamageType.PLAYER_ATTACK;
+            String typeName = (String) sCommandToExec.getSettingValue("type");
+            String key = resolveDamageTypeKey(typeName, p != null);
+            DamageType damageType = null;
             try {
-                damageType = Registry.DAMAGE_TYPE.get(NamespacedKey.minecraft((String) sCommandToExec.getSettingValue("type")));
-            } catch (Exception e) {}
+                damageType = Registry.DAMAGE_TYPE.get(NamespacedKey.minecraft(key));
+            } catch (IllegalArgumentException ignored) {
+            }
+            if (damageType == null) {
+                if (warnedUnknownTypes.add(key)) {
+                    SCore.plugin.getLogger().warning("[DAMAGE] Unknown damage type '" + typeName + "', the default one is used");
+                }
+                damageType = Registry.DAMAGE_TYPE.get(NamespacedKey.minecraft(resolveDamageTypeKey(AUTO_DAMAGE_TYPE, p != null)));
+            }
 
             try {
                 if (p != null) damageSource = DamageSource.builder(damageType).withDirectEntity(p).withCausingEntity(p).build();
@@ -80,6 +91,25 @@ public class Damage extends MixedCommand {
         }
 
         damage(p, livingReceiver, damage, damageSource, aInfo);
+    }
+
+    /**
+     * Vanilla damage type key used by the command.
+     * <ul>
+     *   <li>"auto" (default): player_attack when a player launched the command (right death message,
+     *   counts as that player's attack), indirect_magic otherwise;</li>
+     *   <li>any other value: the vanilla id, case-insensitive (IN_FIRE and in_fire both work, the javadoc
+     *   lists the names in uppercase; they used to be rejected by NamespacedKey and silently ignored).</li>
+     * </ul>
+     * "INDIRECT_MAGIC" in uppercase was the previous default: NamespacedKey rejected it, so it behaved
+     * like "auto". It keeps that behaviour so existing configs deal the same damage.
+     */
+    public static String resolveDamageTypeKey(String type, boolean hasLauncher) {
+        if (type == null || type.trim().isEmpty() || type.trim().equalsIgnoreCase(AUTO_DAMAGE_TYPE) || type.trim().equals("INDIRECT_MAGIC")) {
+            return hasLauncher ? "player_attack" : "indirect_magic";
+        }
+        String key = type.trim().toLowerCase(java.util.Locale.ROOT);
+        return key.startsWith("minecraft:") ? key.substring("minecraft:".length()) : key;
     }
 
     public static void damage(Player p, LivingEntity receiver, double damage, Object damageSource, ActionInfo actionInfo) {
