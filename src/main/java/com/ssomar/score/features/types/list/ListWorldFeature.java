@@ -12,8 +12,10 @@ import com.ssomar.score.utils.strings.StringConverter;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -35,12 +37,22 @@ public class ListWorldFeature extends ListFeatureAbstract<String, ListWorldFeatu
         for (String s : entries) {
             s = StringConverter.decoloredString(s);
             Optional<World> worldOptional = AllWorldManager.getWorld(s);
-            if (worldOptional.isPresent()) {
+            if (worldOptional.isPresent() || isWorldManagerNotEnabledYet()) {
                 value.add(s);
             } else
                 errors.add("&cERROR, Couldn't load the World value of " + this.getName() + " from config, value: " + s + " &7&o" + getParent().getParentInfo());
         }
         return value;
+    }
+
+    /**
+     * Multiverse-Core is no longer in the softdepend of SCore (it created a circular load order with some plugins),
+     * so it can be enabled after the configs are loaded. Its worlds do not exist yet at this moment: the name is kept,
+     * the conditions compare world names at runtime.
+     */
+    private static boolean isWorldManagerNotEnabledYet() {
+        Plugin multiverse = Bukkit.getPluginManager().getPlugin("Multiverse-Core");
+        return multiverse != null && !multiverse.isEnabled();
     }
 
     @Override
