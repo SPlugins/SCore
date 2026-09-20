@@ -174,6 +174,9 @@ public final class SCore extends JavaPlugin implements SPlugin {
 
     private static boolean is26v1 = false;
     private static boolean is26v2 = false;
+    private static boolean is26v3 = false;
+    /* A Minecraft version released after this build of SCore: handled like the newest version SCore knows */
+    private static boolean isNewerThanKnownVersions = false;
 
 
 
@@ -381,6 +384,10 @@ public final class SCore extends JavaPlugin implements SPlugin {
         return is26v2;
     }
 
+    public static boolean is26v3() {
+        return is26v3;
+    }
+
 
     /* The server is in 1.10 or - ? */
     public static boolean is1v10Less() {
@@ -492,7 +499,11 @@ public final class SCore extends JavaPlugin implements SPlugin {
     }
 
     public static boolean is26v2Plus() {
-        return is26v2() ;
+        return is26v2() || is26v3Plus();
+    }
+
+    public static boolean is26v3Plus() {
+        return is26v3() || isNewerThanKnownVersions;
     }
 
     public static boolean isVersionBetween(String version1, String version2) {
@@ -938,6 +949,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
     }
 
     public static void initVersion() {
+        is26v3 = Bukkit.getServer().getVersion().contains("26.3");
         is26v2 = Bukkit.getServer().getVersion().contains("26.2");
         is26v1 = Bukkit.getServer().getVersion().contains("26.1");
         is1v21v11 = Bukkit.getServer().getVersion().contains("1.21.11");
@@ -972,6 +984,8 @@ public final class SCore extends JavaPlugin implements SPlugin {
         is1v9 = Bukkit.getServer().getVersion().contains("1.9") && !is1v21v9;;
         is1v8 = Bukkit.getServer().getVersion().contains("1.8") && !is1v21v8;
 
+        isNewerThanKnownVersions = !is1v8 && !is1v9 && !is1v10 && !is1v11 && !is1v12Plus() && getMinecraftMajorVersion() >= 26;
+
         isSpigot = Bukkit.getServer().getVersion().contains("Spigot") || Bukkit.getServer().getVersion().contains("spigot");
         isMohist = Bukkit.getServer().getName().contains("Mohist") || Bukkit.getServer().getVersion().contains("Mohist");
         isPaper = Bukkit.getServer().getVersion().contains("Paper") || Bukkit.getServer().getVersion().contains("paper");
@@ -980,6 +994,18 @@ public final class SCore extends JavaPlugin implements SPlugin {
         isLuminol = Bukkit.getServer().getVersion().contains("Luminol") || Bukkit.getServer().getVersion().contains("luminol");
         isPurpur = Bukkit.getServer().getVersion().contains("Purpur") || Bukkit.getServer().getVersion().contains("purpur");
         isPufferfish = Bukkit.getServer().getVersion().contains("Pufferfish") || Bukkit.getServer().getVersion().contains("pufferfish");
+    }
+
+    /* 26 for "26.3", 1 for "1.21.11", -1 when the version can't be read */
+    private static int getMinecraftMajorVersion() {
+        try {
+            String version = Bukkit.getServer().getVersion();
+            int index = version.indexOf("MC: ");
+            if (index == -1) return -1;
+            return Integer.parseInt(version.substring(index + 4).split("[^0-9]")[0]);
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     public static boolean hasClass(String className) {
@@ -1002,6 +1028,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
 
     public void displayVersion() {
         Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Version of the server &6" + Bukkit.getServer().getVersion()+ " &7!");
+        if (isNewerThanKnownVersions) Utils.sendConsoleMsg(SCore.NAME_COLOR + " &eThis Minecraft version is newer than this build of SCore, it is handled like &626.3&e. Check if an update of SCore is available.");
         if(false){
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is Folia &6" + SCore.isFolia() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is Spigot &6" + SCore.isSpigot() + " &7!");
@@ -1042,6 +1069,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v21v11 &6" + SCore.is1v21v11() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v1 &6" + SCore.is26v1() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v2 &6" + SCore.is26v2() + " &7!");
+            Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v3 &6" + SCore.is26v3() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v10Less &6" + SCore.is1v10Less() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v11Less &6" + SCore.is1v11Less() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v12Less &6" + SCore.is1v12Less() + " &7!");
@@ -1065,6 +1093,7 @@ public final class SCore extends JavaPlugin implements SPlugin {
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 1v21v7Plus &6" + SCore.is1v21v7Plus() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v1Plus &6" + SCore.is26v1Plus() + " &7!");
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v2Plus &6" + SCore.is26v2Plus() + " &7!");
+            Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Is 26v3Plus &6" + SCore.is26v3Plus() + " &7!");
         }
     }
 

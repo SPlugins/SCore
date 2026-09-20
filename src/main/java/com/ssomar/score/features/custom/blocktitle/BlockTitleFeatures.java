@@ -3,6 +3,7 @@ package com.ssomar.score.features.custom.blocktitle;
 import com.Zrips.CMI.CMI;
 import com.Zrips.CMI.Modules.Holograms.CMIHologram;
 import com.ssomar.score.SCore;
+import com.ssomar.score.usedapi.Dependency;
 import com.ssomar.score.config.GeneralConfig;
 import com.ssomar.score.features.FeatureInterface;
 import com.ssomar.score.features.FeatureParentInterface;
@@ -213,6 +214,12 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         return loc.getWorld().getName() + "-" + loc.getBlockX() + "-" + loc.getBlockY() + "-" + loc.getBlockZ();
     }
 
+    /* DecentHolograms can be installed but disabled (it turns itself off on a Minecraft version it doesn't support):
+     * its API classes are then unreachable, so the built-in title is used instead. */
+    private static boolean useDecentHolograms(String pluginToUse) {
+        return SCore.hasDecentHolograms && Dependency.DECENT_HOLOGRAMS.isEnabled() && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"));
+    }
+
     /**
      * Return the location of the Holo
      **/
@@ -230,7 +237,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             holo.update();
             //SsomarDev.testMsg("Hologram spawned >> "+holo.getCenterLocation());
             return holo.getLocation().getBukkitLoc();
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
+        } else if (useDecentHolograms(pluginToUse)) {
             Location loc = location.clone().add(0, 0.5 + getTitleAjustement().getValue().get(), 0);
 
             // 26/01/2023 Double creation needed required to avoid hologram not updating when we use SETEXECUTABLEBLOCK on an EB
@@ -308,7 +315,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = CMI.getInstance().getHologramManager().getByLoc(location);
             if (holo != null) holo.remove();
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
+        } else if (useDecentHolograms(pluginToUse)) {
             //SsomarDev.testMsg("Hologram in remove  DecentHolograms, find the placeholder ?>> "+(DHAPI.getHologram(location.toString()) != null), true);
             eu.decentsoftware.holograms.api.holograms.Hologram hologram;
             String key = getSimpleLocString(location);
@@ -389,7 +396,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
                 holo.update();
                 return location;
             } else  return  spawn(objectLocation, sp);
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
+        } else if (useDecentHolograms(pluginToUse)) {
             String key = getSimpleLocString(location);
             eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(key);
             if (hologram != null) {
