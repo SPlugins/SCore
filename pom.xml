@@ -529,7 +529,7 @@
         <dependency>
             <groupId>com.ssomar.sevents</groupId>
             <artifactId>SEvents</artifactId>
-            <version>1.26.7.12</version>
+            <version>1.26.9.20</version>
             <scope>compile</scope>
         </dependency>
 
@@ -559,7 +559,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>26.2.build.29-alpha</version>
+            <version>26.3.build.26-alpha</version>
             <scope>provided</scope>
         </dependency>
 
