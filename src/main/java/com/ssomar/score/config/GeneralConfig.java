@@ -49,6 +49,8 @@ public class GeneralConfig extends Config {
 
     private boolean enableCommentsInConfig;
 
+    private boolean editorIconPreview;
+
     private boolean selfHostPackDebug;
 
     private String selfHostPackIp;
@@ -102,6 +104,7 @@ public class GeneralConfig extends Config {
         loopKillMode = config.getBoolean("loopKillMode", false);
         disableCustomMetadataOnEntities = config.getBoolean("disableCustomMetadataOnEntities", false);
         enableCommentsInConfig = config.getBoolean("enableCommentsInConfig", true) && SCore.is1v19Plus();
+        editorIconPreview = config.getBoolean("editorIconPreview", true);
         selfHostPackDebug = config.getBoolean("selfHostPackDebug", false);
         selfHostPackIp = config.getString("selfHostPackIp", "");
         hologramsPlugin = config.getString("hologramsPlugin", "NONE").toUpperCase();
