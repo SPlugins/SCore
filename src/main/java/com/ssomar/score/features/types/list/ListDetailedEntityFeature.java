@@ -269,6 +269,12 @@ public class ListDetailedEntityFeature extends FeatureAbstract<List<String>, Lis
 
                     SsomarDev.testMsg("VERIF key: " + key + " value: " + value + " type: " + entity.getType(), DEBUG);
 
+                    /* NBT-API answers null (not NBTTagEnd) for a key it cannot read on this server:
+                     * a whitelist with NBT tags then threw an NPE for EVERY entity scanned by
+                     * MOB_AROUND, thousands of stack traces per minute (report of 2026-08-14).
+                     * An unreadable tag simply does not match. */
+                    if (nbtType == null) return false;
+
                     switch (nbtType) {
                         /* The tag was not found */
                         case NBTTagEnd:
