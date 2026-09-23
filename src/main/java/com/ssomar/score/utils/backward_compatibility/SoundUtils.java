@@ -13,7 +13,28 @@ import java.util.Map;
 
 public class SoundUtils {
 
+    /* The sound registry never changes while the server runs, but getSounds() used to walk it
+     * (~1 500 entries) and sort the result on EVERY call — and SoundFeature.save() calls it for
+     * every sound of every saved object. A mass save (pack import in MyFurniture, /ei editor on a
+     * big config) then blocked the main thread for seconds (Paper watchdog dumps, 2026-09-22).
+     * Built once, read-only afterwards. */
+    private static volatile Map<Object, String> cachedSounds;
+
     public static Map<Object, String> getSounds() {
+        Map<Object, String> sounds = cachedSounds;
+        if (sounds == null) {
+            synchronized (SoundUtils.class) {
+                sounds = cachedSounds;
+                if (sounds == null) {
+                    sounds = java.util.Collections.unmodifiableMap(buildSounds());
+                    cachedSounds = sounds;
+                }
+            }
+        }
+        return sounds;
+    }
+
+    private static Map<Object, String> buildSounds() {
         Map<Object, String> list = new HashMap<>();
         if (SCore.is1v21v2Plus()) {
             for (Keyed l : Registry.SOUNDS) {
