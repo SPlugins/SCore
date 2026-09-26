@@ -1,5 +1,6 @@
 package com.ssomar.score.utils.messages;
 
+import com.ssomar.score.features.custom.conditions.ConditionFeature;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
 import com.ssomar.score.utils.strings.StringConverter;
 import lombok.Getter;
@@ -21,6 +22,12 @@ public class SendMessage implements Serializable {
     @Setter
     private StringPlaceholder sp = new StringPlaceholder();
 
+    /** Passive activators (LOOP): the player did not try to activate anything, so the default "invalid condition"
+     *  message is not sent (every loop would repeat it). A message written in the config is still sent. */
+    @Getter
+    @Setter
+    private boolean skipDefaultConditionError = false;
+
     public static void sendMessageNoPlch(Player p, String s) {
         sendMessageNoPlch((CommandSender) p, s);
     }
@@ -39,12 +46,14 @@ public class SendMessage implements Serializable {
     }
 
     public void sendMessage(CommandSender cs, String s) {
+        if (skipDefaultConditionError && ConditionFeature.DEFAULT_ERROR_MESSAGE.equals(s)) return;
         String prepareMsg = s;
         prepareMsg = sp.replacePlaceholder(prepareMsg);
         sendMessageFinal(cs, prepareMsg, true);
     }
 
     public void sendMessage(CommandSender cs, String s, boolean checkUncoloredEmpty) {
+        if (skipDefaultConditionError && ConditionFeature.DEFAULT_ERROR_MESSAGE.equals(s)) return;
         String prepareMsg = s;
         prepareMsg = sp.replacePlaceholder(prepareMsg);
         sendMessageFinal(cs, prepareMsg, checkUncoloredEmpty);
