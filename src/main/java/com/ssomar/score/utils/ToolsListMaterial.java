@@ -23,6 +23,8 @@ public class ToolsListMaterial {
      * Value = ItemStack Material Enum value
      */
     private static Map<Material, Material> blockAndItemMaterial;
+    /* block-only materials -> their item, learned by getRealMaterialOfBlock (never read by getBlockMaterialOfItem) */
+    private static Map<Material, Material> derivedItemOfBlock;
     private List<Material> plantWithGrowth;
 
     private List<Material> plantWithGrowthOnlyFarmland;
@@ -88,6 +90,7 @@ public class ToolsListMaterial {
         addWithoutProblem(validJungleBlockMaterials, FixedMaterial.getMaterial(Collections.singletonList("STRIPPED_JUNGLE_LOG")));
 
         blockAndItemMaterial = new HashMap<>();
+        derivedItemOfBlock = new java.util.concurrent.ConcurrentHashMap<>();
 
         // Link a crop block towards their seed material
 
@@ -158,6 +161,8 @@ public class ToolsListMaterial {
         if (blockAndItemMaterial.containsKey(material)) {
             return blockAndItemMaterial.get(material);
         }
+        Material derived = derivedItemOfBlock.get(material);
+        if (derived != null) return derived;
         // Block states that are not items (WALL_TORCH, OAK_WALL_SIGN, HORN_CORAL_WALL_FAN, POTTED_*…):
         // derive the item the same way the game does, so %block_item_material% gives something usable.
         try {
@@ -165,7 +170,9 @@ public class ToolsListMaterial {
                 for (String candidate : itemCandidatesOfBlock(material.name())) {
                     Material item = Material.matchMaterial(candidate);
                     if (item != null && item.isItem()) {
-                        blockAndItemMaterial.put(material, item);
+                        /* own cache: blockAndItemMaterial is also read backwards by getBlockMaterialOfItem, and
+                           PLAYER_WALL_HEAD -> PLAYER_HEAD there made EB place wall heads (and wall torches) */
+                        derivedItemOfBlock.put(material, item);
                         return item;
                     }
                 }

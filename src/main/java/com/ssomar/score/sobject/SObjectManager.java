@@ -24,6 +24,8 @@ public abstract class SObjectManager<T extends SObject> {
     private List<T> allObjects;
     private Map<String, T> objectIndex;
     private String objectName;
+    /* staged load (see beginStagedLoad): the objects of a reload in progress, not visible before commitStagedLoad */
+    private List<T> stagedObjects;
 
     public SObjectManager(SPlugin sPlugin) {
         this.sPlugin = sPlugin;
@@ -48,6 +50,14 @@ public abstract class SObjectManager<T extends SObject> {
     }
 
     public void addLoadedObject(T object, boolean generateLoadEvent) {
+        List<T> staged = stagedObjects;
+        if (staged != null) {
+            /* a reload is in progress: the current objects stay visible until commitStagedLoad */
+            staged.add(object);
+            actionOnObjectWhenLoading(object);
+            if (generateLoadEvent) generateLoadEvent(object.getId(), object);
+            return;
+        }
         loadedObjects.add(object);
 
         actionOnObjectWhenLoading(object);
@@ -69,6 +79,29 @@ public abstract class SObjectManager<T extends SObject> {
         }
 
         rebuildAllObjects();
+    }
+
+    /**
+     * Starts a reload that keeps the loaded objects visible while the new ones are read: until
+     * {@link #commitStagedLoad()}, {@link #addLoadedObject} collects the new objects aside, and the lookups
+     * (getLoadedObjectWithID, getAllObjects...) still answer with the previous ones. Without it, a
+     * reload empties the list first and every lookup made during the reload (a give by another plugin...) finds nothing.
+     */
+    public synchronized void beginStagedLoad() {
+        stagedObjects = new ArrayList<>();
+    }
+
+    /** Ends a staged load: the objects read since {@link #beginStagedLoad()} replace the loaded objects at once. */
+    public synchronized void commitStagedLoad() {
+        List<T> staged = stagedObjects;
+        if (staged == null) return;
+        stagedObjects = null;
+        loadedObjects = staged;
+        rebuildAllObjects();
+    }
+
+    public boolean isStagedLoadInProgress() {
+        return stagedObjects != null;
     }
 
     private void rebuildAllObjects() {
