@@ -3,6 +3,7 @@ package com.ssomar.score.features.custom.blocktitle;
 import com.Zrips.CMI.CMI;
 import com.Zrips.CMI.Modules.Holograms.CMIHologram;
 import com.ssomar.score.SCore;
+import com.ssomar.score.usedapi.Dependency;
 import com.ssomar.score.config.GeneralConfig;
 import com.ssomar.score.features.FeatureInterface;
 import com.ssomar.score.features.FeatureParentInterface;
@@ -56,6 +57,9 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
     private static boolean isPendingSpawn(UUID uuid) {
         return uuid != null && uuid.getMostSignificantBits() == 0L;
     }
+    // DecentHolograms: last rendered lines per hologram key, so a periodic refresh that renders the
+    // same text does not push the lines to the hologram (and to every viewer) again.
+    private static final Map<String, List<String>> dhLastLines = new ConcurrentHashMap<>();
 
     private ListColoredStringFeature title;
     private DoubleFeature titleAjustement;
@@ -178,8 +182,42 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         GenericFeatureParentEditorManager.getInstance().startEditing(player, this);
     }
 
+    /**
+     * Colored title lines with their placeholders resolved. Lines without any placeholder are
+     * only colored: resolving placeholders walks the whole placeholder table per line and was
+     * the main cost of the periodic title refresh on servers with many placed blocks.
+     */
+    public List<String> resolveTitleLines(StringPlaceholder sp) {
+        List<String> lines = new ArrayList<>();
+        List<String> toResolve = null;
+        for (String s : getTitle().getValues()) {
+            s = StringConverter.coloredString(s);
+            if (s.indexOf('%') != -1) {
+                if (toResolve == null) toResolve = new ArrayList<>();
+                toResolve.add(s);
+                lines.add(null);
+            } else lines.add(s);
+        }
+        if (toResolve != null) {
+            List<String> resolved = sp != null ? sp.replacePlaceholders(toResolve) : toResolve;
+            int j = 0;
+            for (int i = 0; i < lines.size(); i++) {
+                if (lines.get(i) != null) continue;
+                lines.set(i, j < resolved.size() ? resolved.get(j) : toResolve.get(j));
+                j++;
+            }
+        }
+        return lines;
+    }
+
     public String getSimpleLocString(Location loc) {
         return loc.getWorld().getName() + "-" + loc.getBlockX() + "-" + loc.getBlockY() + "-" + loc.getBlockZ();
+    }
+
+    /* DecentHolograms can be installed but disabled (it turns itself off on a Minecraft version it doesn't support):
+     * its API classes are then unreachable, so the built-in title is used instead. */
+    private static boolean useDecentHolograms(String pluginToUse) {
+        return SCore.hasDecentHolograms && Dependency.DECENT_HOLOGRAMS.isEnabled() && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"));
     }
 
     /**
@@ -190,12 +228,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
 
         String pluginToUse = GeneralConfig.getInstance().getHologramsPlugin().toUpperCase();
 
-        List<String> lines = new ArrayList<>();
-        for (String s : getTitle().getValues()) {
-            s = StringConverter.coloredString(s);
-            lines.add(s);
-        }
-        lines = sp.replacePlaceholders(lines);
+        List<String> lines = resolveTitleLines(sp);
         final List<String> finalLines = lines;
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = new CMIHologram(UUID.randomUUID().toString(), location.clone().add(0, 0.5 + getTitleAjustement().getValue().get(), 0));
@@ -204,21 +237,28 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             holo.update();
             //SsomarDev.testMsg("Hologram spawned >> "+holo.getCenterLocation());
             return holo.getLocation().getBukkitLoc();
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
+        } else if (useDecentHolograms(pluginToUse)) {
             Location loc = location.clone().add(0, 0.5 + getTitleAjustement().getValue().get(), 0);
 
             // 26/01/2023 Double creation needed required to avoid hologram not updating when we use SETEXECUTABLEBLOCK on an EB
             // One creation sync and one with delay
             // -> When we use SETEXECUTABLEBLOCK on an EB the title of the EB replaced stay and the title of the EB set is not placed
             // Idk why it doesnt update without, it's something in DecentHologram
-            if (DHAPI.getHologram(getSimpleLocString(loc)) != null) remove(loc);
-            DHAPI.createHologram(getSimpleLocString(loc), loc, lines);
+            // The hologram is keyed by getSimpleLocString(loc) ("world-x-y-z") everywhere: spawn, the delayed
+            // re-creation below, update() and remove(). Looking it up with Location.toString() (as update() and
+            // this runnable used to) never matched, so every periodic refresh fell through to spawn() and
+            // destroyed + re-created the hologram twice (reported by requeim with a Spark profile).
+            final String key = getSimpleLocString(loc);
+            if (DHAPI.getHologram(key) != null) remove(loc);
+            DHAPI.createHologram(key, loc, lines);
+            dhLastLines.put(key, lines);
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (DHAPI.getHologram(loc.toString()) != null) {
+                    if (DHAPI.getHologram(key) != null) {
                         remove(loc);
-                        eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.createHologram(getSimpleLocString(loc), loc, finalLines);
+                        eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.createHologram(key, loc, finalLines);
+                        dhLastLines.put(key, finalLines);
                         hologram.updateAll();
                     }
                     // if null it means that the hologram has been removed during the tick and we don't want to recreate/update it
@@ -275,10 +315,12 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = CMI.getInstance().getHologramManager().getByLoc(location);
             if (holo != null) holo.remove();
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
+        } else if (useDecentHolograms(pluginToUse)) {
             //SsomarDev.testMsg("Hologram in remove  DecentHolograms, find the placeholder ?>> "+(DHAPI.getHologram(location.toString()) != null), true);
             eu.decentsoftware.holograms.api.holograms.Hologram hologram;
-            if ((hologram = DHAPI.getHologram(getSimpleLocString(location))) != null) {
+            String key = getSimpleLocString(location);
+            dhLastLines.remove(key);
+            if ((hologram = DHAPI.getHologram(key)) != null) {
                 hologram.destroy();
                 //SsomarDev.testMsg("Hologram removed  DecentHolograms", true);
             }
@@ -345,12 +387,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             return spawn(objectLocation, sp);
         }
 
-        List<String> lines = new ArrayList<>();
-        for (String s : getTitle().getValues()) {
-            s = StringConverter.coloredString(s);
-            lines.add(s);
-        }
-        lines = sp.replacePlaceholders(lines);
+        List<String> lines = resolveTitleLines(sp);
 
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = CMI.getInstance().getHologramManager().getByLoc(location);
@@ -359,10 +396,14 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
                 holo.update();
                 return location;
             } else  return  spawn(objectLocation, sp);
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
-            eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(location.toString());
+        } else if (useDecentHolograms(pluginToUse)) {
+            String key = getSimpleLocString(location);
+            eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(key);
             if (hologram != null) {
-                DHAPI.setHologramLines(hologram, lines);
+                if (!lines.equals(dhLastLines.get(key))) {
+                    DHAPI.setHologramLines(hologram, lines);
+                    dhLastLines.put(key, lines);
+                }
                 return location;
             } else return spawn(objectLocation, sp);
         }

@@ -1073,6 +1073,11 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
         infoBlock.setBlockLocationZ(blockLocation.getBlockZ());
         infoBlock.setBlockLocationWorld(blockLocation.getWorld().getUID());
         infoBlock.setOldBlockMaterialName(blockOpt.get().getType().name());
+        /* Same block placeholders as a block activator (%block%, %target_block%, %block_x%...): the
+         * location alone was set, so `SENDMESSAGE %block%` printed the literal placeholder
+         * (report of 2026-02-15). */
+        infoBlock.setBlock(blockOpt.get());
+        infoBlock.getSp().setBlockPlcHldr(blockOpt.get());
 
         playerOpt2.ifPresent(value -> infoBlock.setLauncherUUID(value.getUniqueId()));
 

@@ -1,5 +1,7 @@
 package com.ssomar.score.features.custom.toolrules.group;
 
+import java.util.ArrayList;
+import com.ssomar.score.utils.ToolsListMaterial;
 import com.ssomar.score.SCore;
 import com.ssomar.score.features.*;
 import com.ssomar.score.features.custom.toolrules.toolrule.ToolRuleFeature;
@@ -234,10 +236,25 @@ public class ToolRulesGroupFeature extends FeatureWithHisOwnEditor<ToolRulesGrou
                 for (Tag<Material> tag : tags) {
                     tool.addRule(tag, miningSpeed, correctForDrops);
                 }
-                tool.addRule(rule.getMaterials().asMaterialList(), rule.getMiningSpeed().getValue().get().floatValue(), rule.getCorrectForDrops().getValue());
+                List<Material> blocks = blocksOnly(rule.getMaterials().asMaterialList());
+                if (!blocks.isEmpty()) tool.addRule(blocks, miningSpeed, correctForDrops);
             }
             meta.setTool(tool);
         }
+    }
+
+    /**
+     * The tool component only accepts blocks: an item material (POTATO, or a group such as ALL_CROPS that also lists
+     * POTATO/CARROT) made Paper throw and the whole item failed to build (give, /ei editor...). An item is replaced by its
+     * crop block when it has one (POTATO -> POTATOES), otherwise skipped.
+     */
+    public static List<Material> blocksOnly(List<Material> materials) {
+        List<Material> blocks = new ArrayList<>();
+        for (Material material : materials) {
+            Material block = material.isBlock() ? material : ToolsListMaterial.getInstance().getBlockMaterialOfItem(material);
+            if (block != null && block.isBlock() && !blocks.contains(block)) blocks.add(block);
+        }
+        return blocks;
     }
 
     @Override

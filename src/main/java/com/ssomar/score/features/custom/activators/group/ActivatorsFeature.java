@@ -108,6 +108,7 @@ public class ActivatorsFeature extends FeatureWithHisOwnEditor<ActivatorsFeature
         List<SActivator> result = new ArrayList<>();
         for (SActivator activator : activators.values()) {
             //SsomarDev.testMsg("check activator >> "+activator.getId(), true);
+            if (activator.isDisabledByInvalidOption()) continue;
             if (activator.getOption().equals(option)) {
                 if (!whitelistActivatorsId.isEmpty() && !whitelistActivatorsId.contains(activator.getId())) {
                     //SsomarDev.testMsg("activator not valid", true);

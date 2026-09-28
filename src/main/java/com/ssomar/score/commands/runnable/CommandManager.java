@@ -14,26 +14,28 @@ public abstract class CommandManager<T extends SCommand> {
     @Setter
     private List<T> commands;
 
-    /** Get the associated custom command of the entry if there is one **/
+    /** Get the associated custom command of the entry if there is one.
+     * The name must end on a word boundary and the longest matching name wins, so the result no longer
+     * depends on registration order (SETBLOCK vs SETBLOCKPOS, TELEPORT vs TELEPORT POSITION) and another
+     * plugin's command that merely starts with an SCore name (launchprojectile, breakinradius) is left alone. **/
     public Optional<T> getCommand(String entry) {
+        T best = null;
+        int bestLen = -1;
         for (T command : this.commands) {
-            for (String name : command.getNames()) {
-                if (entry.regionMatches(true, 0, name, 0, name.length())) {
-                    return Optional.of(command);
-                }
+            int len = command.matchedNameLength(entry);
+            if (len > bestLen) {
+                bestLen = len;
+                best = command;
             }
         }
-        return Optional.empty();
+        return Optional.ofNullable(best);
     }
 
     /** Extract the arguments of the entry for a specific custom command **/
     public List<String> getArgs(T command, String entry) {
-        for (String name : command.getNames()) {
-            if (entry.startsWith(name)) {
-                entry = entry.substring(name.length());
-                break;
-            }
-        }
+        // Same (case-insensitive, boundary-aware) comparison as getCommand: a case-sensitive strip here
+        // left the command word in the arguments for lower-case entries.
+        entry = command.stripName(entry);
         if(entry.trim().equals("")) return new ArrayList<>();
         return Arrays.asList(entry.trim().split(" "));
     }

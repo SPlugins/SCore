@@ -30,6 +30,14 @@ public class MultiverseAPI {
                 }
             }
             return null;
+        } catch (RuntimeException e) {
+            /* Multiverse-Core can be enabled after SCore: its world manager is not ready yet */
+            for (World w : Bukkit.getWorlds()) {
+                if (w.getName().equalsIgnoreCase(worldStr)) {
+                    return w;
+                }
+            }
+            return null;
         }
         return null;
     }
@@ -49,6 +57,12 @@ public class MultiverseAPI {
                 worlds.add(w.getName());
             }
             return worlds;
+        } catch (RuntimeException e) {
+            /* Multiverse-Core can be enabled after SCore: its world manager is not ready yet */
+            for (World w : Bukkit.getWorlds()) {
+                worlds.add(w.getName());
+            }
+            return worlds;
         }
         return worlds;
     }
@@ -64,6 +78,10 @@ public class MultiverseAPI {
             }
         } catch (NoClassDefFoundError e) {
             SCore.hasMultiverse = false;
+            worlds.addAll(Bukkit.getWorlds());
+            return worlds;
+        } catch (RuntimeException e) {
+            /* Multiverse-Core can be enabled after SCore: its world manager is not ready yet */
             worlds.addAll(Bukkit.getWorlds());
             return worlds;
         }

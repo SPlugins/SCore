@@ -23,6 +23,7 @@ public class EntityCommandManager extends CommandManager<SCommand> {
         commands.add(new ChangeTo());
         commands.add(new DropItem());
         commands.add(new DropExecutableItem());
+        commands.add(new ChangeIntoItem());
         commands.add(new DropExecutableBlock());
         commands.add(new Heal());
         commands.add(new SetBaby());

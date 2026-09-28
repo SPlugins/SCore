@@ -43,6 +43,21 @@ public enum MaterialWithGroups {
         this.materials = materials;
     }
 
+    /** The materials of this group (unmodifiable view). */
+    public List<Material> getMaterials() {
+        return Collections.unmodifiableList(materials);
+    }
+
+    /** Group lookup by name (case-insensitive), empty when the name is a plain material or unknown. */
+    public static Optional<MaterialWithGroups> getGroup(String name) {
+        if (name == null) return Optional.empty();
+        name = name.toUpperCase();
+        for (MaterialWithGroups materialGroup : MaterialWithGroups.values()) {
+            if (materialGroup.name().equals(name)) return Optional.of(materialGroup);
+        }
+        return Optional.empty();
+    }
+
     public static boolean verif(Material material, String name) {
         name = name.toUpperCase();
         MaterialWithGroups materialWithGroups = null;

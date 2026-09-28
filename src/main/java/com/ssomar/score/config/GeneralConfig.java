@@ -49,6 +49,8 @@ public class GeneralConfig extends Config {
 
     private boolean enableCommentsInConfig;
 
+    private boolean editorIconPreview;
+
     private boolean selfHostPackDebug;
 
     private String selfHostPackIp;
@@ -95,13 +97,14 @@ public class GeneralConfig extends Config {
         //SsomarDev.testMsg("configVerbosity: " + configVerbosity, true);
         reduceDamageIndicatorWithProtolcolLib = config.getBoolean("reduceDamageIndicatorWithProtolcolLib", false);
        // jetMinionsGenerateBreakActivator = config.getBoolean("jetMinionsGenerateBreakActivator", false);
-        silenceOutputs = config.getStringList("silenceOutputs");
-        globalSilenceOutputs = config.getStringList("globalSilenceOutputs");
+        silenceOutputs = loadSilenceOutputs(config, "silenceOutputs");
+        globalSilenceOutputs = loadSilenceOutputs(config, "globalSilenceOutputs");
         debugCheckDamages = config.getBoolean("debugCheckDamages", false);
         enableDetectionEntitiesFromSpawner = config.getBoolean("enableDetectionEntitiesFromSpawner", true);
         loopKillMode = config.getBoolean("loopKillMode", false);
         disableCustomMetadataOnEntities = config.getBoolean("disableCustomMetadataOnEntities", false);
         enableCommentsInConfig = config.getBoolean("enableCommentsInConfig", true) && SCore.is1v19Plus();
+        editorIconPreview = config.getBoolean("editorIconPreview", true);
         selfHostPackDebug = config.getBoolean("selfHostPackDebug", false);
         selfHostPackIp = config.getString("selfHostPackIp", "");
         hologramsPlugin = config.getString("hologramsPlugin", "NONE").toUpperCase();
@@ -146,5 +149,18 @@ public class GeneralConfig extends Config {
             else locales.add("&2➤ &7&o"+locale.name()+ " &a- &7&o"+locale.getName());
         }
         return locales.toArray(new String[0]);
+    }
+
+    /* An empty entry matches every console line: the whole console would be silenced */
+    private static List<String> loadSilenceOutputs(FileConfiguration config, String key) {
+        List<String> result = new ArrayList<>();
+        for (String s : config.getStringList(key)) {
+            if (s == null || s.trim().isEmpty()) {
+                Utils.sendConsoleMsg(SCore.NAME_COLOR + " &cAn empty entry of &6" + key + " &cin config.yml is ignored (it would hide every console line).");
+                continue;
+            }
+            result.add(s);
+        }
+        return result;
     }
 }
