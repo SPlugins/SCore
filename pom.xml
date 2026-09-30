@@ -424,6 +424,10 @@
             <id>inject repo</id>
             <url>https://maven.andante.dev/releases/</url>
         </repository>
+        <repository>
+            <id>nightexpress-releases</id>
+            <url>https://repo.nightexpressdev.com/releases</url>
+        </repository>
 
     </repositories>
 
@@ -1041,8 +1045,7 @@
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>Core</artifactId>
             <version>5.1.6</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/ExcellentShop-5.1.6.jar</systemPath>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
