@@ -187,11 +187,24 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
      * only colored: resolving placeholders walks the whole placeholder table per line and was
      * the main cost of the periodic title refresh on servers with many placed blocks.
      */
+    /* the title template colored once (MiniMessage + hex are costly and the template does not change): source copy + result */
+    private volatile List<String>[] coloredTemplate;
+
+    @SuppressWarnings("unchecked")
+    private List<String> coloredTemplate() {
+        List<String> values = getTitle().getValues();
+        List<String>[] cached = coloredTemplate;
+        if (cached != null && cached[0].equals(values)) return cached[1];
+        List<String> colored = new ArrayList<>(values.size());
+        for (String s : values) colored.add(StringConverter.coloredString(s));
+        coloredTemplate = new List[]{new ArrayList<>(values), colored};
+        return colored;
+    }
+
     public List<String> resolveTitleLines(StringPlaceholder sp) {
         List<String> lines = new ArrayList<>();
         List<String> toResolve = null;
-        for (String s : getTitle().getValues()) {
-            s = StringConverter.coloredString(s);
+        for (String s : coloredTemplate()) {
             if (s.indexOf('%') != -1) {
                 if (toResolve == null) toResolve = new ArrayList<>();
                 toResolve.add(s);

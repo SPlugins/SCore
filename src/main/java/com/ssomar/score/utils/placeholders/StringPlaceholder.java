@@ -464,14 +464,17 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
         return s;
     }
 
+    /* compiled once: compiling it on every call was 1 % of the server thread on requeim's server (block titles, 2026-10-01) */
+    private static final Pattern SCORE_REGEX = Pattern.compile("%score_*");
+
     public String replacePlaceholderOfSCore(String s) {
+        if (s.indexOf("%score_") == -1) return s;
         String replace = s;
         // Placeholder occurrences that couldn't be resolved get marked with this sentinel so
         // lastIndexOf("%score_") stops picking them and the loop can move on to other occurrences,
         // then it's restored to "%score_" before returning.
         String unresolvedMarker = " score_";
 
-        Pattern SCORE_REGEX = Pattern.compile("%score_*");
         Matcher countSCoreMatcher = SCORE_REGEX.matcher(replace);
         int maxReplace = 0;
         while (countSCoreMatcher.find()) {
