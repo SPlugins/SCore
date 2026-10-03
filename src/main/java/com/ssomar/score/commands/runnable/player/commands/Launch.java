@@ -168,11 +168,11 @@ public class Launch extends PlayerCommand {
                             if (entity instanceof Fireball) {
                                 Fireball fireball = (Fireball) entity;
                                 fireball.setDirection(eyeVector);
-                                FireballSpeed.apply(fireball, eyeVector);
+                                FireballSpeed.apply(fireball, eyeVector, velocity);
                             } else if (entity instanceof DragonFireball) {
                                 DragonFireball fireball = (DragonFireball) entity;
                                 fireball.setDirection(eyeVector);
-                                FireballSpeed.apply(fireball, eyeVector);
+                                FireballSpeed.apply(fireball, eyeVector, velocity);
                             } else {
                                 entity.setVelocity(eyeVector);
                             }
