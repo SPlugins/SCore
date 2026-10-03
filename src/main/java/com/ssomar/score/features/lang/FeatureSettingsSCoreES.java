@@ -147,6 +147,7 @@ public enum FeatureSettingsSCoreES implements FeatureSettingsInterface {
     cancelCraft("cancel-item-craft-no-custom", "Cancelar Crafteo", new String[]{"&7&oEl objeto no puede ser usado", "&7&opara craftear objetos vanilla"}, FixedMaterial.getMaterial(Arrays.asList("CRAFTING_TABLE", "WORKBENCH"))),
     cancelCrafter("cancel-crafter", "Cancelar Crafteador", new String[]{"&7&oEl objeto no puede ser", "&7&ocolocado en un crafteador"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelDecoratedPot("cancel-decorated-pot", "Cancelar Maceta Decorada", new String[]{"&7&oEl objeto no puede ser", "&7&ocolocado en una maceta decorada"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelDepositInChest("cancel-deposit-in-chest", "Cancelar Depósito en Cofre", new String[]{"&7&oEl objeto no puede ser", "&7&odepositado en un cofre"}, Material.CHEST),
     cancelDepositInFurnace("cancel-deposit-in-furnace", "Cancelar Depósito en Horno", new String[]{"&7&oEl objeto no puede ser", "&7&odepositado en un horno"}, Material.FURNACE),
     cancelDispenser("cancel-dispenser", "Cancelar Dispensador", new String[]{"&7&oEl objeto no puede ser", "&7&ocolocado en un dispensador"}, Material.DISPENSER),

@@ -61,6 +61,8 @@ public class Restrictions extends FeatureWithHisOwnEditor<Restrictions, Restrict
             if (SCore.is1v13Less() && notFor1_13_less.contains(restriction)) continue;
             if (!SCore.is1v19Plus() && notFor1_18_less.contains(restriction)) continue;
             if (!SCore.is1v20Plus() && notFor1_19_less.contains(restriction)) continue;
+            /* shelves exist since 1.21.9 */
+            if (restriction == RestrictionEnum.CANCEL_SHELF && org.bukkit.Material.matchMaterial("OAK_SHELF") == null) continue;
             restrictions.put(restriction, new BooleanFeature(this, defaultValues.get(restriction), restriction.featureSetting));
         }
     }

@@ -84,6 +84,7 @@ public enum FeatureSettingsSCoreEN implements FeatureSettingsInterface {
     cancelCrafter("cancel-crafter", "Cancel Crafter", new String[]{"&7&oThe item can't be", "&7&oplaced in a crafter"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelPlaceInBundle("cancel-place-in-bundle", "Cancel Place in Bundle", new String[]{"&7&oThe item can't be", "&7&oplaced in a bundle"}, FixedMaterial.getMaterial(Collections.singletonList("BUNDLE"))),
     cancelDecoratedPot("cancel-decorated-pot", "Cancel Decorated Pot", new String[]{"&7&oThe item can't be", "&7&oplaced in a decorated pot"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelDepositInChest("cancel-deposit-in-chest", "Cancel Deposit in Chest", new String[]{"&7&oThe item can't be", "&7&oto deposit in a chest"}, Material.CHEST),
     cancelDepositInFurnace("cancel-deposit-in-furnace", "Cancel Deposit in Furnace", new String[]{"&7&oThe item can't be", "&7&oto deposit in a furnace"}, Material.FURNACE),
     cancelDispenser("cancel-dispenser", "Cancel Dispenser", new String[]{"&7&oThe item can't be", "&7&oplaced in a dispenser"}, Material.DISPENSER),
