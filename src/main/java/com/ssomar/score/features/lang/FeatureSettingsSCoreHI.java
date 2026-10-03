@@ -58,6 +58,7 @@ public enum FeatureSettingsSCoreHI implements FeatureSettingsInterface {
     cancelLectern("cancel-lectern", "लेक्टर्न रद्द करें", new String[]{"&7&oआइटम को लेक्टर्न पर नहीं रखा जा सकता"}, FixedMaterial.getMaterial(Collections.singletonList("LECTERN"))),
     cancelLoom("cancel-loom", "लूम रद्द करें", new String[]{"&7&oआइटम को लूम में नहीं रखा जा सकता"}, FixedMaterial.getMaterial(Collections.singletonList("LOOM"))),
     cancelDecoratedPot("cancel-decorated-pot", "सजावटी बर्तन रद्द करें", new String[]{"&7&oआइटम को सजावटी बर्तन में नहीं रखा जा सकता"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelCrafter("cancel-crafter", "क्राफ्टर रद्द करें", new String[]{"&7&oआइटम को क्राफ्टर में नहीं रखा जा सकता"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelPlaceInBundle("cancel-place-in-bundle", "Cancel Place in Bundle", new String[]{"&7&oThe item can't be", "&7&oplaced in a bundle"}, FixedMaterial.getMaterial(Collections.singletonList("BUNDLE"))),
     cancelMerchant("cancel-merchant", "व्यापारी में उपयोग रद्द करें", new String[]{"&7&oआइटम को व्यापारी में नहीं रखा जा सकता"}, FixedMaterial.getMaterial(Arrays.asList("VILLAGER_SPAWN_EGG", "EMERALD"))),

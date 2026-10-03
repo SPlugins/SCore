@@ -126,6 +126,7 @@ public enum FeatureSettingsSCoreZH implements FeatureSettingsInterface {
     cancelLectern("cancel-lectern", "禁用讲台使用", new String[]{"&7&o此物品无法", "&7&o放入讲台中"}, FixedMaterial.getMaterial(Collections.singletonList("LECTERN"))),
     cancelLoom("cancel-loom", "禁用织布机使用", new String[]{"&7&o此物品无法", "&7&o放入织布机中"}, FixedMaterial.getMaterial(Collections.singletonList("LOOM"))),
     cancelDecoratedPot("cancel-decorated-pot", "禁用装饰陶罐使用", new String[]{"&7&o此物品无法", "&7&o放入装饰陶罐中"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelCrafter("cancel-crafter", "禁用自动合成器使用", new String[]{"&7&o此物品无法", "&7&o放入自动合成器中"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelMerchant("cancel-merchant", "禁用商人使用", new String[]{"&7&o此物品无法", "&7&o放入商人交易槽中"}, FixedMaterial.getMaterial(Arrays.asList("VILLAGER_SPAWN_EGG", "EMERALD"))),
     cancelPlaceInBundle("cancel-place-in-bundle", "Cancel Place in Bundle", new String[]{"&7&oThe item can't be", "&7&oplaced in a bundle"}, FixedMaterial.getMaterial(Collections.singletonList("BUNDLE"))),
