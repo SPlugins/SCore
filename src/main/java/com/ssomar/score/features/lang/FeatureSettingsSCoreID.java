@@ -139,6 +139,7 @@ public enum FeatureSettingsSCoreID implements FeatureSettingsInterface {
     cancelCraft("cancel-item-craft-no-custom", "Batalkan Crafting", new String[]{"&7&oItem tidak dapat digunakan", "&7&ountuk membuat item vanilla"}, FixedMaterial.getMaterial(Arrays.asList("CRAFTING_TABLE", "WORKBENCH"))),
     cancelCrafter("cancel-crafter", "Batalkan Crafter", new String[]{"&7&oItem tidak dapat", "&7&odiletakkan di crafter"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelDecoratedPot("cancel-decorated-pot", "Batalkan Pot Hias", new String[]{"&7&oItem tidak dapat", "&7&odiletakkan di pot hias"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelDepositInChest("cancel-deposit-in-chest", "Batalkan Penyimpanan di Peti", new String[]{"&7&oItem tidak dapat", "&7&odisimpan di peti"}, Material.CHEST),
     cancelDepositInFurnace("cancel-deposit-in-furnace", "Batalkan Penyimpanan di Tungku", new String[]{"&7&oItem tidak dapat", "&7&odiletakkan di tungku"}, Material.FURNACE),
     cancelDispenser("cancel-dispenser", "Batalkan Dispenser", new String[]{"&7&oItem tidak dapat", "&7&odiletakkan di dispenser"}, Material.DISPENSER),

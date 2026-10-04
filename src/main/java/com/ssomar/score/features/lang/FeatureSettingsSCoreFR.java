@@ -73,6 +73,7 @@ public enum FeatureSettingsSCoreFR implements FeatureSettingsInterface {
     cancelLectern("cancel-lectern", "Annuler Pupitre", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé sur un pupitre"}, FixedMaterial.getMaterial(Collections.singletonList("LECTERN"))),
     cancelLoom("cancel-loom", "Annuler Métier à Tisser", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé dans un métier à tisser"}, FixedMaterial.getMaterial(Collections.singletonList("LOOM"))),
     cancelDecoratedPot("cancel-decorated-pot", "Annuler Pot Décoré", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé dans un pot décoré"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Annuler Étagère", new String[]{"&7&oL'objet ne peut pas être", "&7&oposé sur une étagère"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelCrafter("cancel-crafter", "Annuler Établi", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé dans un établi"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelPlaceInBundle("cancel-place-in-bundle", "Annuler Placement dans Bundle", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé dans un bundle"}, FixedMaterial.getMaterial(Collections.singletonList("BUNDLE"))),
     cancelMerchant("cancel-merchant", "Annuler Marchand", new String[]{"&7&oL'objet ne peut pas être", "&7&oéchangé avec un villageois"}, FixedMaterial.getMaterial(Arrays.asList("VILLAGER_SPAWN_EGG", "EMERALD"))),

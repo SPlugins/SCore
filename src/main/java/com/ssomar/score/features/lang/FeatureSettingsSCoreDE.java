@@ -150,6 +150,7 @@ public enum FeatureSettingsSCoreDE implements FeatureSettingsInterface {
     cancelCraft("cancel-item-craft-no-custom", "Herstellung verhindern", new String[]{"&7&oDer Gegenstand kann nicht",  "&7&ozur Herstellung von Vanilla-Gegenständen verwendet werden"},  FixedMaterial.getMaterial(Arrays.asList("CRAFTING_TABLE", "WORKBENCH"))),
     cancelCrafter("cancel-crafter", "Handwerkstisch verhindern", new String[]{"&7&oDer Gegenstand kann nicht",  "&7&oim Handwerkstisch verwendet werden"},  FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelDecoratedPot("cancel-decorated-pot", "Verzierte Töpfe verhindern", new String[]{"&7&oDer Gegenstand kann nicht",  "&7&oin einem verzierten Topf platziert werden"},  FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelDepositInChest("cancel-deposit-in-chest", "Einlagerung in Truhe verhindern", new String[]{"&7&oDer Gegenstand kann nicht",  "&7&oin einer Truhe eingelagert werden"},  Material.CHEST),
     cancelDepositInFurnace("cancel-deposit-in-furnace", "Einlagerung in Ofen verhindern", new String[]{"&7&oDer Gegenstand kann nicht",  "&7&oin einem Ofen eingelagert werden"},  Material.FURNACE),
     cancelDispenser("cancel-dispenser", "Spender verhindern", new String[]{"&7&oDer Gegenstand kann nicht",  "&7&oim Spender platziert werden"},  Material.DISPENSER),

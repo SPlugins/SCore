@@ -1,5 +1,7 @@
 package com.ssomar.score.commands.runnable.player.commands;
 
+import com.ssomar.score.projectiles.features.FireballSpeed;
+
 import com.ssomar.executableitems.listeners.projectiles.ProjectileInfo;
 import com.ssomar.executableitems.listeners.projectiles.ProjectilesHandler;
 import com.ssomar.score.SCore;
@@ -166,9 +168,11 @@ public class Launch extends PlayerCommand {
                             if (entity instanceof Fireball) {
                                 Fireball fireball = (Fireball) entity;
                                 fireball.setDirection(eyeVector);
+                                FireballSpeed.apply(fireball, eyeVector, velocity);
                             } else if (entity instanceof DragonFireball) {
                                 DragonFireball fireball = (DragonFireball) entity;
                                 fireball.setDirection(eyeVector);
+                                FireballSpeed.apply(fireball, eyeVector, velocity);
                             } else {
                                 entity.setVelocity(eyeVector);
                             }

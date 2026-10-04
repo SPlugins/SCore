@@ -68,6 +68,7 @@ public enum FeatureSettingsSCoreIT implements FeatureSettingsInterface {
     cancelLectern("cancel-lectern", "Annulla Uso Leggio", new String[]{"&7&oL'oggetto non può essere", "&7&oposto su un leggio"}, FixedMaterial.getMaterial(Collections.singletonList("LECTERN"))),
     cancelLoom("cancel-loom", "Annulla Uso Telaio", new String[]{"&7&oL'oggetto non può essere", "&7&oposto su un telaio"}, FixedMaterial.getMaterial(Collections.singletonList("LOOM"))),
     cancelDecoratedPot("cancel-decorated-pot", "Annulla Uso Vaso Decorato", new String[]{"&7&oL'oggetto non può essere", "&7&oposto in un vaso decorato"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelCrafter("cancel-crafter", "Annulla Uso Crafter", new String[]{"&7&oL'oggetto non può essere", "&7&oposto in un crafter"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelPlaceInBundle("cancel-place-in-bundle", "Cancel Place in Bundle", new String[]{"&7&oThe item can't be", "&7&oplaced in a bundle"}, FixedMaterial.getMaterial(Collections.singletonList("BUNDLE"))),
     cancelMerchant("cancel-merchant", "Annulla Uso Mercante", new String[]{"&7&oL'oggetto non può essere", "&7&oposto in un mercante"}, FixedMaterial.getMaterial(Arrays.asList("VILLAGER_SPAWN_EGG", "EMERALD"))),
