@@ -355,6 +355,8 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                         if (variableOpt.isPresent()) {
                             if (modifType.equalsIgnoreCase("set-default")) {
                                 variableOpt.get().getDefaultValue().setValue(value);
+                                /* write it in the variable file too, it was only changed in memory and came back after a reload (Discord 1445405117246476300) */
+                                variableOpt.get().save();
 
                                 SendMessage.sendMessageNoPlch(sender, MessageMain.getInstance().getMessage(SCore.plugin, Message.VARIABLE_DEFAULT_VALUE_SET));
                             }

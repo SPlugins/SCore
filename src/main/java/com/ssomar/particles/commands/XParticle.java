@@ -635,6 +635,12 @@ public final class XParticle {
             @Override
             public void run() {
                 int repeat = speedFinal;
+                /* the location comes from the target (entity, block...): when it is gone, stop the animation instead of throwing every tick
+                 * (Folia, Discord 1421543760637988936) */
+                if (display.getLocation() == null) {
+                    task.get().cancel();
+                    return;
+                }
                 while (repeat-- != 0) {
                     y += rate;
                     nucleotideDist++;
