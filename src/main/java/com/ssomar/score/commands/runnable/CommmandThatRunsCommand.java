@@ -194,6 +194,7 @@ public interface CommmandThatRunsCommand {
             String[] tab = CommmandThatRunsCommand.splitCommands(buildCommands, aInfo);
             reloadForNested(tab, sp, aInfo);
             List<String> commands = new ArrayList<>();
+            String nestedFirstCommand = null;
             boolean passToNextPlayer = false;
             for (int m = 0; m < tab.length; m++) {
                 String s = tab[m];
@@ -203,12 +204,23 @@ public interface CommmandThatRunsCommand {
                 if (m == 0) {
                     //SsomarDev.testMsg("receive : s = " + s, true);
                     /* step placeholders for around into around or mob_around */
-                    s = sp.replacePlaceholder(s);
-                    /* Replace placeholder for conditions */
-                    s = stripOldSystemMarkers(s);
+                    /* When the first command runs commands itself (IF ... AROUND ... CONDITIONS(...)), its CONDITIONS(...), %::...::% and
+                     * %around_...% belong to it: they are resolved for each of ITS targets, not here for the receiver of this command
+                     * (Discord 1454841226112143565). It is passed on untouched. */
+                    String trimmed = s.trim();
+                    /* only when it has its own CONDITIONS(...): that case never worked, so nothing else changes for the nested commands */
+                    boolean nestedOwnsConditions = trimmed.contains("CONDITIONS(") && !trimmed.startsWith("CONDITIONS(")
+                            && (trimmed.startsWith("IF ") || AllCommandsManager.getInstance().startsWithCommandThatRunCommands(trimmed));
+                    if (nestedOwnsConditions) nestedFirstCommand = s;
+                    else s = sp.replacePlaceholder(s);
+                    List<PlaceholderConditionFeature> conditions = new ArrayList<>();
+                    if (!nestedOwnsConditions) {
+                        /* Replace placeholder for conditions */
+                        s = stripOldSystemMarkers(s);
 
-                    List<PlaceholderConditionFeature> conditions = extractConditions(s);
-                    s = getFirstCommandWithoutConditions(s);
+                        conditions = extractConditions(s);
+                        s = getFirstCommandWithoutConditions(s);
+                    }
                     SsomarDev.testMsg("s: " + s + " conditions size: " + conditions.size(), true);
                     if (!conditions.isEmpty() && SCore.hasPlaceholderAPI) {
                         for (PlaceholderConditionFeature condition : conditions) {
@@ -237,6 +249,7 @@ public interface CommmandThatRunsCommand {
             if (passToNextPlayer) continue;
 
             commands = sp.replacePlaceholders(commands);
+            if (nestedFirstCommand != null && !commands.isEmpty()) commands.set(0, nestedFirstCommand.trim());
             //SsomarDev.testMsg("NEXT STEP : " + aInfo2.getStep(), true);
             /*for (int i = 0; i < commands.size(); i++) {
                 System.out.println("DEBUGGGGG COMMANDS: " + commands.get(i));

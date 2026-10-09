@@ -42,6 +42,10 @@ public class PlaceholderAPISCoreExpansion extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer player, String params) {
+        /* nested placeholders in brackets, e.g. %score_variables_list_{score_variables_index_int}%: PlaceholderAPI hands them over unparsed,
+         * so the index was never read and the whole list came back (Discord 1423490871252484151) */
+        if (params.indexOf('{') >= 0 && params.indexOf('}') > params.indexOf('{'))
+            params = me.clip.placeholderapi.PlaceholderAPI.setBracketPlaceholders(player, params);
         //System.out.println("params: "+params);
 
         Optional<String> varPlaceHolder = VariablesManager.getInstance().onRequestPlaceholder(player, params);
