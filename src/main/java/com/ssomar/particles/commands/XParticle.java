@@ -638,7 +638,9 @@ public final class XParticle {
                 /* the location comes from the target (entity, block...): when it is gone, stop the animation instead of throwing every tick
                  * (Folia, Discord 1421543760637988936) */
                 if (display.getLocation() == null) {
-                    task.get().cancel();
+                    /* async with no delay: the first tick can run before task.set(...), it is then cancelled on the next one */
+                    ScheduledTask t = task.get();
+                    if (t != null) t.cancel();
                     return;
                 }
                 while (repeat-- != 0) {
