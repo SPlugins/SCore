@@ -93,7 +93,6 @@ public class SellContent extends BlockCommand {
                     }
                     else if (SCore.hasExcellentShop && (reference.equals("ExcellentShop") || reference.isEmpty())) {
 
-                        // get iterated item's quantity
                         int quantity = item.getAmount();
                         // get static pointer for virtual shop module
                         VirtualShopModule module = ShopAPI.getVirtualShop();
