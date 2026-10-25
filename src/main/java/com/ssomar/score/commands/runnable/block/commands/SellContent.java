@@ -94,10 +94,8 @@ public class SellContent extends BlockCommand {
                     else if (SCore.hasExcellentShop && (reference.equals("ExcellentShop") || reference.isEmpty())) {
 
                         int quantity = item.getAmount();
-                        // get static pointer for virtual shop module
-                        VirtualShopModule module = ShopAPI.getVirtualShop();
                         // get the shops the player has access to
-                        Set<VirtualShop> shops = module.getShops(p);
+                        Set<VirtualShop> shops = ShopAPI.getVirtualShop().getShops(p);
                         // get price of said item
                         Product best = ShopUtils.findBestProduct(item, TradeType.SELL, shops);
                         if (best == null) {
