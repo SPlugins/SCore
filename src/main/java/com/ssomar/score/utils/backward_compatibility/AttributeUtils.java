@@ -57,7 +57,19 @@ public class AttributeUtils {
      * @param string
      * @return
      */
+    /* name -> attribute: the attribute registry is frozen once the server has started, and rebuilding + sorting it on every lookup
+     * (as getAttribute did) cost 5 % of the server thread on requeim's server (max health of each block title owner, 2026-10-01) */
+    private static final Map<String, Attribute> ATTRIBUTE_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static Attribute getAttribute(String string) {
+        Attribute cached = ATTRIBUTE_CACHE.get(string);
+        if (cached != null) return cached;
+        Attribute found = findAttribute(string);
+        if (found != null) ATTRIBUTE_CACHE.put(string, found);
+        return found;
+    }
+
+    private static Attribute findAttribute(String string) {
         string = string.replace("minecraft:", "");
         SsomarDev.testMsg(ChatColor.GOLD+"[#s0019] getAttribute() is triggered: "+string, true);
         for (Map.Entry<Object, String> entry : getAttributes().entrySet()) {

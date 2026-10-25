@@ -361,6 +361,36 @@ public abstract class SCommand {
     public abstract List<String> getNames();
 
     /**
+     * True when {@code entry} starts with the command name {@code name} (case-insensitive) AND the name
+     * ends on a word boundary. Without the boundary, SCore claimed other plugins' commands by prefix:
+     * {@code launchprojectile ARROW ...} matched {@code LAUNCH} and its arguments shifted by one.
+     * A non-word character right after the name (space, end of line, '&', ':'...) still matches.
+     */
+    public static boolean startsWithName(String entry, String name) {
+        if (entry == null || name == null || name.isEmpty()) return false;
+        int len = name.length();
+        if (!entry.regionMatches(true, 0, name, 0, len)) return false;
+        if (entry.length() == len) return true;
+        char next = entry.charAt(len);
+        return !(Character.isLetterOrDigit(next) || next == '_');
+    }
+
+    /** Length of the longest name of this command that starts the entry, or -1. */
+    public int matchedNameLength(String entry) {
+        int best = -1;
+        for (String name : getNames()) {
+            if (name.length() > best && startsWithName(entry, name)) best = name.length();
+        }
+        return best;
+    }
+
+    /** The entry without the (longest) command name it starts with. */
+    public String stripName(String entry) {
+        int len = matchedNameLength(entry);
+        return len < 0 ? entry : entry.substring(len);
+    }
+
+    /**
      * Lets SCore show the user what the full command format looks like
      * when selected in the command preview list in the ingame commands editor.<br>
      * It's a must to assign values to this to make sure users aren't lost while utilizing
@@ -403,12 +433,7 @@ public abstract class SCommand {
 
     public Optional<String> verifySettings(String entry) {
 
-        for (String name : getNames()) {
-            if (entry.startsWith(name)) {
-                entry = entry.substring(name.length());
-                break;
-            }
-        }
+        entry = stripName(entry);
         entry = entry.trim();
         //SsomarDev.testMsg("entry: " + entry, true);
 

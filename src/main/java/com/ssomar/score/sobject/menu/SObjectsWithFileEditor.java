@@ -9,6 +9,7 @@ import com.ssomar.score.languages.messages.Text;
 import com.ssomar.score.menu.GUI;
 import com.ssomar.score.sobject.SObject;
 import com.ssomar.score.sobject.SObjectEditable;
+import com.ssomar.score.sobject.SObjectIconCache;
 import com.ssomar.score.sobject.SObjectManager;
 import com.ssomar.score.sobject.SObjectWithFileLoader;
 import com.ssomar.score.splugin.SPlugin;
@@ -34,6 +35,8 @@ public abstract class SObjectsWithFileEditor<T extends SObject & SObjectEditable
     private String path;
     private SObjectWithFileLoader loader;
     private boolean dontShowDirectory = false;
+    private List<String> cachedFiles;
+    private String cachedFilesKey;
 
     public SObjectsWithFileEditor(SPlugin sPlugin, FeatureSettingsInterface settings, String path, SObjectManager manager, SObjectWithFileLoader loader) {
         super(sPlugin, settings, manager);
@@ -72,7 +75,14 @@ public abstract class SObjectsWithFileEditor<T extends SObject & SObjectEditable
         int total = 0;
         Plugin plugin = getSPlugin().getPlugin();
         SsomarDev.testMsg(">>>>>>>>>>>>"+plugin.getDataFolder() + path, true);
-        List<String> listFiles = getFilesInFolder(plugin.getDataFolder() + path);
+        // The recursive directory walk is only redone when the folder (or the flatten option) changes,
+        // not on every page flip.
+        String filesKey = plugin.getDataFolder() + path + "|" + dontShowDirectory;
+        if (cachedFiles == null || !filesKey.equals(cachedFilesKey)) {
+            cachedFiles = getFilesInFolder(plugin.getDataFolder() + path);
+            cachedFilesKey = filesKey;
+        }
+        List<String> listFiles = cachedFiles;
 
         for (String str : listFiles) {
             if ((index - 1) * SOBJECT_PER_PAGE <= total && total < index * SOBJECT_PER_PAGE) {
@@ -106,40 +116,48 @@ public abstract class SObjectsWithFileEditor<T extends SObject & SObjectEditable
                     Optional<T> sObjectOpt = getManager().getLoadedObjectWithID(id);
                     if (sObjectOpt.isPresent()) {
                         T sObject = sObjectOpt.get();
-                        ItemStack itemS = sObject.getIconItem();
+                        ItemStack itemS = SObjectIconCache.getIcon(sObject);
+                        // An object whose icon is AIR (e.g. an ExecutableCrafting recipe with an AIR
+                        // result) has no ItemMeta: without this guard the NPE kills the whole editor.
+                        if (itemS == null || itemS.getType() == Material.AIR) itemS = new ItemStack(Material.BARRIER);
 
                         /* Remove useless tags */
                         ItemMeta meta = itemS.getItemMeta();
-                        ItemFlag additionnalFlag = SCore.is1v20v5Plus() ? ItemFlag.HIDE_ADDITIONAL_TOOLTIP : ItemFlag.valueOf("HIDE_POTION_EFFECTS");
-                        meta.addItemFlags(additionnalFlag);
-                        meta.addItemFlags(new ItemFlag[]{additionnalFlag});
-                        meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ATTRIBUTES});
-                        meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ENCHANTS});
-                        meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_UNBREAKABLE});
-                        if (SCore.is1v17Plus())
-                            meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_DYE});
-                        if(SCore.is1v20Plus())
-                            meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ARMOR_TRIM});
-                        itemS.setItemMeta(meta);
+                        // Read before createItem() overwrites the name / lore and the flags below hide the rest
+                        List<String> preview = GeneralConfig.getInstance().isEditorIconPreview() ? SObjectIconPreview.of(meta) : new ArrayList<String>();
+                        if (meta != null) {
+                            ItemFlag additionnalFlag = SCore.is1v20v5Plus() ? ItemFlag.HIDE_ADDITIONAL_TOOLTIP : ItemFlag.valueOf("HIDE_POTION_EFFECTS");
+                            meta.addItemFlags(additionnalFlag);
+                            meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ATTRIBUTES});
+                            meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ENCHANTS});
+                            meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_UNBREAKABLE});
+                            if (SCore.is1v17Plus())
+                                meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_DYE});
+                            if(SCore.is1v20Plus())
+                                meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ARMOR_TRIM});
+                            itemS.setItemMeta(meta);
+                        }
 
                         List<String> desc = new ArrayList<>();
                         desc.add("");
                         desc.add(GUI.CLICK_HERE_TO_CHANGE);
                         if(isGiveButton()) desc.add(TM.g(Text.EDITOR_GIVE_SHIFT_RIGHT_DESCRIPTION));
                         if(isDeleteButton()) desc.add(GUI.SHIFT_LEFT_CLICK_TO_REMOVE);
-                        desc.addAll(sObject.getDescription());
+                        List<String> objectDesc = sObject.getDescription();
+                        // Capped on its own so a long list of activators can't push the preview out
+                        desc.addAll(objectDesc.subList(0, Math.min(objectDesc.size(), 25 - desc.size())));
 
                         // A limit had to be added here because some users may have items that contain 249+ activators.
                         // How are activators involved? When you go to "/ei show" for example, the icons show the list
                         // of activators and their ids and an error tripped due to an icon surpassing 256 lore lines.
-                        String[] descArray = new String[Math.min(desc.size(), 25)];
-                        for (int j = 0; j < Math.min(desc.size(), 25); j++) {
-                            if (desc.get(j).length() > 40) {
-                                descArray[j] = desc.get(j).substring(0, 39) + "...";
-                            } else {
-                                descArray[j] = desc.get(j);
-                            }
+                        for (int j = 0; j < desc.size(); j++) {
+                            if (desc.get(j).length() > 40) desc.set(j, desc.get(j).substring(0, 39) + "...");
                         }
+                        if (!preview.isEmpty()) {
+                            desc.add("");
+                            desc.addAll(preview);
+                        }
+                        String[] descArray = desc.toArray(new String[0]);
 
                         createItem(itemS, 1, i, CREATION_ID + " &e&o" + id, false, false, descArray);
                     } else {

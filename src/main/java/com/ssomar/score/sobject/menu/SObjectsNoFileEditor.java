@@ -7,6 +7,7 @@ import com.ssomar.score.languages.messages.Text;
 import com.ssomar.score.menu.GUI;
 import com.ssomar.score.sobject.SObject;
 import com.ssomar.score.sobject.SObjectEditable;
+import com.ssomar.score.sobject.SObjectIconCache;
 import com.ssomar.score.sobject.SObjectManager;
 import com.ssomar.score.sobject.SObjectWithFileLoader;
 import com.ssomar.score.splugin.SPlugin;
@@ -44,7 +45,7 @@ public abstract class SObjectsNoFileEditor<T extends SObject & SObjectEditable> 
 
             if ((index - 1) * SOBJECT_PER_PAGE <= total && total < index * SOBJECT_PER_PAGE) {
 
-                ItemStack itemS = object.getIconItem();
+                ItemStack itemS = SObjectIconCache.getIcon(object);
 
                 List<String> desc = new ArrayList<>();
                 desc.add("");

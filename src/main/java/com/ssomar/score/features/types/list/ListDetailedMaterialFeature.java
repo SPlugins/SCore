@@ -363,13 +363,32 @@ public class ListDetailedMaterialFeature extends ListFeatureAbstract<String, Lis
         return tags;
     }
 
+    /**
+     * Flat list of the plain materials described by this feature: raw materials, and the
+     * content of SCore groups (ALL_ORES, ALL_LOGS, ...). Custom lists (SCORE:name) are already
+     * expanded at load time. Block-state suffixes ({lit:true}) are ignored, negated entries (!X),
+     * #minecraft tags and custom-plugin blocks (ITEMSADDER:...) are skipped: they can't be
+     * expressed as a Material.
+     */
     public List<Material> asMaterialList() {
         List<Material> materials = new ArrayList<>();
         for (String s : getValues()) {
+            if (s == null || s.isEmpty() || s.startsWith("!") || s.startsWith(symbolStartMaterialTag)) continue;
             String materialStr = s;
-            try{
-                Material mat = Material.valueOf(materialStr.toUpperCase());
-                materials.add(mat);
+            if (materialStr.contains(symbolStart)) materialStr = materialStr.split("\\" + symbolStart)[0];
+            materialStr = materialStr.trim().toUpperCase();
+            if (materialStr.isEmpty()) continue;
+
+            Optional<MaterialWithGroups> group = MaterialWithGroups.getGroup(materialStr);
+            if (group.isPresent()) {
+                for (Material mat : group.get().getMaterials()) {
+                    if (mat != null && !materials.contains(mat)) materials.add(mat);
+                }
+                continue;
+            }
+            try {
+                Material mat = Material.valueOf(materialStr);
+                if (!materials.contains(mat)) materials.add(mat);
             } catch (Exception e) {
                 SsomarDev.testMsg(">> verif material not found: " + materialStr, DEBUG);
             }

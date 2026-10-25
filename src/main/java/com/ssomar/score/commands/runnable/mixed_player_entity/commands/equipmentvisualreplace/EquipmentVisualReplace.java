@@ -3,7 +3,6 @@ package com.ssomar.score.commands.runnable.mixed_player_entity.commands.equipmen
 import com.ssomar.score.commands.runnable.ArgumentChecker;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.mixed_player_entity.MixedCommand;
-import com.ssomar.score.usedapi.ProtocolLibAPI;
 import com.ssomar.score.utils.GetItem;
 import com.ssomar.score.utils.emums.BetterEquipmentSlot;
 import org.bukkit.ChatColor;
@@ -31,7 +30,7 @@ public class EquipmentVisualReplace extends MixedCommand {
         String material = args.get(1);
         ItemStack item = GetItem.getItem(material, Integer.parseInt(args.get(2))).orElse(new ItemStack(Material.BARRIER));
         int time = Integer.parseInt(args.get(3));
-        EquipmentVisualManager.getInstance().addTask(receiver.getUniqueId(), slot, ProtocolLibAPI.sendEquipmentVisualReplace(livingReceiver, slot, item, time));
+        EquipmentVisualManager.getInstance().replace(livingReceiver, slot, item, time);
     }
 
     @Override

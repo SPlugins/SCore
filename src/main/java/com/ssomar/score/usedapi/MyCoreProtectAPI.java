@@ -76,6 +76,21 @@ public class MyCoreProtectAPI {
     }
 
     public void addPickup(Location location, ItemStack itemStack, Player player) {
+        /* Logging uses CoreProtect internals (Queue, ConfigHandler) that change between CoreProtect versions. The item is already in the
+         * player's inventory when this runs: if it threw, the pickup was cut short and the item stayed on the ground too (dupe,
+         * Discord 1558753195352789063). Logging must never break the pickup. */
+        if (pickupLoggingBroken) return;
+        try {
+            addPickupUnsafe(location, itemStack, player);
+        } catch (Throwable e) {
+            pickupLoggingBroken = true;
+            SCore.plugin.getLogger().warning("CoreProtect pickup logging disabled: this CoreProtect version is not compatible (" + e + ")");
+        }
+    }
+
+    private static boolean pickupLoggingBroken = false;
+
+    private void addPickupUnsafe(Location location, ItemStack itemStack, Player player) {
         if (SCore.hasCoreProtect) {
             Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("CoreProtect");
 

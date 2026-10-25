@@ -23,8 +23,10 @@ public class VelocityFeature extends DoubleFeature implements SProjectileFeature
         Vector v = e.getVelocity();
         if (!SCore.is1v11Less() && e instanceof ShulkerBullet) v = launcher.getEyeLocation().getDirection();
         else if (v.getX() == 0 && v.getY() == 0 && v.getZ() == 0) v = launcher.getEyeLocation().getDirection();
-        if (getValue().isPresent() && getValue().get() != 1)
+        if (getValue().isPresent() && getValue().get() != 1) {
             v = v.multiply(getValue().get());
+            FireballSpeed.multiply(e, getValue().get());
+        }
         e.setVelocity(v);
     }
 

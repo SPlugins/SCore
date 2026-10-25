@@ -109,6 +109,9 @@ public class ActivatorsFeature extends FeatureWithHisOwnEditor<ActivatorsFeature
         for (SActivator activator : activators.values()) {
             //SsomarDev.testMsg("check activator >> "+activator.getId(), true);
             if (activator.getOption().equals(option)) {
+                /* checked only for the activators of this option: it walks getFeatures(), which some plugins build on
+                   each call (ExecutableEvents), and getActivators runs on every event */
+                if (activator.isDisabledByInvalidOption()) continue;
                 if (!whitelistActivatorsId.isEmpty() && !whitelistActivatorsId.contains(activator.getId())) {
                     //SsomarDev.testMsg("activator not valid", true);
                     continue;

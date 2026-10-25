@@ -101,8 +101,12 @@ public class MixedCommandsManager extends CommandManager<SCommand> {
     public List<SCommand> getDisplayCommands(){
         List<SCommand> commands = new ArrayList<>();
         for (SCommand cmd : this.getCommands()) {
+            // AROUND / MOB_AROUND: a display entity (a MyFurniture furniture) can be the centre of an aura, e.g. a LOOP
+            // activator giving an effect to the players or the mobs around the furniture, in the furniture's world
             if (cmd instanceof AllMobs ||
                     cmd instanceof AllPlayers ||
+                    cmd instanceof Around ||
+                    cmd instanceof MobAround ||
                     cmd instanceof Burn ||
                     cmd instanceof ConsoleMessage ||
                     cmd instanceof Glowing ||

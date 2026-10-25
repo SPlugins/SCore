@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +25,25 @@ public class StringConverter {
         return coloredString(s, false);
     }
 
+    /* coloredString is a pure function of its arguments, called for each name and lore line at every item refresh (a MiniMessage parse each time) */
+    private static final int COLORED_CACHE_MAX = 4096;
+    /* Longer strings (book pages, long messages) are converted each time: the cache holds 4096 short lines at most */
+    private static final int COLORED_CACHE_MAX_LENGTH = 1024;
+    private static final Map<String, String> COLORED_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, String> COLORED_CACHE_BYPASS_NO_COLOR = new ConcurrentHashMap<>();
+
     public static String coloredString(String s, boolean bypassNoColor) {
+        if (s.length() > COLORED_CACHE_MAX_LENGTH) return coloredStringUncached(s, bypassNoColor);
+        Map<String, String> cache = bypassNoColor ? COLORED_CACHE_BYPASS_NO_COLOR : COLORED_CACHE;
+        String cached = cache.get(s);
+        if (cached != null) return cached;
+        String colored = coloredStringUncached(s, bypassNoColor);
+        if (cache.size() >= COLORED_CACHE_MAX) cache.clear();
+        cache.put(s, colored);
+        return colored;
+    }
+
+    private static String coloredStringUncached(String s, boolean bypassNoColor) {
 
         if(!bypassNoColor && s.contains("NO_COLOR")) {
             return s.replaceAll("NO_COLOR", "").trim();

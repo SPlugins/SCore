@@ -6,6 +6,7 @@ import com.ssomar.score.events.BlockBreakEventExtension;
 import com.ssomar.score.features.custom.detailedblocks.DetailedBlocks;
 import com.ssomar.score.utils.logging.Debugers;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
+import com.ssomar.score.utils.safebreak.BreakChain;
 import com.ssomar.sevents.events.player.click.onentity.left.PlayerLeftClickOnEntityEvent;
 import com.ssomar.sevents.events.player.click.onplayer.left.PlayerLeftClickOnPlayerEvent;
 import com.ssomar.sevents.events.player.receivehit.byentity.PlayerReceiveHitByEntityEvent;
@@ -46,6 +47,9 @@ public class ActionInfo implements Serializable {
 
     private boolean isEventFromCustomBreakCommand;
     private transient BlockBreakEventExtension.BreakCause breakCause;
+
+    /* The blocks broken by its commands and by the actions they trigger (BreakChain): the chain it starts in */
+    private transient BreakChain breakChain;
 
     private boolean isActionRelatedToDamageEvent;
 
@@ -116,6 +120,7 @@ public class ActionInfo implements Serializable {
         this.velocity = Optional.empty();
         this.debugers = new Debugers();
         this.step = 0;
+        this.breakChain = BreakChain.currentOrNew();
     }
 
     public ActionInfo clone() {
@@ -140,6 +145,7 @@ public class ActionInfo implements Serializable {
         result.setDetailedBlocks(detailedBlocks);
         result.setVelocity(velocity);
         result.setStep(step);
+        result.setBreakChain(breakChain);
 
         return result;
     }

@@ -523,13 +523,13 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>RELEASE</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.ssomar.sevents</groupId>
             <artifactId>SEvents</artifactId>
-            <version>1.26.7.12</version>
+            <version>1.26.10.16</version>
             <scope>compile</scope>
         </dependency>
 
@@ -559,7 +559,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>26.2.build.29-alpha</version>
+            <version>26.3.build.26-alpha</version>
             <scope>provided</scope>
         </dependency>
 
@@ -823,11 +823,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Compile time only: in compile scope the whole Lombok jar (1.8 MB) was shaded into SCore.jar -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.38</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

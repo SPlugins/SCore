@@ -36,6 +36,10 @@ public class AllCommandsManager extends CommandManager<SCommand> {
         }
     }
 
+    public List<String> getCommandsThatRunCommandsNames() {
+        return commandsThatRunCommandsNames;
+    }
+
     public boolean startsWithCommandThatRunCommands(String command) {
     	for(String cmd : commandsThatRunCommandsNames) {
     		if(command.startsWith(cmd)) return true;

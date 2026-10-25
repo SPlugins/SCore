@@ -40,6 +40,7 @@ import com.ssomar.score.utils.logging.Utils;
 import com.ssomar.score.utils.messages.CenteredMessage;
 import com.ssomar.score.utils.messages.SendMessage;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
+import com.ssomar.score.utils.safebreak.BreakChain;
 import com.ssomar.score.utils.strings.StringConverter;
 import com.ssomar.score.utils.strings.StringJoiner;
 import com.ssomar.score.variables.Variable;
@@ -355,6 +356,8 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                         if (variableOpt.isPresent()) {
                             if (modifType.equalsIgnoreCase("set-default")) {
                                 variableOpt.get().getDefaultValue().setValue(value);
+                                /* write it in the variable file too, it was only changed in memory and came back after a reload (Discord 1445405117246476300) */
+                                variableOpt.get().save();
 
                                 SendMessage.sendMessageNoPlch(sender, MessageMain.getInstance().getMessage(SCore.plugin, Message.VARIABLE_DEFAULT_VALUE_SET));
                             }
@@ -1035,7 +1038,8 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                 double finalY = y;
                 double finalZ = z;
                 Optional<Player> finalPlayerOpt = playerOpt2;
-                SCore.schedulerHook.runLocationTask(()->{run_rest_of_blockCmd(sender, finalWorld, finalX, finalY, finalZ, blockCmd, finalPlayerOpt);}, new Location(world.get(),x,y,z),0);
+                /* Run from an activator triggered by a block broken by a command: its ActionInfo stays in that chain (BreakChain) */
+                SCore.schedulerHook.runLocationTask(BreakChain.wrap(BreakChain.current(), ()->{run_rest_of_blockCmd(sender, finalWorld, finalX, finalY, finalZ, blockCmd, finalPlayerOpt);}), new Location(world.get(),x,y,z),0);
 
                 break;
             default:
@@ -1073,6 +1077,11 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
         infoBlock.setBlockLocationZ(blockLocation.getBlockZ());
         infoBlock.setBlockLocationWorld(blockLocation.getWorld().getUID());
         infoBlock.setOldBlockMaterialName(blockOpt.get().getType().name());
+        /* Same block placeholders as a block activator (%block%, %target_block%, %block_x%...): the
+         * location alone was set, so `SENDMESSAGE %block%` printed the literal placeholder
+         * (report of 2026-02-15). */
+        infoBlock.setBlock(blockOpt.get());
+        infoBlock.getSp().setBlockPlcHldr(blockOpt.get());
 
         playerOpt2.ifPresent(value -> infoBlock.setLauncherUUID(value.getUniqueId()));
 

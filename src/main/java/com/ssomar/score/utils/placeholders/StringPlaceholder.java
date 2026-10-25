@@ -97,7 +97,8 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
     private String blockface = "";
     /* placeholders of the cooldown */
     private String cooldown = "";
-    private List<VariableReal> variables = new ArrayList<>();
+    /* transient: not serializable, a delayed command saved at the shutdown keeps their value through getBrutCommandToSave() */
+    private transient List<VariableReal> variables = new ArrayList<>();
     private Map<String, String> extraPlaceholders = new HashMap<>();
 
     /* OLD */
@@ -173,6 +174,12 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
     public StringPlaceholder setShooterPlcHldr(UUID uuid) {
         shooterPlch.setPlayerPlcHldr(uuid);
         return this;
+    }
+
+    /* playerPlch has no generated getter, but the player it holds is needed to pass the player
+     * context on to a placeholder holder built for a sub-command. */
+    public UUID getPlayerUUIDPlcHldr() {
+        return playerPlch.getPlayerUUID();
     }
 
     public StringPlaceholder setProjectilePlcHldr(Projectile proj, String blockFace) {
@@ -367,9 +374,7 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
 
         /* there are replace with calcul */
         if (withVariables && variables != null) {
-            for (VariableReal var : variables) {
-                s = var.replaceVariablePlaceholder(s);
-            }
+            s = replaceVariablesUntilStable(s);
         }
 
         placeholders.putAll(playerPlch.getPlaceholders());
@@ -439,14 +444,44 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
         return s;
     }
 
+    /** Upper bound of the variable passes: a variable whose value contains its own placeholder must not loop. */
+    static final int MAX_VARIABLE_PASSES = 5;
+
+    /** Replaces only the variable placeholders (current values). */
+    public String replaceVariablePlaceholders(String s) {
+        if (variables == null || variables.isEmpty() || s == null) return s;
+        return replaceVariablesUntilStable(s);
+    }
+
+    /**
+     * Replaces the variable placeholders until nothing changes (bounded by {@link #MAX_VARIABLE_PASSES}).
+     * A single pass only resolved a dynamic variable name such as {@code %var_world%var_selection_int%%} when the
+     * inner variable was declared before the outer one. Otherwise the text still read {@code %var_world2%} when
+     * PlaceholderAPI ran, and a PAPI wrapper around it ({@code %stringutils_executein_%var_world%var_selection_int%%%})
+     * was destroyed.
+     */
+    String replaceVariablesUntilStable(String s) {
+        for (int pass = 0; pass < MAX_VARIABLE_PASSES; pass++) {
+            String before = s;
+            for (VariableReal var : variables) {
+                s = var.replaceVariablePlaceholder(s);
+            }
+            if (s.equals(before) || s.indexOf('%') < 0) break;
+        }
+        return s;
+    }
+
+    /* compiled once: compiling it on every call was 1 % of the server thread on requeim's server (block titles, 2026-10-01) */
+    private static final Pattern SCORE_REGEX = Pattern.compile("%score_*");
+
     public String replacePlaceholderOfSCore(String s) {
+        if (s.indexOf("%score_") == -1) return s;
         String replace = s;
         // Placeholder occurrences that couldn't be resolved get marked with this sentinel so
         // lastIndexOf("%score_") stops picking them and the loop can move on to other occurrences,
         // then it's restored to "%score_" before returning.
         String unresolvedMarker = " score_";
 
-        Pattern SCORE_REGEX = Pattern.compile("%score_*");
         Matcher countSCoreMatcher = SCORE_REGEX.matcher(replace);
         int maxReplace = 0;
         while (countSCoreMatcher.find()) {

@@ -63,7 +63,7 @@ public class NewDefaultObjectsEditor<T extends SObjectWithFile & SObjectEditable
 
             if ((index - 1) * SOBJECT_PER_PAGE <= total && total < index * SOBJECT_PER_PAGE) {
 
-                ItemStack itemS = sObject.getIconItem();
+                ItemStack itemS = SObjectIconCache.getIcon(sObject);
 
                 List<String> desc = new ArrayList<>();
                 desc.add("");

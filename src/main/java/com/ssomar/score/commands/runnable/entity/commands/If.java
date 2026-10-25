@@ -6,6 +6,7 @@ import com.ssomar.score.commands.runnable.CommmandThatRunsCommand;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.entity.EntityCommand;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
+import com.ssomar.score.utils.strings.PlaceholderWhitespace;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -23,7 +24,7 @@ public class If extends EntityCommand {
     @Override
     public void run(Player p, Entity entity, SCommandToExec sCommandToExec) {
         ActionInfo aInfo = sCommandToExec.getActionInfo();
-        List<String> args = sCommandToExec.getOtherArgs();
+        List<String> args = PlaceholderWhitespace.mergeFirstArgPlaceholders(sCommandToExec.getOtherArgs());
 
         String condition = args.get(0);
         SsomarDev.testMsg("IF condition: " + condition, true);

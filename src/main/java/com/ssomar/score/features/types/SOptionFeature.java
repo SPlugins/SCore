@@ -19,6 +19,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -30,6 +32,9 @@ public class SOptionFeature extends FeatureAbstract<SOption, SOptionFeature> imp
     private SOption value;
     private SPlugin plugin;
     private SOption builderInstance;
+    /** True when the config named an option that does not exist: the value is the default one only so the
+     *  editor keeps working, and the activator must never run (see SActivator#isDisabledByInvalidOption). */
+    private boolean invalidInConfig = false;
 
     public SOptionFeature(SPlugin sPlugin, SOption builderInstance, FeatureParentInterface parent, FeatureSettingsInterface featureSettings) {
         super(parent, featureSettings);
@@ -41,11 +46,21 @@ public class SOptionFeature extends FeatureAbstract<SOption, SOptionFeature> imp
     @Override
     public List<String> load(SPlugin plugin, ConfigurationSection config, boolean isPremiumLoading) {
         List<String> errors = new ArrayList<>();
+        invalidInConfig = false;
         String colorStr = config.getString(this.getName(), "NULL").toUpperCase();
         try {
             SOption option = builderInstance.getOption(colorStr);
             if (option == null) {
-                errors.add("&cERROR, Couldn't load the Option value of " + this.getName() + " from config, value: " + colorStr + " &7&o" + getParent().getParentInfo() + " &6>> Options available: https://docs.ssomar.com/");
+                if (config.contains(this.getName())) {
+                    // A value that names no option (typo, option of another plugin…): do not silently run the
+                    // activator on the default option (a mining ability that fell back to PLAYER_ALL_CLICK fired
+                    // on every click). The default is kept for the editor, the activator is disabled.
+                    invalidInConfig = true;
+                    errors.add("&cERROR, Couldn't load the Option value of " + this.getName() + " from config, value: " + colorStr + " &7&o" + getParent().getParentInfo() + " &6>> This activator is DISABLED until the option is fixed. Did you mean: &e" + String.join("&6, &e", closestOptionNames(colorStr, 3)) + " &6? Options available: https://docs.ssomar.com/");
+                } else {
+                    // Key absent: existing configs relied on the default option, keep that (with the error) unchanged.
+                    errors.add("&cERROR, Couldn't load the Option value of " + this.getName() + " from config, value: " + colorStr + " &7&o" + getParent().getParentInfo() + " &6>> Options available: https://docs.ssomar.com/");
+                }
                 option = builderInstance.getDefaultValue();
             }
             this.value = option;
@@ -91,12 +106,73 @@ public class SOptionFeature extends FeatureAbstract<SOption, SOptionFeature> imp
     public SOptionFeature clone(FeatureParentInterface newParent) {
         SOptionFeature clone = new SOptionFeature(plugin, builderInstance, newParent, getFeatureSettings());
         clone.setValue(value);
+        clone.setInvalidInConfig(invalidInConfig);
         return clone;
     }
 
     @Override
     public void reset() {
         this.value = builderInstance.getDefaultValue();
+        this.invalidInConfig = false;
+    }
+
+    public void setValue(SOption value) {
+        this.value = value;
+        // chosen from the editor / API: the option is valid again
+        this.invalidInConfig = false;
+    }
+
+    /** Names of the available options closest to {@code typed}, for the error message. */
+    private List<String> closestOptionNames(String typed, int max) {
+        List<String> names = new ArrayList<>();
+        for (SOption option : builderInstance.getValues()) names.add(option.getName());
+        return closestNames(typed, names, max);
+    }
+
+    /**
+     * The {@code max} names of {@code candidates} with the smallest edit distance to {@code typed}
+     * (case-insensitive), best first. Pure helper, unit-tested.
+     */
+    public static List<String> closestNames(String typed, List<String> candidates, int max) {
+        String t = typed == null ? "" : typed.toUpperCase();
+        SortedMap<Integer, List<String>> byDistance = new TreeMap<>();
+        List<String> typedWords = sortedWords(t);
+        for (String candidate : candidates) {
+            if (candidate == null) continue;
+            String c = candidate.toUpperCase();
+            // Same words in another order (PLAYER_BREAK_BLOCK vs PLAYER_BLOCK_BREAK) is the most likely intent.
+            int d = typedWords.equals(sortedWords(c)) ? 0 : editDistance(t, c);
+            byDistance.computeIfAbsent(d, k -> new ArrayList<>()).add(candidate);
+        }
+        List<String> result = new ArrayList<>();
+        for (List<String> group : byDistance.values()) {
+            for (String name : group) {
+                if (result.size() >= max) return result;
+                result.add(name);
+            }
+        }
+        return result;
+    }
+
+    private static List<String> sortedWords(String name) {
+        List<String> words = new ArrayList<>(Arrays.asList(name.split("_")));
+        Collections.sort(words);
+        return words;
+    }
+
+    private static int editDistance(String a, String b) {
+        int[] prev = new int[b.length() + 1];
+        int[] cur = new int[b.length() + 1];
+        for (int j = 0; j <= b.length(); j++) prev[j] = j;
+        for (int i = 1; i <= a.length(); i++) {
+            cur[0] = i;
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                cur[j] = Math.min(Math.min(cur[j - 1] + 1, prev[j] + 1), prev[j - 1] + cost);
+            }
+            int[] tmp = prev; prev = cur; cur = tmp;
+        }
+        return prev[b.length()];
     }
 
     @Override

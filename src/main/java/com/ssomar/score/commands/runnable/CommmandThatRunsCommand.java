@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public interface CommmandThatRunsCommand {
 
@@ -46,6 +47,120 @@ public interface CommmandThatRunsCommand {
         int step = actionInfo.getStep();
         if (step > 0) return "<\\+::step" + step + ">";
         return "<\\+>";
+    }
+
+
+    /** Name of the explicit step separators ({@code <+::step1>}, {@code <+::step2>}, ...) */
+    String STEP_PARTICLE_PREFIX = "<+::step";
+
+    /**
+     * True if the line starts with a command that itself runs commands (IF, AROUND, MOB_AROUND, ...).
+     * The match is case-insensitive and requires the name to be followed by a space or the end of the line,
+     * so that e.g. "IFX" is not mistaken for "IF".
+     */
+    static boolean startsWithCommandThatRunsCommands(String line, Collection<String> commandNames) {
+        if (line == null) return false;
+        String s = line.trim();
+        if (s.startsWith("/")) s = s.substring(1).trim();
+        for (String name : commandNames) {
+            int len = name.length();
+            if (len == 0 || s.length() < len) continue;
+            if (s.regionMatches(true, 0, name, 0, len) && (s.length() == len || s.charAt(len) == ' ')) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Splits the remainder of a command-running command into the commands it must execute.
+     * <ul>
+     *   <li>Legacy explicit steps ({@code <+::stepN>}): each level only splits on its own particle, unchanged.</li>
+     *   <li>Otherwise, if the remainder starts with another command that runs commands (nested IF, AROUND, ...),
+     *       it is NOT split: the whole remainder is handed to that nested command, so that
+     *       {@code IF a IF b cmd1 <+> cmd2} skips cmd2 too when the inner IF fails.
+     *       https://discord.com/channels/701066025516531753 (report by hugo10098, 2026-09-06)</li>
+     *   <li>Otherwise it is split on the plain {@code <+>} separator (whatever the depth).</li>
+     * </ul>
+     */
+    /**
+     * The sub-commands of IF / AROUND / NEAREST / ALL_PLAYERS / HITSCAN_* ... are first resolved with a
+     * StringPlaceholder that only knows the per-target player (it rebinds %player% to each target), and that
+     * pass runs PlaceholderAPI. A PAPI placeholder that nests a placeholder of the parent action
+     * ({@code %javascript_x_%block_lower%,a,b%}, {@code %parseother_{%target%}_{player_name}%},
+     * {@code %stringutils_x_%var_world%%}) was then broken: PAPI paired the wrapper's opening % with the nested
+     * placeholder's own %, the expansion received a truncated identifier and returned "" (or threw, killing the
+     * whole activator), and the later full-context pass could not recover it.
+     * <p>
+     * Before that PAPI pass, this resolves the SCore placeholders of the nested tokens only (tokens with at least
+     * three %): first with the per-target holder, so %player% still means the target, then with the parent
+     * action's holder, without PAPI. PAPI keeps running with the target player, and tokens without nesting are
+     * left untouched, so they are still resolved when the command runs (after its delay).
+     * <p>
+     * No reload here: the callers reload both holders once per target ({@link #reloadForNested}), so a command with
+     * several nested tokens does not rebuild the player placeholders for each of them.
+     */
+    static String resolveNestedPlaceholders(String s, StringPlaceholder targetSp, ActionInfo aInfo) {
+        if (s == null || aInfo == null || aInfo.getSp() == null) return s;
+        if (s.indexOf('%') < 0) return s;
+        String[] tokens = s.split(" ", -1);
+        boolean changed = false;
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
+            if (countPercent(token) < 3) continue;
+            String resolved = targetSp.replacePlaceholderWithoutReload(token, false);
+            if (countPercent(resolved) >= 3) resolved = aInfo.getSp().replacePlaceholderWithoutReload(resolved, false);
+            if (!resolved.equals(token)) {
+                tokens[i] = resolved;
+                changed = true;
+            }
+        }
+        return changed ? String.join(" ", tokens) : s;
+    }
+
+    /** True when a fragment has a nested token, so the holders only get reloaded when there is work to do. */
+    static boolean hasNestedToken(String[] fragments) {
+        for (String fragment : fragments) {
+            if (fragment == null || fragment.indexOf('%') < 0) continue;
+            for (String token : fragment.split(" ")) if (countPercent(token) >= 3) return true;
+        }
+        return false;
+    }
+
+    /** Reloads the two holders used by {@link #resolveNestedPlaceholders} once per target. */
+    static void reloadForNested(String[] fragments, StringPlaceholder targetSp, ActionInfo aInfo) {
+        if (aInfo == null || aInfo.getSp() == null || !hasNestedToken(fragments)) return;
+        targetSp.reloadAllPlaceholders();
+        aInfo.getSp().reloadAllPlaceholders();
+    }
+
+    static int countPercent(String s) {
+        int c = 0;
+        for (int i = 0; i < s.length(); i++) if (s.charAt(i) == '%') c++;
+        return c;
+    }
+
+    /**
+     * Old system of protected placeholders for the conditions: {@code %::player_name::%} -> {@code %player_name%}.
+     * Token-scoped: a blanket replace of "%::" and "::%" also ate the "::" separator of a weightedrandom entry
+     * written next to a placeholder ({@code <%papi%::>}), which silently removed the weight.
+     */
+    static String stripOldSystemMarkers(String s) {
+        if (s == null || !s.contains("::")) return s;
+        return s.replaceAll("%::([^%<>\\s]+)::%", "%$1%");
+    }
+
+    static String[] splitCommands(String buildCommands, int step, Collection<String> nestingCommandNames) {
+        if (buildCommands.contains(STEP_PARTICLE_PREFIX)) {
+            String particle = step > 0 ? STEP_PARTICLE_PREFIX + step + ">" : "<+>";
+            if (buildCommands.contains(particle)) return buildCommands.split(step > 0 ? "<\\+::step" + step + ">" : "<\\+>");
+            return new String[]{buildCommands};
+        }
+        if (startsWithCommandThatRunsCommands(buildCommands, nestingCommandNames)) return new String[]{buildCommands};
+        if (buildCommands.contains("<+>")) return buildCommands.split("<\\+>");
+        return new String[]{buildCommands};
+    }
+
+    static String[] splitCommands(String buildCommands, ActionInfo aInfo) {
+        return splitCommands(buildCommands, aInfo.getStep(), AllCommandsManager.getInstance().getCommandsThatRunCommandsNames());
     }
 
     /**
@@ -79,30 +194,36 @@ public interface CommmandThatRunsCommand {
             prepareCommands.deleteCharAt(prepareCommands.length() - 1);
 
             String buildCommands = prepareCommands.toString();
-            String[] tab;
-            //SsomarDev.testMsg(">>>>>>>>> GETOR PARTICLE: " + CommmandThatRunsCommand.getOrCommandsParticle(aInfo), true);
-            if (buildCommands.contains(CommmandThatRunsCommand.getOrCommandsParticle(aInfo)))
-                tab = buildCommands.split(CommmandThatRunsCommand.getOrCommandsParticleRegex(aInfo));
-            else {
-                tab = new String[1];
-                tab[0] = buildCommands;
-            }
+            String[] tab = CommmandThatRunsCommand.splitCommands(buildCommands, aInfo);
+            reloadForNested(tab, sp, aInfo);
             List<String> commands = new ArrayList<>();
+            String nestedFirstCommand = null;
             boolean passToNextPlayer = false;
             for (int m = 0; m < tab.length; m++) {
                 String s = tab[m];
 
                 s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+                s = resolveNestedPlaceholders(s, sp, aInfo);
                 if (m == 0) {
                     //SsomarDev.testMsg("receive : s = " + s, true);
                     /* step placeholders for around into around or mob_around */
-                    s = sp.replacePlaceholder(s);
-                    /* Replace placeholder for conditions */
-                    s = s.replaceAll("%::", "%");
-                    s = s.replaceAll("::%", "%");
+                    /* When the first command runs commands itself (IF ... AROUND ... CONDITIONS(...)), its CONDITIONS(...), %::...::% and
+                     * %around_...% belong to it: they are resolved for each of ITS targets, not here for the receiver of this command
+                     * (Discord 1454841226112143565). It is passed on untouched. */
+                    String trimmed = s.trim();
+                    /* only when it has its own CONDITIONS(...): that case never worked, so nothing else changes for the nested commands */
+                    boolean nestedOwnsConditions = trimmed.contains("CONDITIONS(") && !trimmed.startsWith("CONDITIONS(")
+                            && (trimmed.startsWith("IF ") || AllCommandsManager.getInstance().startsWithCommandThatRunCommands(trimmed));
+                    if (nestedOwnsConditions) nestedFirstCommand = s;
+                    else s = sp.replacePlaceholder(s);
+                    List<PlaceholderConditionFeature> conditions = new ArrayList<>();
+                    if (!nestedOwnsConditions) {
+                        /* Replace placeholder for conditions */
+                        s = stripOldSystemMarkers(s);
 
-                    List<PlaceholderConditionFeature> conditions = extractConditions(s);
-                    s = getFirstCommandWithoutConditions(s);
+                        conditions = extractConditions(s);
+                        s = getFirstCommandWithoutConditions(s);
+                    }
                     SsomarDev.testMsg("s: " + s + " conditions size: " + conditions.size(), true);
                     if (!conditions.isEmpty() && SCore.hasPlaceholderAPI) {
                         for (PlaceholderConditionFeature condition : conditions) {
@@ -131,6 +252,7 @@ public interface CommmandThatRunsCommand {
             if (passToNextPlayer) continue;
 
             commands = sp.replacePlaceholders(commands);
+            if (nestedFirstCommand != null && !commands.isEmpty()) commands.set(0, nestedFirstCommand.trim());
             //SsomarDev.testMsg("NEXT STEP : " + aInfo2.getStep(), true);
             /*for (int i = 0; i < commands.size(); i++) {
                 System.out.println("DEBUGGGGG COMMANDS: " + commands.get(i));
@@ -324,6 +446,17 @@ public interface CommmandThatRunsCommand {
             StringPlaceholder sp = new StringPlaceholder();
             sp.setAroundTargetEntityPlcHldr(entity.getUniqueId());
 
+            /* The placeholders of the sub-commands are replaced here, before the commands are
+             * handed to the builder, so this holder must know the player of the parent action.
+             * Without it %score_variables_<id>% and the PAPI placeholders were resolved with no
+             * player at all and always gave the default value of the variable. */
+            UUID playerUUID = aInfo.getSp() == null ? null : aInfo.getSp().getPlayerUUIDPlcHldr();
+            if (playerUUID == null) playerUUID = aInfo.getLauncherUUID();
+            if (playerUUID != null && !aInfo.isNoPlayerTriggeredTheAction()) {
+                if (aInfo.getSlot() == null) sp.setPlayerPlcHldr(playerUUID);
+                else sp.setPlayerPlcHldr(playerUUID, aInfo.getSlot());
+            }
+
             ActionInfo aInfo2 = aInfo.clone();
             aInfo2.setEntityUUID(entity.getUniqueId());
             aInfo2.setStep(aInfo.getStep() + 1);
@@ -338,18 +471,13 @@ public interface CommmandThatRunsCommand {
             prepareCommands.deleteCharAt(prepareCommands.length() - 1);
 
             String buildCommands = prepareCommands.toString();
-            String[] tab;
-            //SsomarDev.testMsg(">>>>>>>>> GETOR PARTICLE: " + CommmandThatRunsCommand.getOrCommandsParticle(aInfo), true);
-            if (buildCommands.contains(CommmandThatRunsCommand.getOrCommandsParticle(aInfo)))
-                tab = buildCommands.split(CommmandThatRunsCommand.getOrCommandsParticleRegex(aInfo));
-            else {
-                tab = new String[1];
-                tab[0] = buildCommands;
-            }
+            String[] tab = CommmandThatRunsCommand.splitCommands(buildCommands, aInfo);
+            reloadForNested(tab, sp, aInfo);
             List<String> commands = new ArrayList<>();
             for (int m = 0; m < tab.length; m++) {
                 String s = tab[m];
                 s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+                s = resolveNestedPlaceholders(s, sp, aInfo);
 
                 while (s.startsWith(" ")) {
                     s = s.substring(1);

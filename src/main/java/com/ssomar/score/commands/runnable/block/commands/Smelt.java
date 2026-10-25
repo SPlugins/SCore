@@ -57,8 +57,8 @@ public class Smelt extends BlockCommand {
                 int fortuneLevel = itemInHand.getEnchantmentLevel(fortune);
                 amountToDrop = ThreadLocalRandom.current().nextInt(fortuneLevel + 1) + 1;
             }
-            // BREAK
-            SafeBreak.breakBlockWithEvent(block, pUUID, aInfo.getSlot(), false, event, false, BlockBreakEventExtension.BreakCause.SMELT);
+            // BREAK (a cancelled break keeps the block: no smelted item then)
+            if (!SafeBreak.breakBlockWithEvent(block, pUUID, aInfo.getSlot(), false, event, false, BlockBreakEventExtension.BreakCause.SMELT)) return;
 
             // Drop the smelted item
             Location dropLocation = block.getLocation();

@@ -32,12 +32,15 @@ public class MineInCube extends BlockCommand {
         CommandSetting createEvent = new CommandSetting("createEvent", 2, Boolean.class, true);
         CommandSetting offsetBreak = new CommandSetting("offsetBreak", 3, Boolean.class, false);
         CommandSetting smelt = new CommandSetting("smelt", 4, Boolean.class, false);
+        /* Read by ExecutableItems: the blocks broken by the command also run the activator that launched it */
+        CommandSetting runActivatorOnBlocks = new CommandSetting("runActivatorOnBlocks", -1, Boolean.class, false);
         List<CommandSetting> settings = getSettings();
         settings.add(radius);
         settings.add(droploot);
         settings.add(createEvent);
         settings.add(offsetBreak);
         settings.add(smelt);
+        settings.add(runActivatorOnBlocks);
         setNewSettingsMode(true);
     }
 
@@ -194,7 +197,7 @@ public class MineInCube extends BlockCommand {
 
     @Override
     public String getTemplate() {
-        return "MINEINCUBE {radius} {ActiveDrop true or false} {create blockBreakEvent true or false} {offset default false}";
+        return "MINEINCUBE {radius} {ActiveDrop true or false} {create blockBreakEvent true or false} {offset default false} [runActivatorOnBlocks:false]";
     }
 
     @Override

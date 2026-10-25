@@ -3,6 +3,7 @@ package com.ssomar.score.events;
 import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.CommandsHandler;
 import com.ssomar.score.commands.runnable.entity.commands.PlayerRideOnEntityManager;
+import com.ssomar.score.commands.runnable.mixed_player_entity.commands.equipmentvisualreplace.EquipmentVisualManager;
 import com.ssomar.score.commands.runnable.player.commands.openchest.OpenChestListener;
 import com.ssomar.score.commands.runnable.player.commands.sudoop.SecurityOPCommands;
 import com.ssomar.score.commands.runnable.player.events.*;
@@ -97,6 +98,9 @@ public class EventsHandler {
         if(Dependency.AURA_SKILLS.isInstalled()) main.getServer().getPluginManager().registerEvents(new AuraSkillsLootDropListener(), main);
 
         main.getServer().getPluginManager().registerEvents(new OpenChestListener(), main);
+
+        /* EQUIPMENT_VISUAL_REPLACE: forget the visuals of the players who quit and of the entities that die or despawn */
+        if (SCore.hasProtocolLib && !SCore.is1v12Less()) EquipmentVisualManager.getInstance().registerListeners(main);
 
         main.getServer().getPluginManager().registerEvents(new JoinQuitListener(), main);
 

@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class PlayerJoinListener implements Listener {
 
@@ -36,6 +37,15 @@ public class PlayerJoinListener implements Listener {
         AbsorptionManager.getInstance().onConnect(p);
         AddTemporaryAttributeManager.removeExpiredAttributes(p);
 
+    }
+
+    /**
+     * Temporary attributes that expired while the player was dead are removed on respawn too,
+     * not only on the next join.
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void playerRespawn(PlayerRespawnEvent e) {
+        AddTemporaryAttributeManager.removeExpiredAttributes(e.getPlayer());
     }
 
 

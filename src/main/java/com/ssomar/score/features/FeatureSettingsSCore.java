@@ -70,6 +70,7 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
     cancelLectern(getFeatureSettings("cancelLectern", "cancel-lectern", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     cancelLoom(getFeatureSettings("cancelLoom", "cancel-loom", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     cancelDecoratedPot(getFeatureSettings("cancelDecoratedPot", "cancel-decorated-pot", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
+    cancelShelf(getFeatureSettings("cancelShelf", "cancel-shelf", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     cancelCrafter(getFeatureSettings("cancelCrafter", "cancel-crafter", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     cancelPlaceInBundle(getFeatureSettings("cancelPlaceInBundle", "cancel-place-in-bundle", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     cancelMerchant(getFeatureSettings("cancelMerchant", "cancel-merchant", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),

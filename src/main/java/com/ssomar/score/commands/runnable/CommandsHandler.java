@@ -59,6 +59,9 @@ public class CommandsHandler implements Listener {
     /* Commands delayed saved that wait to be runned  PLAYER_UUID|PLAYERRUNCOMMAND -> Useful to avoid to call a query at each join*/
     private Map<UUID, List<PlayerRunCommand>> delayedCommandsSaved;
 
+    /* Commands loaded from the database at the start, until they start at the first tick */
+    private final List<RunCommand> loadedNotStarted = new CopyOnWriteArrayList<>();
+
     public CommandsHandler() {
         delayedCommandsByRcUuid = new ConcurrentHashMap<>();
         delayedCommandsByReceiverUuid = Collections.synchronizedMap(new HashMap<>());
@@ -130,35 +133,43 @@ public class CommandsHandler implements Listener {
 
     public void onEnable() {
 
+        /* Started at the first tick, once every plugin is enabled: a command whose delay ended while the server was off
+         * runs at once, and it can need ExecutableBlocks / ExecutableItems (SETEXECUTABLEBLOCK, eb place ...) */
+        List<RunCommand> toStart = new ArrayList<>();
+
         Map<UUID, List<PlayerRunCommand>> loaded = new ConcurrentHashMap<>();
+        int cpt = 0;
         for (Map.Entry<UUID, List<PlayerRunCommand>> entry : PlayerCommandsQuery.loadSavedCommands(Database.getInstance().connect()).entrySet()) {
             if (entry.getKey() == null || entry.getValue() == null) continue;
-            loaded.put(entry.getKey(), new CopyOnWriteArrayList<>(entry.getValue()));
-        }
-        getInstance().setDelayedCommandsSaved(loaded);
-        int cpt = 0;
-        for (Map.Entry<UUID, List<PlayerRunCommand>> entry : getInstance().getDelayedCommandsSaved().entrySet()) {
             OfflinePlayer player = Bukkit.getOfflinePlayer(entry.getKey());
+            List<PlayerRunCommand> waitJoin = new CopyOnWriteArrayList<>();
             for (PlayerRunCommand command : entry.getValue()) {
                 if (command == null) continue;
                 Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7SCore loaded the delayed command for &a" + player.getName() + " &7: &6" + command.getBrutCommand() + " &7>> delay: &b" + command.getDelay());
                 cpt++;
+                /* [<OFFLINE>]: runs without waiting for the receiver to join */
+                if (command.isRunOffline()) toStart.add(command);
+                else waitJoin.add(command);
             }
+            if (!waitJoin.isEmpty()) loaded.put(entry.getKey(), waitJoin);
         }
+        getInstance().setDelayedCommandsSaved(loaded);
         Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7SCore loaded &6" + cpt + " &7delayed commands saved");
 
         /* Quite useless because at the start of the server the entities seems not loaded and the Bukkit.getentity return null */
-        List<EntityRunCommand> commands = EntityCommandsQuery.selectEntityCommands(Database.getInstance().connect());
-        for (EntityRunCommand eCommand : commands) {
-            eCommand.run();
-        }
+        toStart.addAll(EntityCommandsQuery.selectEntityCommands(Database.getInstance().connect()));
         EntityCommandsQuery.deleteEntityCommands(Database.getInstance().connect(true));
 
-        List<BlockRunCommand> commands2 = BlockCommandsQuery.selectAllCommands(Database.getInstance().connect());
-        for (BlockRunCommand bCommand : commands2) {
-            bCommand.run();
-        }
+        toStart.addAll(BlockCommandsQuery.selectAllCommands(Database.getInstance().connect()));
         BlockCommandsQuery.deleteCommands(Database.getInstance().connect(true));
+
+        if (toStart.isEmpty()) return;
+        loadedNotStarted.addAll(toStart);
+        SCore.schedulerHook.runTask(() -> {
+            for (RunCommand command : toStart) {
+                if (loadedNotStarted.remove(command)) command.run();
+            }
+        }, 1);
     }
 
     public void onDisable() {
@@ -167,7 +178,18 @@ public class CommandsHandler implements Listener {
         for (List<PlayerRunCommand> saved : getInstance().getDelayedCommandsSaved().values()) {
             savedCommands.addAll(saved);
         }
+        List<EntityRunCommand> entityCommands = getDelayedEntityCommands();
+        List<BlockRunCommand> blockCommands = new ArrayList<>(this.delayedCommandsByBlockUuid);
+        /* Loaded at the start, but the server stops before its first tick */
+        for (RunCommand command : loadedNotStarted) {
+            if (command instanceof PlayerRunCommand) savedCommands.add((PlayerRunCommand) command);
+            else if (command instanceof EntityRunCommand) entityCommands.add((EntityRunCommand) command);
+            else if (command instanceof BlockRunCommand) blockCommands.add((BlockRunCommand) command);
+        }
+        loadedNotStarted.clear();
+
         for (PlayerRunCommand command : savedCommands) {
+            if (command.getReceiverUUID() == null) continue;
             OfflinePlayer player = Bukkit.getOfflinePlayer(command.getReceiverUUID());
             Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7SCore saved the delayed command for &a" + player.getName() + " &7: &6" + command.getBrutCommand() + " &7>> delay: &b" + command.getDelay());
         }
@@ -175,9 +197,9 @@ public class CommandsHandler implements Listener {
         PlayerCommandsQuery.insertCommand(Database.getInstance().connect(), savedCommands, false);
         getInstance().getDelayedCommandsSaved().clear();
 
-        EntityCommandsQuery.insertCommand(Database.getInstance().connect(), getDelayedEntityCommands());
+        EntityCommandsQuery.insertCommand(Database.getInstance().connect(), entityCommands);
 
-        BlockCommandsQuery.insertCommand(Database.getInstance().connect(), this.delayedCommandsByBlockUuid);
+        BlockCommandsQuery.insertCommand(Database.getInstance().connect(), blockCommands);
         this.delayedCommandsByBlockUuid.clear();
 
         synchronized (receiverLock) {

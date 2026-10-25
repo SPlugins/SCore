@@ -140,6 +140,7 @@ public enum FeatureSettingsSCoreAR implements FeatureSettingsInterface {
     cancelCraft("cancel-item-craft-no-custom", "إلغاء_الصناعة", new String[]{"&7&oلا_يمكن_استخدام_العنصر", "&7&oلصناعة_عناصر_عادية"}, FixedMaterial.getMaterial(Arrays.asList("CRAFTING_TABLE", "WORKBENCH"))),
     cancelCrafter("cancel-crafter", "إلغاء_الحرفي", new String[]{"&7&oلا_يمكن_وضع_العنصر", "&7&oفي_طاولة_الحرفي"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelDecoratedPot("cancel-decorated-pot", "إلغاء_الوعاء_المزخرف", new String[]{"&7&oلا_يمكن_وضع_العنصر", "&7&oفي_الوعاء_المزخرف"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelDepositInChest("cancel-deposit-in-chest", "إلغاء_الإيداع_في_الصندوق", new String[]{"&7&oلا_يمكن_إيداع_العنصر", "&7&oفي_الصندوق"}, Material.CHEST),
     cancelDepositInFurnace("cancel-deposit-in-furnace", "إلغاء_الإيداع_في_الفرن", new String[]{"&7&oلا_يمكن_إيداع_العنصر", "&7&oفي_الفرن"}, Material.FURNACE),
     cancelDispenser("cancel-dispenser", "إلغاء_الموزع", new String[]{"&7&oلا_يمكن_وضع_العنصر", "&7&oفي_الموزع"}, Material.DISPENSER),

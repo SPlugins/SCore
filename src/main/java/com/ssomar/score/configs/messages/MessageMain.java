@@ -74,12 +74,32 @@ public class MessageMain {
                 throw new RuntimeException("Unable to create the file: " + this.fileName + " for the plugin: " + plugin.getName(), e);
             } catch (NullPointerException e) {/* locale */}
         }
+        repairDoubledQuotes(pdfile);
         FileConfiguration config = YamlConfiguration.loadConfiguration(pdfile);
+        /* A file that was unreadable got rewritten message by message, cut at the doubled quote ("... You"): reload them from the jar */
+        for (String key : config.getKeys(false)) {
+            String value = config.getString(key);
+            if (value != null && (key.equals("errorUPDItem") || key.equals("errorUPDActivator")) && value.trim().endsWith("You")) config.set(key, null);
+        }
 
         for (MessageInterface msgI : messagesEnum) {
             formMessages.put(msgI, this.loadMessage(plugin, pdfile, config, msgI.getName()));
         }
         messages.put(plugin, formMessages);
+    }
+
+    /**
+     * ExecutableItems shipped Locale_EN.yml with You""ve inside a double quoted string from 2022 to 26.9.17: the whole
+     * file fails to parse. Only that sequence is rewritten, the rest of the file is left as the admin wrote it.
+     */
+    static void repairDoubledQuotes(File pdfile) {
+        try {
+            if (!pdfile.exists()) return;
+            String text = new String(java.nio.file.Files.readAllBytes(pdfile.toPath()), StandardCharsets.UTF_8);
+            if (!text.contains("You\"\"ve")) return;
+            java.nio.file.Files.write(pdfile.toPath(), text.replace("You\"\"ve", "You've").getBytes(StandardCharsets.UTF_8));
+        } catch (IOException ignored) {
+        }
     }
 
     public String loadMessage(Plugin plugin, File pdFile, FileConfiguration config, String message) {

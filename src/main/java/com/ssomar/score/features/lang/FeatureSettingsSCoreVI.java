@@ -84,6 +84,7 @@ public enum FeatureSettingsSCoreVI implements FeatureSettingsInterface {
     cancelCrafter("cancel-crafter", "Hủy Crafter", new String[]{"&7&oVật phẩm không thể được", "&7&ođặt vào crafter"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelPlaceInBundle("cancel-place-in-bundle", "Hủy Đặt Vào Túi", new String[]{"&7&oVật phẩm không thể được", "&7&ođặt vào túi"}, FixedMaterial.getMaterial(Collections.singletonList("BUNDLE"))),
     cancelDecoratedPot("cancel-decorated-pot", "Hủy Bình Trang Trí", new String[]{"&7&oVật phẩm không thể được", "&7&ođặt vào bình trang trí"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelDepositInChest("cancel-deposit-in-chest", "Hủy Gửi Vào Rương", new String[]{"&7&oVật phẩm không thể được", "&7&ođưa vào rương"}, Material.CHEST),
     cancelDepositInFurnace("cancel-deposit-in-furnace", "Hủy Gửi Vào Lò", new String[]{"&7&oVật phẩm không thể được", "&7&ođưa vào lò nung"}, Material.FURNACE),
     cancelDispenser("cancel-dispenser", "Hủy Máy Bắn", new String[]{"&7&oVật phẩm không thể được", "&7&ođặt vào máy bắn"}, Material.DISPENSER),

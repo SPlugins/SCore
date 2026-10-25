@@ -17,6 +17,8 @@ public class IfHasItems extends PlayerConditionFeature<HasItemGroupFeature, IfHa
 
     @Override
     public boolean verifCondition(PlayerConditionRequest request) {
+        /* Checked first: the inventory contents were copied for every activator, condition set or not */
+        if (!hasCondition()) return true;
         //SsomarDev.testMsg("IfHasItems.verifCondition >> "+ hasCondition());
         Player player = request.getPlayer();
         ItemStack[] items = player.getInventory().getContents();

@@ -24,7 +24,7 @@ public class NewSObjectsManagerEditor extends NewGUIManager<SObjectsEditorAbstra
     public void startEditing(Player editor, SObjectsEditorAbstract gui) {
         cache.put(editor, gui);
         gui.openGUISync(editor);
-        SaveSessionPathManager.getInstance().addPlayerSessionPath(editor, cache.get(editor));
+        SaveSessionPathManager.getInstance().addPlayerSessionPath(editor, cache.get(editor), this);
     }
 
     @Override

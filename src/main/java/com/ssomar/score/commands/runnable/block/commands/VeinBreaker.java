@@ -60,10 +60,13 @@ public class VeinBreaker extends BlockCommand {
         CommandSetting maxVeinSize = new CommandSetting("maxVeinSize", 0, Integer.class, 10, true);
         CommandSetting createBBEvent = new CommandSetting("createBBEvent", 1, Boolean.class, true, true);
         CommandSetting smelt = new CommandSetting("smelt", 2, Boolean.class, false, true);
+        /* Read by ExecutableItems: the blocks broken by the command also run the activator that launched it */
+        CommandSetting runActivatorOnBlocks = new CommandSetting("runActivatorOnBlocks", -1, Boolean.class, false);
         List<CommandSetting> settings = getSettings();
         settings.add(maxVeinSize);
         settings.add(createBBEvent);
         settings.add(smelt);
+        settings.add(runActivatorOnBlocks);
         setNewSettingsMode(true);
     }
 
@@ -186,7 +189,7 @@ public class VeinBreaker extends BlockCommand {
 
     @Override
     public String getTemplate() {
-        return "VEIN_BREAKER maxVeinSize:10 triggerEvent:true";
+        return "VEIN_BREAKER maxVeinSize:10 createBBEvent:true smelt:false runActivatorOnBlocks:false";
     }
 
     @Override

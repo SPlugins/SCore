@@ -57,15 +57,23 @@ public class EntityCommandsQuery {
         try {
             pstmt = conn.prepareStatement(sql);
             for (EntityRunCommand command : commands) {
-                pstmt.setString(1, command.getLauncherUUID().toString());
-                pstmt.setString(2, command.getEntityUUID().toString());
-                pstmt.setString(3, command.getBrutCommand());
-                pstmt.setLong(4, command.getRunTime());
-                pstmt.setString(5, ActionInfoSerializer.toString(command.getaInfo()));
+                try {
+                    /* No launcher when nobody triggered the activator, the column is not read back */
+                    pstmt.setString(1, command.getLauncherUUID() == null ? "" : command.getLauncherUUID().toString());
+                    pstmt.setString(2, command.getEntityUUID().toString());
+                    pstmt.setString(3, command.getBrutCommandToSave());
+                    pstmt.setLong(4, command.getRunTime());
+                    pstmt.setString(5, ActionInfoSerializer.toString(command.getaInfo()));
+                } catch (IOException | RuntimeException err) {
+                    /* Only this command is lost, not the others */
+                    SCore.plugin.getLogger().severe(SCore.NAME_COLOR_WITH_BRACKETS + " Couldn't save the delayed command: " + command.getBrutCommand() + " >>" + err);
+                    continue;
+                }
                 pstmt.addBatch();
-                pstmt.executeBatch(); // Execute every 1000 items.
+                i++;
             }
-        } catch (SQLException | IOException e) {
+            if (i > 0) pstmt.executeBatch();
+        } catch (SQLException e) {
             System.out.println(SCore.NAME_COLOR_WITH_BRACKETS + " " + e.getMessage());
             e.printStackTrace();
         } finally {

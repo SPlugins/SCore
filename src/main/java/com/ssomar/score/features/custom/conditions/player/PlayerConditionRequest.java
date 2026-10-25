@@ -21,7 +21,7 @@ public class PlayerConditionRequest extends ConditionRequest {
     private Optional<Player> launcher;
 
     public PlayerConditionRequest(@NotNull Player player, Optional<Player> launcher, @Nullable StringPlaceholder sp, @Nullable Event event) {
-        super(event, Optional.ofNullable(sp).orElse(new StringPlaceholder()));
+        super(event, sp != null ? sp : new StringPlaceholder());
         this.player = player;
         this.launcher = launcher;
     }

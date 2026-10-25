@@ -75,6 +75,9 @@ public class LogFilter implements Filter, LifeCycle {
         messageToHide.add("Replaced a slot at");
         messageToHide.add("Changed the block at");
         messageToHide.add("Base value for attribute");
+        /* recent versions write "The base value for attribute ... set to / reset to" (lowercase b), the line above no longer matched (Discord 1557465154952765582) */
+        messageToHide.add("base value for attribute");
+        messageToHide.add("base value of attribute");
         messageToHide.add("Nothing changed.");
         messageToHide.add("is not holding any item");
         messageToHide.add("cannot support that enchantment");

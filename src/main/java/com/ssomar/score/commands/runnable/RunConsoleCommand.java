@@ -2,6 +2,7 @@ package com.ssomar.score.commands.runnable;
 
 import com.ssomar.score.SCore;
 import com.ssomar.score.usedapi.AllWorldManager;
+import com.ssomar.score.utils.safebreak.BreakChain;
 import com.ssomar.score.utils.strings.StringConverter;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -43,7 +44,8 @@ public class RunConsoleCommand {
 
             }
         };
-        SCore.schedulerHook.runTask(runnable, 1);
+        /* score run-block-command ... BREAK dispatched here continues the chain of blocks broken by commands */
+        SCore.schedulerHook.runTask(BreakChain.wrap(BreakChain.current(), runnable), 1);
 
 
         Runnable runnable3 = new Runnable() {

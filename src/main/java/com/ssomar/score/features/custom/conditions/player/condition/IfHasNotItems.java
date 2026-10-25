@@ -17,6 +17,8 @@ public class IfHasNotItems extends PlayerConditionFeature<HasItemGroupFeature, I
 
     @Override
     public boolean verifCondition(PlayerConditionRequest request) {
+        /* Checked first: the inventory contents were copied for every activator, condition set or not */
+        if (!hasCondition()) return true;
         Player player = request.getPlayer();
         ItemStack[] items = player.getInventory().getContents();
         if(SCore.is1v11Less()){

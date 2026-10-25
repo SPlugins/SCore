@@ -61,18 +61,26 @@ public class BlockCommandsQuery {
         try {
             pstmt = conn.prepareStatement(sql);
             for (BlockRunCommand command : commands) {
-                pstmt.setString(1, command.getLauncherUUID().toString());
-                pstmt.setInt(2, command.getBlockX());
-                pstmt.setInt(3, command.getBlockY());
-                pstmt.setInt(4, command.getBlockZ());
-                pstmt.setString(5, command.getBlockWorld().toString());
-                pstmt.setString(6, command.getBrutCommand());
-                pstmt.setLong(7, command.getRunTime());
-                pstmt.setString(8, ActionInfoSerializer.toString(command.getaInfo()));
+                try {
+                    /* No launcher when the EB has no owner (placed by a command...), the column is not read back */
+                    pstmt.setString(1, command.getLauncherUUID() == null ? "" : command.getLauncherUUID().toString());
+                    pstmt.setInt(2, command.getBlockX());
+                    pstmt.setInt(3, command.getBlockY());
+                    pstmt.setInt(4, command.getBlockZ());
+                    pstmt.setString(5, command.getBlockWorld().toString());
+                    pstmt.setString(6, command.getBrutCommandToSave());
+                    pstmt.setLong(7, command.getRunTime());
+                    pstmt.setString(8, ActionInfoSerializer.toString(command.getaInfo()));
+                } catch (IOException | RuntimeException err) {
+                    /* Only this command is lost, not the others */
+                    SCore.plugin.getLogger().severe(SCore.NAME_COLOR_WITH_BRACKETS + " Couldn't save the delayed command: " + command.getBrutCommand() + " >>" + err);
+                    continue;
+                }
                 pstmt.addBatch();
-                pstmt.executeBatch(); // Execute every 1000 items.
+                i++;
             }
-        } catch (SQLException | IOException e) {
+            if (i > 0) pstmt.executeBatch();
+        } catch (SQLException e) {
             System.out.println(SCore.NAME_COLOR_WITH_BRACKETS + " " + e.getMessage());
             e.printStackTrace();
         } finally {

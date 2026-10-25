@@ -67,6 +67,7 @@ public enum FeatureSettingsSCorePT implements FeatureSettingsInterface {
     cancelLectern("cancel-lectern", "Cancelar Atril", new String[]{"&7&oO item não pode ser", "&7&ocolocado em um atril"}, FixedMaterial.getMaterial(Collections.singletonList("LECTERN"))),
     cancelLoom("cancel-loom", "Cancelar Tear", new String[]{"&7&oO item não pode ser", "&7&ocolocado em um tear"}, FixedMaterial.getMaterial(Collections.singletonList("LOOM"))),
     cancelDecoratedPot("cancel-decorated-pot", "Cancelar Vaso Decorado", new String[]{"&7&oO item não pode ser", "&7&ocolocado em um vaso decorado"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Cancel Shelf", new String[]{"&7&oThe item can't be", "&7&oplaced on a shelf"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelCrafter("cancel-crafter", "Cancelar Mesa de Fabricação", new String[]{"&7&oO item não pode ser", "&7&ocolocado em uma mesa de fabricação"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelPlaceInBundle("cancel-place-in-bundle", "Cancel Place in Bundle", new String[]{"&7&oThe item can't be", "&7&oplaced in a bundle"}, FixedMaterial.getMaterial(Collections.singletonList("BUNDLE"))),
     cancelMerchant("cancel-merchant", "Cancelar Comerciante", new String[]{"&7&oO item não pode ser", "&7&ocolocado em um comerciante"}, FixedMaterial.getMaterial(Arrays.asList("VILLAGER_SPAWN_EGG", "EMERALD"))),

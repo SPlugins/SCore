@@ -21,7 +21,7 @@ public class WorldConditionRequest extends ConditionRequest {
     private Optional<Player> playerOpt;
 
     public WorldConditionRequest(@NotNull World world, @NotNull Optional<Player> playerOpt, @Nullable StringPlaceholder sp, @Nullable Event event) {
-        super(event, Optional.ofNullable(sp).orElse(new StringPlaceholder()));
+        super(event, sp != null ? sp : new StringPlaceholder());
         this.world = world;
         this.playerOpt = playerOpt;
     }

@@ -3,6 +3,7 @@ package com.ssomar.score.features.custom.blocktitle;
 import com.Zrips.CMI.CMI;
 import com.Zrips.CMI.Modules.Holograms.CMIHologram;
 import com.ssomar.score.SCore;
+import com.ssomar.score.usedapi.Dependency;
 import com.ssomar.score.config.GeneralConfig;
 import com.ssomar.score.features.FeatureInterface;
 import com.ssomar.score.features.FeatureParentInterface;
@@ -34,11 +35,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -47,7 +48,18 @@ import org.bukkit.entity.Entity;
 @Setter
 public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatures, BlockTitleFeatures, GenericFeatureParentEditor, GenericFeatureParentEditorManager> {
 
-    private static final Map<Location, UUID> textDisplayCache = new HashMap<>();
+    // Touched from several region threads on Folia, hence the concurrent map.
+    private static final Map<Location, UUID> textDisplayCache = new ConcurrentHashMap<>();
+    // While a TextDisplay spawn is queued on its region thread the cache holds a marker
+    // (most significant bits = 0, unique per spawn request) so a remove() arriving in
+    // between knows there is nothing to delete yet, and a spawn task can tell whether it
+    // was cancelled or superseded by another spawn for the same location.
+    private static boolean isPendingSpawn(UUID uuid) {
+        return uuid != null && uuid.getMostSignificantBits() == 0L;
+    }
+    // DecentHolograms: last rendered lines per hologram key, so a periodic refresh that renders the
+    // same text does not push the lines to the hologram (and to every viewer) again.
+    private static final Map<String, List<String>> dhLastLines = new ConcurrentHashMap<>();
 
     private ListColoredStringFeature title;
     private DoubleFeature titleAjustement;
@@ -170,8 +182,55 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         GenericFeatureParentEditorManager.getInstance().startEditing(player, this);
     }
 
+    /**
+     * Colored title lines with their placeholders resolved. Lines without any placeholder are
+     * only colored: resolving placeholders walks the whole placeholder table per line and was
+     * the main cost of the periodic title refresh on servers with many placed blocks.
+     */
+    /* the title template colored once (MiniMessage + hex are costly and the template does not change): source copy + result */
+    private volatile List<String>[] coloredTemplate;
+
+    @SuppressWarnings("unchecked")
+    private List<String> coloredTemplate() {
+        List<String> values = getTitle().getValues();
+        List<String>[] cached = coloredTemplate;
+        if (cached != null && cached[0].equals(values)) return cached[1];
+        List<String> colored = new ArrayList<>(values.size());
+        for (String s : values) colored.add(StringConverter.coloredString(s));
+        coloredTemplate = new List[]{new ArrayList<>(values), colored};
+        return colored;
+    }
+
+    public List<String> resolveTitleLines(StringPlaceholder sp) {
+        List<String> lines = new ArrayList<>();
+        List<String> toResolve = null;
+        for (String s : coloredTemplate()) {
+            if (s.indexOf('%') != -1) {
+                if (toResolve == null) toResolve = new ArrayList<>();
+                toResolve.add(s);
+                lines.add(null);
+            } else lines.add(s);
+        }
+        if (toResolve != null) {
+            List<String> resolved = sp != null ? sp.replacePlaceholders(toResolve) : toResolve;
+            int j = 0;
+            for (int i = 0; i < lines.size(); i++) {
+                if (lines.get(i) != null) continue;
+                lines.set(i, j < resolved.size() ? resolved.get(j) : toResolve.get(j));
+                j++;
+            }
+        }
+        return lines;
+    }
+
     public String getSimpleLocString(Location loc) {
         return loc.getWorld().getName() + "-" + loc.getBlockX() + "-" + loc.getBlockY() + "-" + loc.getBlockZ();
+    }
+
+    /* DecentHolograms can be installed but disabled (it turns itself off on a Minecraft version it doesn't support):
+     * its API classes are then unreachable, so the built-in title is used instead. */
+    private static boolean useDecentHolograms(String pluginToUse) {
+        return SCore.hasDecentHolograms && Dependency.DECENT_HOLOGRAMS.isEnabled() && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"));
     }
 
     /**
@@ -182,12 +241,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
 
         String pluginToUse = GeneralConfig.getInstance().getHologramsPlugin().toUpperCase();
 
-        List<String> lines = new ArrayList<>();
-        for (String s : getTitle().getValues()) {
-            s = StringConverter.coloredString(s);
-            lines.add(s);
-        }
-        lines = sp.replacePlaceholders(lines);
+        List<String> lines = resolveTitleLines(sp);
         final List<String> finalLines = lines;
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = new CMIHologram(UUID.randomUUID().toString(), location.clone().add(0, 0.5 + getTitleAjustement().getValue().get(), 0));
@@ -196,21 +250,28 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             holo.update();
             //SsomarDev.testMsg("Hologram spawned >> "+holo.getCenterLocation());
             return holo.getLocation().getBukkitLoc();
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
+        } else if (useDecentHolograms(pluginToUse)) {
             Location loc = location.clone().add(0, 0.5 + getTitleAjustement().getValue().get(), 0);
 
             // 26/01/2023 Double creation needed required to avoid hologram not updating when we use SETEXECUTABLEBLOCK on an EB
             // One creation sync and one with delay
             // -> When we use SETEXECUTABLEBLOCK on an EB the title of the EB replaced stay and the title of the EB set is not placed
             // Idk why it doesnt update without, it's something in DecentHologram
-            if (DHAPI.getHologram(getSimpleLocString(loc)) != null) remove(loc);
-            DHAPI.createHologram(getSimpleLocString(loc), loc, lines);
+            // The hologram is keyed by getSimpleLocString(loc) ("world-x-y-z") everywhere: spawn, the delayed
+            // re-creation below, update() and remove(). Looking it up with Location.toString() (as update() and
+            // this runnable used to) never matched, so every periodic refresh fell through to spawn() and
+            // destroyed + re-created the hologram twice (reported by requeim with a Spark profile).
+            final String key = getSimpleLocString(loc);
+            if (DHAPI.getHologram(key) != null) remove(loc);
+            DHAPI.createHologram(key, loc, lines);
+            dhLastLines.put(key, lines);
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (DHAPI.getHologram(loc.toString()) != null) {
+                    if (DHAPI.getHologram(key) != null) {
                         remove(loc);
-                        eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.createHologram(getSimpleLocString(loc), loc, finalLines);
+                        eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.createHologram(key, loc, finalLines);
+                        dhLastLines.put(key, finalLines);
                         hologram.updateAll();
                     }
                     // if null it means that the hologram has been removed during the tick and we don't want to recreate/update it
@@ -237,17 +298,22 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
                 Location loc = location.clone().add(0, 0.5 + getTitleAjustement().getValue().get(), 0);
                 // Because Textdisplay doesnt have yaw, and it causes problem for remove if we let it.
                 loc.setYaw(0);
-                TextDisplay textDisplay = loc.getWorld().spawn(loc, TextDisplay.class);
-                textDisplay.setSeeThrough(true);
-                textDisplay.setBillboard(Display.Billboard.CENTER);
-                textDisplay.setViewRange(25);
-                StringBuilder sb = new StringBuilder();
-                for (String s : lines) {
-                    sb.append(s).append("\n");
-                }
-                if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
-                textDisplay.setText(sb.toString());
-                textDisplayCache.put(loc.clone(), textDisplay.getUniqueId());
+                String text = joinLines(lines);
+                Location key = loc.clone();
+                UUID pending = new UUID(0L, System.nanoTime());
+                textDisplayCache.put(key, pending);
+                // Spawning an entity must happen on the region thread owning the location (Folia);
+                // the holo location is derived from the block, so we can return it right away.
+                SCore.schedulerHook.runLocationTaskAsap(() -> {
+                    // remove() (or a newer spawn) ran before us: don't spawn an orphan.
+                    if (textDisplayCache.get(key) != pending) return;
+                    TextDisplay textDisplay = loc.getWorld().spawn(loc, TextDisplay.class);
+                    textDisplay.setSeeThrough(true);
+                    textDisplay.setBillboard(Display.Billboard.CENTER);
+                    textDisplay.setViewRange(25);
+                    textDisplay.setText(text);
+                    textDisplayCache.put(key, textDisplay.getUniqueId());
+                }, loc);
                 return loc;
             } else return null;
         }
@@ -262,10 +328,12 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = CMI.getInstance().getHologramManager().getByLoc(location);
             if (holo != null) holo.remove();
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
+        } else if (useDecentHolograms(pluginToUse)) {
             //SsomarDev.testMsg("Hologram in remove  DecentHolograms, find the placeholder ?>> "+(DHAPI.getHologram(location.toString()) != null), true);
             eu.decentsoftware.holograms.api.holograms.Hologram hologram;
-            if ((hologram = DHAPI.getHologram(getSimpleLocString(location))) != null) {
+            String key = getSimpleLocString(location);
+            dhLastLines.remove(key);
+            if ((hologram = DHAPI.getHologram(key)) != null) {
                 hologram.destroy();
                 //SsomarDev.testMsg("Hologram removed  DecentHolograms", true);
             }
@@ -280,6 +348,8 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             }
         } else if (SCore.is1v20v4Plus()) {
             UUID cachedUuid = textDisplayCache.remove(location);
+            // Spawn still queued: dropping the marker is enough, the spawn task will bail out.
+            if (isPendingSpawn(cachedUuid)) return;
             // Entity manipulation (remove()) must happen on the region thread that owns this
             // location on Folia — this is a void call so we can just dispatch it there, running
             // synchronously already if we're on the right thread (no behavior change on non-Folia).
@@ -330,12 +400,7 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
             return spawn(objectLocation, sp);
         }
 
-        List<String> lines = new ArrayList<>();
-        for (String s : getTitle().getValues()) {
-            s = StringConverter.coloredString(s);
-            lines.add(s);
-        }
-        lines = sp.replacePlaceholders(lines);
+        List<String> lines = resolveTitleLines(sp);
 
         if (SCore.hasCMI && (!SCore.is1v20v4Plus() || pluginToUse.equals("CMI"))) {
             CMIHologram holo = CMI.getInstance().getHologramManager().getByLoc(location);
@@ -344,10 +409,14 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
                 holo.update();
                 return location;
             } else  return  spawn(objectLocation, sp);
-        } else if (SCore.hasDecentHolograms && (!SCore.is1v20v4Plus() || pluginToUse.equals("DECENT_HOLOGRAMS"))) {
-            eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(location.toString());
+        } else if (useDecentHolograms(pluginToUse)) {
+            String key = getSimpleLocString(location);
+            eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(key);
             if (hologram != null) {
-                DHAPI.setHologramLines(hologram, lines);
+                if (!lines.equals(dhLastLines.get(key))) {
+                    DHAPI.setHologramLines(hologram, lines);
+                    dhLastLines.put(key, lines);
+                }
                 return location;
             } else return spawn(objectLocation, sp);
         }
@@ -358,21 +427,34 @@ public class BlockTitleFeatures extends FeatureWithHisOwnEditor<BlockTitleFeatur
         } else if (SCore.is1v20v4Plus()) {
             UUID cachedUuid = textDisplayCache.get(location);
             if (cachedUuid != null) {
-                Entity entity = Bukkit.getEntity(cachedUuid);
-                if (entity instanceof TextDisplay) {
-                    TextDisplay textDisplay = (TextDisplay) entity;
-                    StringBuilder sb = new StringBuilder();
-                    for (String s : lines) {
-                        sb.append(s).append("\n");
+                String text = joinLines(lines);
+                // Entity lookup + setText must run on the owning region thread (Folia). If the
+                // entity is missing (despawned, or its spawn is still queued -> pending marker
+                // resolves to null) we remove+respawn from inside the task: same holo location,
+                // so the caller needs nothing new.
+                SCore.schedulerHook.runLocationTaskAsap(() -> {
+                    Entity entity = Bukkit.getEntity(cachedUuid);
+                    if (entity instanceof TextDisplay) {
+                        ((TextDisplay) entity).setText(text);
+                    } else {
+                        remove(location);
+                        spawn(objectLocation, sp);
                     }
-                    if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
-                    SCore.schedulerHook.runEntityTask(()->{textDisplay.setText(sb.toString());}, ()->{}, textDisplay, 0);
-                    return location;
-                }
+                }, location);
+                return location;
             }
             remove(location);
             return spawn(objectLocation, sp);
         }
         return location;
+    }
+
+    private static String joinLines(List<String> lines) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : lines) {
+            sb.append(s).append("\n");
+        }
+        if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 }

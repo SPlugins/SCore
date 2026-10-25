@@ -12,6 +12,7 @@ import com.ssomar.score.features.types.PlaceholderConditionTypeFeature;
 import com.ssomar.score.utils.emums.Comparator;
 import com.ssomar.score.utils.emums.PlaceholdersCdtType;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
+import com.ssomar.score.utils.strings.PlaceholderWhitespace;
 import com.ssomar.score.utils.strings.StringConverter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -30,7 +31,7 @@ public class If extends PlayerCommand {
     @Override
     public void run(Player p, Player receiver, SCommandToExec sCommandToExec) {
         ActionInfo aInfo = sCommandToExec.getActionInfo();
-        List<String> args = sCommandToExec.getOtherArgs();
+        List<String> args = PlaceholderWhitespace.mergeFirstArgPlaceholders(sCommandToExec.getOtherArgs());
     
         String condition = args.get(0);
         SsomarDev.testMsg("IF condition: " + condition, true);
@@ -54,7 +55,7 @@ public class If extends PlayerCommand {
 
     public static boolean evaluateCondition(String condition, Player receiver, StringPlaceholder sp) {
         // Remove any whitespace for easier processing
-        condition = condition.replaceAll("\\s+", "");
+        condition = PlaceholderWhitespace.stripOutsidePlaceholders(condition);
         condition = StringConverter.deconvertColor(condition);
     
         // Use two stacks to manage conditions and operators

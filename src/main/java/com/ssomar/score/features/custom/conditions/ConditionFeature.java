@@ -39,7 +39,9 @@ public abstract class ConditionFeature<Y extends FeatureAbstract, T extends Cond
     private BooleanFeature silenceOutput;
 
     private boolean cancelDefaultValue = false;
-    private static Optional<String> DEFAULT_DEFAULT_ERROR = Optional.of("&4[ERROR] &cYou can't activate this item > invalid condition");
+    /** Default message of a failed condition, not sent by passive activators (LOOP) that the player did not trigger */
+    public static final String DEFAULT_ERROR_MESSAGE = "&4[ERROR] &cYou can't activate this item > invalid condition";
+    private static Optional<String> DEFAULT_DEFAULT_ERROR = Optional.of(DEFAULT_ERROR_MESSAGE);
 
     public ConditionFeature(FeatureParentInterface parent, FeatureSettingsInterface featureSettings) {
         super(parent, featureSettings);
