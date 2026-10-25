@@ -267,35 +267,45 @@
                                 <configuration>
                                     <target>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\ExecutableItems\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\ExecutableItems\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\ExecutableEvents\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\ExecutableEvents\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\CustomPiglinsTrades\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\CustomPiglinsTrades\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\ExecutableBlocks\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\ExecutableBlocks\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\MyFurniture\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\MyFurniture\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.13.2\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.8.8\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.14.4\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.9.4\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.4\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.10.2\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.4 - Copy\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.11.2\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.6\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.12.2\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.8\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.13.2\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.10\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.14.4\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.11\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.4\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 26.1.2\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.4 - Copy\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\FOLIA 1.21.11\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.6\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.8\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.10\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.11\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 26.1.2\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\FOLIA 1.21.11\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
                                               tofile="/Users/josefmikourquico/Documents/Server Files/PAPERSPIGOT 1.21.4/plugins/SCore.jar"/>
                                     </target>
@@ -581,13 +591,6 @@
             <groupId>com.github.LoneDev6</groupId>
             <artifactId>api-itemsadder</artifactId>
             <version>3.2.3c</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql..</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.46</version>
             <scope>provided</scope>
         </dependency>
 

@@ -22,6 +22,7 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 // MUST BE SYNC -> that why runnable , Otherwise it will not run in WHILE
@@ -35,11 +36,17 @@ public class Launch extends PlayerCommand {
         CommandSetting angleRotationVertical = new CommandSetting("angleRotationVertical", 1, Double.class, 0.0);
         CommandSetting angleRotationHorizontal = new CommandSetting("angleRotationHorizontal", 2, Double.class, 0.0);
         CommandSetting velocity = new CommandSetting("velocity", -1, Double.class, 1.0);
+        CommandSetting name = new CommandSetting("name", -1, String.class, "");
+        CommandSetting strictYaw = new CommandSetting("strictYaw", -1, Float.class, null);
+        CommandSetting strictPitch = new CommandSetting("strictPitch", -1, Float.class, null);
         List<CommandSetting> settings = getSettings();
         settings.add(projectileType);
         settings.add(angleRotationVertical);
         settings.add(angleRotationHorizontal);
         settings.add(velocity);
+        settings.add(name);
+        settings.add(strictYaw);
+        settings.add(strictPitch);
         setNewSettingsMode(true);
     }
 
@@ -55,7 +62,10 @@ public class Launch extends PlayerCommand {
             double rotationVertical = (double) sCommandToExec.getSettingValue("angleRotationVertical");
             double rotationHorizontal = (double) sCommandToExec.getSettingValue("angleRotationHorizontal");
             double velocity = (double) sCommandToExec.getSettingValue("velocity");
-       // SsomarDev.testMsg("LAUNCH : "+projectileType, true);
+            String projName = (String) sCommandToExec.getSettingValue("name");
+            Float strictYaw = (Float) sCommandToExec.getSettingValue("strictYaw");
+            Float strictPitch = (Float) sCommandToExec.getSettingValue("strictPitch");
+
 
             if (projectileType == null) {
                 receiver.launchProjectile(Arrow.class);
@@ -78,7 +88,7 @@ public class Launch extends PlayerCommand {
                     boolean isShulkerBullet = false;
                     try {
                         //SsomarDev.testMsg("LAUNCH projectile launched: " + entity.getType().name()+ " 1.21.6 plus ? "+SCore.is1v21v6Plus(), true);
-                        if (entity instanceof ShulkerBullet && SCore.is1v21v6Plus()) {
+                        if ((!SCore.is1v8() && entity instanceof ShulkerBullet) && SCore.is1v21v6Plus()) {
                             ShulkerBullet bullet = (ShulkerBullet) entity;
                             isShulkerBullet = true;
 
@@ -121,11 +131,10 @@ public class Launch extends PlayerCommand {
                         firework.setShotAtAngle(true);
                     }
 
-                    if (!SCore.is1v13Less() && !isShulkerBullet) {
-
+                    if (!isShulkerBullet) {
                         Location loc = receiver.getEyeLocation();
-                        float pitch = loc.getPitch();
-                        float yaw = loc.getYaw();
+                        float pitch = strictPitch != null ? strictPitch : loc.getPitch();
+                        float yaw = strictYaw != null ? strictYaw : loc.getYaw();
                         //SsomarDev.testMsg( "pitch: " + pitch + " yaw: " + yaw);
                         float newPitch = (float) (pitch + rotationHorizontal);
                         float newYaw = (float) (yaw + rotationVertical);
@@ -163,19 +172,16 @@ public class Launch extends PlayerCommand {
 
                         eyeVector = eyeVector.multiply(velocity);
 
-                        if (!SCore.is1v13Less()) {
-                            Vector v;
-                            if (entity instanceof Fireball) {
-                                Fireball fireball = (Fireball) entity;
-                                fireball.setDirection(eyeVector);
-                                FireballSpeed.apply(fireball, eyeVector, velocity);
-                            } else if (entity instanceof DragonFireball) {
-                                DragonFireball fireball = (DragonFireball) entity;
-                                fireball.setDirection(eyeVector);
-                                FireballSpeed.apply(fireball, eyeVector, velocity);
-                            } else {
-                                entity.setVelocity(eyeVector);
-                            }
+                        if (entity instanceof Fireball) {
+                            Fireball fireball = (Fireball) entity;
+                            fireball.setDirection(eyeVector);
+                            FireballSpeed.apply(fireball, eyeVector, velocity);
+                        } else if (!SCore.is1v8() && entity instanceof DragonFireball) {
+                            DragonFireball fireball = (DragonFireball) entity;
+                            fireball.setDirection(eyeVector);
+                            FireballSpeed.apply(fireball, eyeVector, velocity);
+                        } else {
+                            entity.setVelocity(eyeVector);
                         }
                     }
                     if (projectile != null) {
@@ -195,6 +201,10 @@ public class Launch extends PlayerCommand {
                     if (SCore.hasExecutableItems) {
                         ProjectileInfo pInfo = new ProjectileInfo(receiver, entity.getUniqueId(), Optional.ofNullable(sCommandToExec.getActionInfo().getExecutableItem()), sCommandToExec.getActionInfo().getSlot(), System.currentTimeMillis());
                         ProjectilesHandler.getInstance().addProjectileInfo(pInfo);
+                    }
+
+                    if (!Objects.equals(projName, "")) {
+                        entity.setCustomName(projName);
                     }
 
                     PlayerCustomLaunchEntityEvent playerCustomLaunchProjectileEvent = new PlayerCustomLaunchEntityEvent(receiver, entity);
