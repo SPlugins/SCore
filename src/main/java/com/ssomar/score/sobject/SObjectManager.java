@@ -113,6 +113,14 @@ public abstract class SObjectManager<T extends SObject> {
         for (T o : allObjects) {
             objectIndex.put(o.getId(), o);
         }
+        onLoadedObjectsChanged();
+    }
+
+    /**
+     * Called each time the visible objects change (object added, reloaded or deleted, end of a staged load).
+     * Does nothing by default; a manager can override it to refresh what depends on all its objects.
+     */
+    public void onLoadedObjectsChanged() {
     }
 
     public abstract void actionOnObjectWhenLoading(T object);
@@ -204,6 +212,7 @@ public abstract class SObjectManager<T extends SObject> {
             this.objectIndex.remove(id);
             SObjectIconCache.invalidate(o);
             o.delete();
+            onLoadedObjectsChanged();
         }
     }
 

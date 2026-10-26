@@ -14,6 +14,7 @@ import com.ssomar.score.features.types.list.ListDetailedEntityFeature;
 import com.ssomar.score.utils.emums.Comparator;
 import com.ssomar.score.utils.emums.PlaceholdersCdtType;
 import com.ssomar.score.utils.logging.Utils;
+import com.ssomar.score.utils.placeholders.PlaceholdersInterface;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
@@ -169,6 +170,27 @@ public interface CommmandThatRunsCommand {
      *         <code>false</code> if no player is hit
      */
     static boolean runPlayerCommands(Collection<? extends org.bukkit.entity.Player> players, List<String> argsCommands, ActionInfo aInfo) {
+        return runPlayerCommands(players, argsCommands, aInfo, null);
+    }
+
+    /** Placeholder of AROUND / MOB_AROUND: the number of targets found. */
+    String AROUND_TARGET_COUNT = "%around_target_count%";
+
+    /**
+     * Replaces {@link #AROUND_TARGET_COUNT} (with the +N / -N shorthand) in the commands of an AROUND / MOB_AROUND.
+     * Nothing is replaced when {@code aroundTargetCount} is null (the other commands that run commands).
+     * https://discord.com/channels/701066025516531753/1560808343042400396
+     */
+    static String replaceAroundTargetCount(String s, Integer aroundTargetCount) {
+        if (s == null || aroundTargetCount == null || !s.contains(AROUND_TARGET_COUNT)) return s;
+        return PlaceholdersInterface.replaceCalculPlaceholder(s, AROUND_TARGET_COUNT, String.valueOf(aroundTargetCount), true);
+    }
+
+    /**
+     * @param aroundTargetCount number of targets of the AROUND that runs these commands, for %around_target_count%,
+     *                          or null when the caller is not an AROUND
+     */
+    static boolean runPlayerCommands(Collection<? extends org.bukkit.entity.Player> players, List<String> argsCommands, ActionInfo aInfo, Integer aroundTargetCount) {
         int cpt = 0;
         for (Player target : players) {
             ActionInfo aInfo2 = aInfo.clone();
@@ -200,6 +222,7 @@ public interface CommmandThatRunsCommand {
                 String s = tab[m];
 
                 s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+                s = replaceAroundTargetCount(s, aroundTargetCount);
                 s = resolveNestedPlaceholders(s, sp, aInfo);
                 if (m == 0) {
                     //SsomarDev.testMsg("receive : s = " + s, true);
@@ -400,6 +423,14 @@ public interface CommmandThatRunsCommand {
     /* True > an entity has been hit
      *  False > no entity hit */
     static boolean runEntityCommands(Collection<? extends Entity> entities, List<String> argsCommands, ActionInfo aInfo) {
+        return runEntityCommands(entities, argsCommands, aInfo, null);
+    }
+
+    /**
+     * @param aroundTargetCount number of targets of the MOB_AROUND that runs these commands, for %around_target_count%,
+     *                          or null when the caller is not a MOB_AROUND
+     */
+    static boolean runEntityCommands(Collection<? extends Entity> entities, List<String> argsCommands, ActionInfo aInfo, Integer aroundTargetCount) {
 
         ListDetailedEntityFeature whiteList = null;
         ListDetailedEntityFeature blackList = null;
@@ -474,6 +505,7 @@ public interface CommmandThatRunsCommand {
             for (int m = 0; m < tab.length; m++) {
                 String s = tab[m];
                 s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+                s = replaceAroundTargetCount(s, aroundTargetCount);
                 s = resolveNestedPlaceholders(s, sp, aInfo);
 
                 while (s.startsWith(" ")) {

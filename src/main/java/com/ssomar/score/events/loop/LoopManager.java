@@ -27,6 +27,9 @@ public class LoopManager {
     private final List<SActivator> loopActivatorsToAdd;
     private final List<SActivator> loopActivatorsToRemove;
     private ScheduledTask loopTask;
+    /* Ticks counted by the loop task (DELAY per cycle). Plugins that keep a countdown per object
+     * (SActivator#isLoopTimerPerObject) compare their next run to it, so they follow the same clock as the shared countdown */
+    private volatile long loopTicks = 0;
 
     public LoopManager(Plugin plugin) {
         // If SCore is installed, use it as the plugin otherwise use the provided plugin (probably a plugin that shades SCore)
@@ -69,6 +72,7 @@ public class LoopManager {
             @Override
             public void run() {
                 //SsomarDev.testMsg("loop activatores registered: " + loopActivators.size());
+                loopTicks += DELAY;
                 /* List of activators that we need to activate for this cycle */
                 List<SActivator> toActivate = new ArrayList<>();
 
@@ -100,6 +104,13 @@ public class LoopManager {
 
                     LoopFeatures loop;
                     if ((loop = activator.getLoopFeatures()) == null) continue;
+
+                    /* Countdown kept per object by the plugin (EB loopTimerPerBlock): offered on every cycle,
+                     * the plugin only runs it for the objects whose own countdown is over */
+                    if (activator.isLoopTimerPerObject()) {
+                        toActivate.add(activator);
+                        continue;
+                    }
 
                     int delay;
                     if ((delay = loopActivators.get(activator)) > DELAY) {
@@ -164,6 +175,13 @@ public class LoopManager {
      */
     public void shutdown() {
         if (loopTask != null && !loopTask.isCancelled()) loopTask.cancel();
+    }
+
+    /**
+     * @return the ticks counted by the loop task since it started, the clock of the per object countdowns
+     */
+    public long getLoopTicks() {
+        return loopTicks;
     }
 
     public void addLoopActivator(SActivator activator) {
