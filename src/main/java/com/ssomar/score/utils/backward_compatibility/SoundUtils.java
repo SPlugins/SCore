@@ -2,6 +2,8 @@ package com.ssomar.score.utils.backward_compatibility;
 
 import com.ssomar.score.SCore;
 import com.ssomar.score.utils.MapUtil;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -11,7 +13,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SoundUtils {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SoundUtils {
 
     /* The sound registry never changes while the server runs, but getSounds() used to walk it
      * (~1 500 entries) and sort the result on EVERY call — and SoundFeature.save() calls it for

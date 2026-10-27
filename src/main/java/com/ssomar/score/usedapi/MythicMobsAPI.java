@@ -6,12 +6,15 @@ import io.lumine.mythic.api.exceptions.InvalidMobTypeException;
 import io.lumine.mythic.bukkit.BukkitAPIHelper;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.core.mobs.ActiveMob;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
 import java.util.List;
 
-public class MythicMobsAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class MythicMobsAPI {
 
     public static boolean isMythicMob(Entity entity, String mobName) {
         if (SCore.hasMythicMobs) {

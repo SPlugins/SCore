@@ -5,6 +5,8 @@ import com.ssomar.score.commands.runnable.ActionInfo;
 import com.ssomar.score.commands.runnable.ActionInfoSerializer;
 import com.ssomar.score.commands.runnable.player.PlayerRunCommand;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -12,7 +14,8 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-public class PlayerCommandsQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class PlayerCommandsQuery {
 
     private final static String TABLE_COMMANDS_PLAYER = "commands_player";
     private final static String TABLE_COMMANDS_PLAYER_NAME = "Commands Player";

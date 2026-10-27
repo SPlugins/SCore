@@ -5,13 +5,16 @@ import com.ssomar.score.commands.runnable.ActionInfo;
 import com.ssomar.score.commands.runnable.ActionInfoSerializer;
 import com.ssomar.score.commands.runnable.entity.EntityRunCommand;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityCommandsQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class EntityCommandsQuery {
 
     private final static String TABLE_COMMANDS_ENTITY = "commands_entity";
     private final static String TABLE_COMMANDS_ENTITY_NAME = "Commands Entity";

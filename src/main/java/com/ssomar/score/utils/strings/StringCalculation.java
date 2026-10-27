@@ -2,10 +2,13 @@ package com.ssomar.score.utils.strings;
 
 import com.ssomar.score.SsomarDev;
 import com.ssomar.score.utils.numbers.NTools;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.lang.reflect.MalformedParametersException;
 
-public class StringCalculation {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class StringCalculation {
 
     private static final boolean DEBUG = false;
 

@@ -3,6 +3,8 @@ package com.ssomar.score.utils.safeopen;
 import com.ssomar.score.SCore;
 import com.ssomar.score.SsomarDev;
 import com.ssomar.score.usedapi.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -10,7 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class SafeOpen {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SafeOpen {
 
     private static final boolean DEBUG = false;
 

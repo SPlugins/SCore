@@ -1,6 +1,8 @@
 package com.ssomar.score.features.custom.nbttags;
 
 import de.tr7zw.nbtapi.NBT;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -12,7 +14,8 @@ import java.util.List;
  * ship the NBT-API plugin will never trigger a {@code NoClassDefFoundError}
  * for {@code ReadWriteNBT}.
  */
-public class NBTTagNBTAPIApplier {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class NBTTagNBTAPIApplier {
 
     /**
      * Applys NBTs to items using NBT API plugin

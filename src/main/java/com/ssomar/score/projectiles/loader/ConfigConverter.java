@@ -1,11 +1,14 @@
 package com.ssomar.score.projectiles.loader;
 
 import com.google.common.base.Charsets;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.*;
 import java.util.Map;
 
-public class ConfigConverter {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ConfigConverter {
 
 
     public static Map<String, String> getWordsToReplace() {

@@ -1,5 +1,8 @@
 package com.ssomar.score.utils.strings;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,10 +11,8 @@ import java.util.List;
  * the condition must be compacted, but a placeholder such as
  * {@code %checkitem_inhand:main,lorecontains:test test%} must keep its inner spaces.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PlaceholderWhitespace {
-
-    private PlaceholderWhitespace() {
-    }
 
     /**
      * Removes every whitespace located outside {@code %...%} spans, keeps the ones inside.

@@ -1,8 +1,12 @@
 package com.ssomar.score.utils.numbers;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.TreeMap;
 
-public class RomanNumber {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class RomanNumber {
 
     private final static TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 

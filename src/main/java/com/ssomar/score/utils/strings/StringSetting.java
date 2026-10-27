@@ -2,10 +2,13 @@ package com.ssomar.score.utils.strings;
 
 import com.ssomar.score.SsomarDev;
 import com.ssomar.score.utils.Couple;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 
-public class StringSetting {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class StringSetting {
 
     // format xxxxx{Var:{var1:value1,var2:value2,...},Usage:1, Test:[hello,hhhh]}
 

@@ -2,6 +2,8 @@ package com.ssomar.score.data;
 
 import com.ssomar.score.SCore;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -10,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class SecurityOPQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SecurityOPQuery {
 
     private final static String TABLE_SECURITYOP = "securityop";
     private final static String TABLE_SECURITYOP_NAME = "SecurityOP";

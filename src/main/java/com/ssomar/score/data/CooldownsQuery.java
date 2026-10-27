@@ -4,6 +4,8 @@ import com.ssomar.score.SCore;
 import com.ssomar.score.features.custom.conditions.placeholders.group.PlaceholderConditionGroupFeature;
 import com.ssomar.score.features.custom.cooldowns.Cooldown;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.Reader;
@@ -12,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class CooldownsQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class CooldownsQuery {
 
     private final static String TABLE_COOLDOWNS = "cooldowns";
     private final static String TABLE_COOLDOWNS_NAME = "Cooldowns";

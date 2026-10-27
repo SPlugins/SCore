@@ -1,5 +1,8 @@
 package com.ssomar.score.scheduler;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,7 +21,8 @@ import java.util.List;
 // - {YEAR}:!:{WEEK}:!:{DAYSTRING}:!:{HOUR}:!:{MIN}:!:{SEC}
 // - %%%:!:%%:!:MONDAY:!:XX:!:XX:!:XX // Every monday
 // - %%%:!:42:!:XX:!:%%:!:XX:!:XX // Every hour of the week 42
-public class DateGenerator {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class DateGenerator {
 
     public static List<Long> generateNextValidTimestamps(Date startDate, List<String> dateFormats, long calculationTime, Date minDate, Date maxDate) {
         List<Long> timestamps = new ArrayList<>();

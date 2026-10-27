@@ -3,6 +3,8 @@ package com.ssomar.score.features.custom.particles.group;
 import com.ssomar.score.SCore;
 import com.ssomar.score.features.custom.particles.particle.ParticleFeature;
 import com.ssomar.score.utils.scheduler.ScheduledTask;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -17,7 +19,8 @@ import xyz.xenondevs.particle.data.texture.BlockTexture;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ParticlesXenonDev112_1193 {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ParticlesXenonDev112_1193 {
 
     public static void transformTheProjectile(Map<String, ParticleFeature> particles, Entity e, Player launcher, Material materialLaunched) {
         if (particles != null) {

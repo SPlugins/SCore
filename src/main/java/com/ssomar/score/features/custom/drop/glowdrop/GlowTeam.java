@@ -2,11 +2,14 @@ package com.ssomar.score.features.custom.drop.glowdrop;
 
 
 import com.ssomar.executableitems.ExecutableItems;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
-public class GlowTeam {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class GlowTeam {
 
     static Team team_AQUA;
     static Team team_BLACK;

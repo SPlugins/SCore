@@ -5,11 +5,14 @@ import com.ssomar.score.utils.emums.VariableType;
 import com.ssomar.score.utils.logging.Utils;
 import com.ssomar.score.variables.Variable;
 import com.ssomar.score.variables.VariableForEnum;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.sql.*;
 import java.util.*;
 
-public class VariablesQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class VariablesQuery {
 
     private final static String TABLE_VARIABLES = "variables";
     private final static String TABLE_VARIABLES_NAME = "Variables";

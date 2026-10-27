@@ -1,6 +1,8 @@
 package com.ssomar.score.usedapi;
 
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
@@ -9,7 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class AllWorldManager {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AllWorldManager {
 
     public static Optional<World> getWorld(String worldStr) {
 

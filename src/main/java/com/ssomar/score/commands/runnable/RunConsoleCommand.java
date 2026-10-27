@@ -4,6 +4,8 @@ import com.ssomar.score.SCore;
 import com.ssomar.score.usedapi.AllWorldManager;
 import com.ssomar.score.utils.safebreak.BreakChain;
 import com.ssomar.score.utils.strings.StringConverter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.ConsoleCommandSender;
@@ -13,8 +15,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.List;
 import java.util.Optional;
 
-
-public class RunConsoleCommand {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class RunConsoleCommand {
 
     static ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 

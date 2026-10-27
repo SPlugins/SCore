@@ -13,6 +13,8 @@ import dev.rosewood.roseloot.loot.context.LootContext;
 import dev.rosewood.roseloot.loot.context.LootContextParams;
 import dev.rosewood.roseloot.loot.table.LootTableTypes;
 import dev.rosewood.roseloot.manager.LootTableManager;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -31,7 +33,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SafeBreak {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SafeBreak {
 
     private static final boolean DEBUG = true;
 

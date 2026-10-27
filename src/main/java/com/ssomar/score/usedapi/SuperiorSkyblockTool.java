@@ -3,6 +3,8 @@ package com.ssomar.score.usedapi;
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.wrappers.SuperiorPlayer;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.UUID;
 
-public class SuperiorSkyblockTool {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SuperiorSkyblockTool {
 
     public static boolean playerIsOnHisIsland(Player player) {
         return playerIsOnHisIsland(player.getUniqueId(), player.getLocation());

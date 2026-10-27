@@ -1,13 +1,16 @@
 package com.ssomar.score.utils;
 
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Material;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class FixedMaterial {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class FixedMaterial {
 
     /**
      * Attempts to resolve a Bukkit {@link Material} from a list of candidate name strings.

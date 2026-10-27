@@ -3,11 +3,14 @@ package com.ssomar.score.data;
 import com.ssomar.score.SCore;
 import com.ssomar.score.commands.runnable.mixed_player_entity.commands.addtempattribute.AddTemporaryAttributeObject;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.sql.*;
 import java.util.ArrayList;
 
-public class TemporaryAttributeQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class TemporaryAttributeQuery {
 
     private static final String TABLE_ID = "temp_attributes";
     // column names

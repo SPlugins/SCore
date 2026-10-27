@@ -1,6 +1,8 @@
 package com.ssomar.score.usedapi;
 
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import net.coreprotect.config.Config;
@@ -19,7 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MyCoreProtectAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class MyCoreProtectAPI {
 
     public static void logRemoval(String user, Location location, Material type, BlockData blockData){
         if (SCore.hasCoreProtect) {

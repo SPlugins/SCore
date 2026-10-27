@@ -1,5 +1,7 @@
 package com.ssomar.score.usedapi;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -12,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class BentoBoxAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class BentoBoxAPI {
 
     public static boolean playerIsOnHisIsland(Player player) {
         return playerIsOnHisIsland(player.getUniqueId(), player.getLocation());

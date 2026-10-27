@@ -8,13 +8,16 @@ import com.ssomar.score.commands.runnable.player.commands.While;
 import com.ssomar.score.features.custom.cooldowns.CooldownsManager;
 import com.ssomar.score.splugin.SPlugin;
 import com.ssomar.score.utils.strings.StringConverter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class ClearCommand {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ClearCommand {
 
     public static void clearCmd(SPlugin sPlugin, CommandSender sender, String[] args) {
         UUID pUUID = null;

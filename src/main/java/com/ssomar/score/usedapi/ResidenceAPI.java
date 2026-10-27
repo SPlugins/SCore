@@ -3,13 +3,16 @@ package com.ssomar.score.usedapi;
 import com.bekvon.bukkit.residence.Residence;
 import com.bekvon.bukkit.residence.containers.ResidencePlayer;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class ResidenceAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ResidenceAPI {
 
     public static boolean playerIsInHisClaim(@NotNull Player p, Location location, boolean acceptWilderness) {
 

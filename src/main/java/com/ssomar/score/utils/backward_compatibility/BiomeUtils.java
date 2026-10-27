@@ -2,6 +2,8 @@ package com.ssomar.score.utils.backward_compatibility;
 
 import com.ssomar.score.SCore;
 import com.ssomar.score.utils.MapUtil;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -11,7 +13,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BiomeUtils {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class BiomeUtils {
 
     private static Map<Object, String> biomes;
 

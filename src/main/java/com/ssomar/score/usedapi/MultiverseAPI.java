@@ -5,13 +5,16 @@ import com.onarandombox.MultiverseCore.api.Core;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiverseAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class MultiverseAPI {
 
     public static World getWorld(String worldStr) {
 

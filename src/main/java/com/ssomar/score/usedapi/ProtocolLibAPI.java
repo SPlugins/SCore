@@ -6,12 +6,15 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.ssomar.score.SCore;
 import com.ssomar.score.config.GeneralConfig;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
 
-public class ProtocolLibAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ProtocolLibAPI {
 
     public static void registerParticleToggleListener(java.util.Set<java.util.UUID> hiddenPlayers) {
         SCore.protocolManager.addPacketListener(

@@ -1,10 +1,13 @@
 package com.ssomar.score.commands.runnable;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class CommandsExecutor {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class CommandsExecutor {
 
     public static void runCommands(RunCommandsBuilder builder) {
         List<RunCommand> runCommands = new ArrayList<>();

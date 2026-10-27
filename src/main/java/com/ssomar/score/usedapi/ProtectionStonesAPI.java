@@ -1,6 +1,8 @@
 package com.ssomar.score.usedapi;
 
 import dev.espi.protectionstones.PSRegion;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -8,7 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class ProtectionStonesAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ProtectionStonesAPI {
 
     public static boolean playerIsInHisClaim(@NotNull Player p, Location location, boolean acceptWilderness) {
         PSRegion r1 = PSRegion.fromLocation(location);

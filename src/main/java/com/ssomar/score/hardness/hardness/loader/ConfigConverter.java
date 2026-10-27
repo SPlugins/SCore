@@ -1,12 +1,15 @@
 package com.ssomar.score.hardness.hardness.loader;
 
 import com.google.common.base.Charsets;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
 
-public class ConfigConverter {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ConfigConverter {
 
 
     public static void update(File file) {

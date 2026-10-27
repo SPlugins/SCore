@@ -1,14 +1,16 @@
 package com.ssomar.score.usedapi;
 
 import com.plotsquared.core.plot.Plot;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-
-public class PlotSquaredAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class PlotSquaredAPI {
 
 
     public static boolean playerIsInHisPlot(@NotNull Player p, Location location) {

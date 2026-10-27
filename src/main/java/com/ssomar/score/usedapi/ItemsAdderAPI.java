@@ -9,6 +9,8 @@ import com.ssomar.score.utils.safebreak.SafeBreak;
 import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.CustomFurniture;
 import dev.lone.itemsadder.api.CustomStack;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -21,7 +23,8 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemsAdderAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ItemsAdderAPI {
 
     /**
      * These following methods are not allowed for compilation by using JUnit testing because

@@ -3,11 +3,14 @@ package com.ssomar.score.usedapi;
 import com.griefdefender.api.GriefDefender;
 import com.griefdefender.api.claim.Claim;
 import com.griefdefender.api.claim.ClaimManager;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class GriefDefenderAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class GriefDefenderAPI {
 
     public static boolean playerIsInHisClaim(@NotNull Player p, Location location, boolean acceptWilderness) {
 

@@ -1,10 +1,13 @@
 package com.ssomar.score.utils.emums;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.Optional;
 
-public class BetterEquipmentSlot {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class BetterEquipmentSlot {
 
     public static Optional<EquipmentSlot> getEquipmentSlot(String slot) {
         try{

@@ -11,11 +11,14 @@ import io.lumine.mythic.lib.damage.AttackMetadata;
 import io.lumine.mythic.lib.damage.DamageMetadata;
 import io.lumine.mythic.lib.damage.DamageType;
 import io.lumine.mythic.lib.element.Element;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-public class MyhticLibAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class MyhticLibAPI {
 
     /**
      * Utilizes MythicLib API to perform MMO-type damage

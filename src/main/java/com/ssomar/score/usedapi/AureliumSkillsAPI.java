@@ -3,12 +3,15 @@ package com.ssomar.score.usedapi;
 import com.archyx.aureliumskills.AureliumSkills;
 import com.archyx.aureliumskills.data.PlayerData;
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.Locale;
 
-public class AureliumSkillsAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AureliumSkillsAPI {
 
     public static boolean checkMana(Player player, double value) {
         if (SCore.hasAureliumSkills) {

@@ -3,6 +3,8 @@ package com.ssomar.score.usedapi;
 import com.iridium.iridiumskyblock.api.IridiumSkyblockAPI;
 import com.iridium.iridiumskyblock.database.Island;
 import com.iridium.iridiumskyblock.database.User;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class IridiumSkyblockTool {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class IridiumSkyblockTool {
 
     public static boolean playerIsOnHisIsland(Player player) {
         return playerIsOnHisIsland(player.getUniqueId(), player.getLocation());

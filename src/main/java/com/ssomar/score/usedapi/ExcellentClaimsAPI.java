@@ -1,5 +1,7 @@
 package com.ssomar.score.usedapi;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -10,7 +12,8 @@ import su.nightexpress.excellentclaims.claim.ClaimManager;
 
 import java.util.UUID;
 
-public class ExcellentClaimsAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ExcellentClaimsAPI {
 
     public static boolean playerIsInHisClaim(@NotNull Player p, Location location, boolean acceptWilderness) {
         ClaimManager claimManager = ClaimsAPI.getClaimManager();

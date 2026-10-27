@@ -1,6 +1,8 @@
 package com.ssomar.score.utils.item;
 
 import com.ssomar.score.menu.GUI;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -8,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class UpdateItemInGUI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class UpdateItemInGUI {
 
     public static void updateItemInGUI(GUI gui, String editorName, String name, List<String> lore, Material material) {
         /* Bug item no update idk why */

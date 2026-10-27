@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StringConverter {
+public final class StringConverter {
 
     public static final char COLOR_CHAR = '\u00A7';
 

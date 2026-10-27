@@ -5,9 +5,12 @@ import com.ssomar.score.SCore;
 import com.ssomar.score.api.executableitems.ExecutableItemsAPI;
 import com.ssomar.score.sobject.SObject;
 import com.ssomar.score.splugin.SPlugin;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
-public class LinkedPlugins {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class LinkedPlugins {
 
     @Nullable
     public static SObject getSObject(SPlugin sPlugin, String objectID) {

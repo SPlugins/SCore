@@ -1,9 +1,13 @@
 package com.ssomar.score.commands.runnable;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.io.*;
 import java.util.Base64;
 
-public class ActionInfoSerializer {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ActionInfoSerializer {
 
     /**
      * Write the object to a Base64 string.

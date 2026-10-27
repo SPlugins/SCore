@@ -2,6 +2,8 @@ package com.ssomar.score.utils.writer;
 
 import com.ssomar.executableitems.ExecutableItems;
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -9,7 +11,8 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
-public class NameSpaceKeyWriterReader {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class NameSpaceKeyWriterReader {
 
 
     public static String readAllInfo(PersistentDataContainer dataContainer) {

@@ -6,11 +6,14 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class PacketManager {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class PacketManager {
 
     public static void newDisplay() {
 

@@ -3,13 +3,16 @@ package com.ssomar.score.utils;
 import com.ssomar.score.SCore;
 import com.ssomar.score.api.executableitems.ExecutableItemsAPI;
 import com.ssomar.score.api.executableitems.config.ExecutableItemInterface;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
 
-public class GetItem {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class GetItem {
 
     public static List<String> getCustomPluginsWords() {
         List<String> customPluginsWords = new java.util.ArrayList<>();

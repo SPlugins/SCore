@@ -2,6 +2,8 @@ package com.ssomar.score.data;
 
 import com.ssomar.score.SCore;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -9,7 +11,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UsePerDayQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class UsePerDayQuery {
 
     public static final Boolean DEBUG = false;
     private final static String TABLE_USE_PER_DAY = "useperday";

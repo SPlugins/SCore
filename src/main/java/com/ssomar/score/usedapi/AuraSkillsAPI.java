@@ -3,9 +3,12 @@ package com.ssomar.score.usedapi;
 import dev.aurelium.auraskills.api.AuraSkillsApi;
 import dev.aurelium.auraskills.api.user.SkillsUser;
 import dev.aurelium.auraskills.api.user.UserManager;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.entity.Player;
 
-public class AuraSkillsAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AuraSkillsAPI {
 
     public static boolean checkMana(Player player, double value) {
         if (Dependency.AURA_SKILLS.isInstalled()) {

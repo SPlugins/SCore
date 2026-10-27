@@ -1,11 +1,14 @@
 package com.ssomar.score;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class SsomarDev {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SsomarDev {
 
     /* This setting is turned to false when building the plugin for production */
     private static boolean enableDebug = false;

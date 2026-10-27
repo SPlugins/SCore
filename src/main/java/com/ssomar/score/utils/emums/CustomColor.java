@@ -1,12 +1,15 @@
 package com.ssomar.score.utils.emums;
 
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 
 import static org.bukkit.Color.AQUA;
 
-public class CustomColor {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class CustomColor {
 
     public static Color valueOf(String s) {
 

@@ -1,5 +1,7 @@
 package com.ssomar.score.utils.strings;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -7,6 +9,7 @@ import org.bukkit.entity.Entity;
 
 import java.util.Collection;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StringSimplifier {
 
 	public static String simplify(final Object object) {

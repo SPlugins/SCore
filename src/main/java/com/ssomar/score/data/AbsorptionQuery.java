@@ -5,13 +5,16 @@ import com.ssomar.score.SCore;
 import com.ssomar.score.SsomarDev;
 import com.ssomar.score.commands.runnable.player.commands.absorption.AbsorptionObject;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.ChatColor;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class AbsorptionQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AbsorptionQuery {
     // table details
     private static final String TABLE_ID = "temp_absorptions";
     // column names

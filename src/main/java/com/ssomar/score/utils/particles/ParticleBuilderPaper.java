@@ -1,6 +1,8 @@
 package com.ssomar.score.utils.particles;
 
 import com.ssomar.score.features.custom.particles.particle.ParticleFeature;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import xyz.xenondevs.particle.ParticleBuilder;
@@ -8,7 +10,8 @@ import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.color.RegularColor;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
 
-public class ParticleBuilderPaper {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ParticleBuilderPaper {
 
 
     public static void spawnParticle(ParticleFeature particle, float speed, float offset) {

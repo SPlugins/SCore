@@ -1,5 +1,7 @@
 package com.ssomar.score.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -7,7 +9,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class CheckVersionSpigot {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class CheckVersionSpigot {
 
     public static String getNameFromJson(String urlString) throws Exception {
         URL url = new URL(urlString);

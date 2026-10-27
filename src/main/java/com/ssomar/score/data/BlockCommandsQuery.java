@@ -5,13 +5,16 @@ import com.ssomar.score.commands.runnable.ActionInfo;
 import com.ssomar.score.commands.runnable.ActionInfoSerializer;
 import com.ssomar.score.commands.runnable.block.BlockRunCommand;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockCommandsQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class BlockCommandsQuery {
 
     private final static String TABLE_COMMANDS_BLOCK = "commands_block";
     private final static String TABLE_COMMANDS_BLOCK_NAME = "Commands Block";

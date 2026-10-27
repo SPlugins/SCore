@@ -1,6 +1,7 @@
 package com.ssomar.score.utils;
 
 import com.ssomar.sevents.events.player.kill.entity.PlayerKillEntityEvent;
+import lombok.NoArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -9,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityItemNoDrop {
+@NoArgsConstructor
+public final class EntityItemNoDrop {
 
     public static void removeDrop(Entity entity, @Nullable PlayerKillEntityEvent event){
 

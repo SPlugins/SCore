@@ -4,6 +4,8 @@ import com.destroystokyo.paper.ParticleBuilder;
 import com.ssomar.score.SCore;
 import com.ssomar.score.features.custom.particles.particle.ParticleFeature;
 import com.ssomar.score.utils.scheduler.ScheduledTask;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -16,7 +18,8 @@ import org.bukkit.util.Vector;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ParticlesPaper1194_120 {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ParticlesPaper1194_120 {
 
     public static void transformTheProjectile(Map<String, ParticleFeature> particles, Entity e, Player launcher, Material materialLaunched) {
         if (particles != null) {

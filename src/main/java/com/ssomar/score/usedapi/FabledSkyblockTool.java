@@ -3,6 +3,8 @@ package com.ssomar.score.usedapi;
 import com.songoda.skyblock.api.SkyBlockAPI;
 import com.songoda.skyblock.api.island.Island;
 import com.songoda.skyblock.api.island.IslandRole;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -11,7 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class FabledSkyblockTool {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class FabledSkyblockTool {
 
     public static boolean playerIsOnHisIsland(Player player) {
         return playerIsOnHisIsland(player.getUniqueId(), player.getLocation());

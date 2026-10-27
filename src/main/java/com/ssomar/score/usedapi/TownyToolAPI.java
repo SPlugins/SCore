@@ -4,13 +4,16 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class TownyToolAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class TownyToolAPI {
 
 
     public static boolean playerCanBreakBlock(@NotNull UUID uuid, Location location) {

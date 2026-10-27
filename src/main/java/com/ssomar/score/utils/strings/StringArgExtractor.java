@@ -1,8 +1,12 @@
 package com.ssomar.score.utils.strings;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.Arrays;
 
-public class StringArgExtractor {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class StringArgExtractor {
 
     /**
      * It will extract the value of a prefix in a placeholder string (Without the percent signs at the front and back char)

@@ -1,6 +1,8 @@
 package com.ssomar.score.usedapi;
 
 import com.ssomar.score.utils.ToolsListMaterial;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.ClaimPermission;
 import me.ryanhamshire.GriefPrevention.DataStore;
@@ -14,7 +16,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class GriefPreventionAPI {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class GriefPreventionAPI {
 
     public static boolean playerIsInHisClaim(@NotNull Player p, Location location, boolean acceptWilderness) {
         DataStore dataStore = GriefPrevention.instance.dataStore;

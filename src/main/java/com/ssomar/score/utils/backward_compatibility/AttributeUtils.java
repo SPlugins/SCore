@@ -5,6 +5,8 @@ import com.google.common.collect.Multimap;
 import com.ssomar.score.SCore;
 import com.ssomar.score.SsomarDev;
 import com.ssomar.score.utils.MapUtil;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -19,7 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class AttributeUtils {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AttributeUtils {
 
     private final static boolean DEBUG = true;
 

@@ -1,5 +1,7 @@
 package com.ssomar.score.features.custom.headfeatures;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -13,7 +15,8 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.UUID;
 
-public class HeadBuilder118 {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class HeadBuilder118 {
 
     private static final UUID RANDOM_UUID = UUID.fromString("b33183ad-e9c0-4d48-8eea-f8c9358d3568"); // We reuse the same "random" UUID all the time
     private static PlayerProfile getProfile(String url) {

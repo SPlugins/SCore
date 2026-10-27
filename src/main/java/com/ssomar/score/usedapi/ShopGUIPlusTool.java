@@ -1,6 +1,8 @@
 package com.ssomar.score.usedapi;
 
 import com.ssomar.score.SCore;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.brcdev.shopgui.ShopGuiPlusApi;
 import net.brcdev.shopgui.event.ShopPostTransactionEvent;
 import net.brcdev.shopgui.modifier.PriceModifier;
@@ -13,7 +15,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class ShopGUIPlusTool {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ShopGUIPlusTool {
 
     private static final boolean DEBUG = true;
 

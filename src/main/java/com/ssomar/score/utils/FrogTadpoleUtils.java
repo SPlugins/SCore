@@ -1,5 +1,7 @@
 package com.ssomar.score.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -13,7 +15,8 @@ import org.bukkit.util.Vector;
  * This class converts one into the other so that SET_BABY / SET_ADULT behave as expected.
  * It must only be loaded on servers >= 1.19 (frog & tadpole classes dont exist before).
  */
-public class FrogTadpoleUtils {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class FrogTadpoleUtils {
 
     private static final NamespacedKey VARIANT_KEY = new NamespacedKey("score", "frog-variant");
 

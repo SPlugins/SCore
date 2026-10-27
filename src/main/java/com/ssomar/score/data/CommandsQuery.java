@@ -2,13 +2,16 @@ package com.ssomar.score.data;
 
 import com.ssomar.score.SCore;
 import com.ssomar.score.utils.logging.Utils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.entity.Player;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommandsQuery {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class CommandsQuery {
 
     private final static String TABLE_COMMANDS = "commands";
     private final static String TABLE_COMMANDS_NAME = "Commands";

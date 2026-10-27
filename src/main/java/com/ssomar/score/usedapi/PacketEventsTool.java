@@ -5,12 +5,15 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerRotation;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.entity.Player;
 
 import java.util.Set;
 import java.util.UUID;
 
-public class PacketEventsTool {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class PacketEventsTool {
 
     public static void registerParticleToggleListener(Set<UUID> hiddenPlayers) {
         PacketEvents.getAPI().getEventManager().registerListener(new PacketListenerAbstract() {

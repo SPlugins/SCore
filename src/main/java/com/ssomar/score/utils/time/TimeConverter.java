@@ -1,8 +1,12 @@
 package com.ssomar.score.utils.time;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.sql.Timestamp;
 
-public class TimeConverter {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class TimeConverter {
 
     @SuppressWarnings("deprecation")
     public static String longToText(long time) {

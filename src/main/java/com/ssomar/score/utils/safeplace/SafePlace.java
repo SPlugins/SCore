@@ -3,6 +3,8 @@ package com.ssomar.score.utils.safeplace;
 import com.ssomar.score.SCore;
 import com.ssomar.score.SsomarDev;
 import com.ssomar.score.usedapi.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,7 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SafePlace {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SafePlace {
 
     private static final boolean DEBUG = false;
 

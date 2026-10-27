@@ -1,11 +1,14 @@
 package com.ssomar.score.usedapi;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bukkit.inventory.ItemStack;
 import tsp.headdb.api.HeadAPI;
 
 import java.lang.reflect.Method;
 
-public class HeadDB {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class HeadDB {
 
     public static ItemStack getHead(int id) {
 

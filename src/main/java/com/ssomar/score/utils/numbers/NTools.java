@@ -1,5 +1,7 @@
 package com.ssomar.score.utils.numbers;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -10,7 +12,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NTools implements Serializable {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class NTools implements Serializable {
 
     public static DecimalFormat numberFormat_1 = new DecimalFormat("#.0", DecimalFormatSymbols.getInstance(Locale.US));
     public static DecimalFormat numberFormat_2 = new DecimalFormat("#.00", DecimalFormatSymbols.getInstance(Locale.US));
