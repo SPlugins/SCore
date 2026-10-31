@@ -500,6 +500,17 @@ public interface CommmandThatRunsCommand {
         return cpt > 0;
     }
 
+    /**
+     * Currently used by <code>IF</code> of block commands.<br/>
+     * Executes commands and SCore commands on each block inside the collection of blocks with ActionInfo and Player information.
+     * <br/><br/>
+     * (The method was written in the same style as the above runPlayerCommands and runEntityCommands methods, but it is not used by any other command yet.
+     * When there's time, a review is needed to see if the code can be refactored to avoid duplication.)
+     * @param blocks
+     * @param argsCommands
+     * @param aInfo
+     * @param playerExecutor
+     */
     static void runBlockCommands(Collection<? extends Block> blocks, List<String> argsCommands, ActionInfo aInfo, Player playerExecutor) {
 
         for (Block block : blocks) {
@@ -512,7 +523,6 @@ public interface CommmandThatRunsCommand {
             if (playerExecutor != null) aInfo2.setReceiverUUID(playerExecutor.getUniqueId());
             aInfo2.setStep(aInfo.getStep() + 1);
 
-
             /* regroup the last args that correspond to the commands */
             StringBuilder prepareCommands = new StringBuilder();
             for (String s : argsCommands) {
@@ -523,7 +533,7 @@ public interface CommmandThatRunsCommand {
 
             String buildCommands = prepareCommands.toString();
             String[] tab;
-            //SsomarDev.testMsg(">>>>>>>>> GETOR PARTICLE: " + CommmandThatRunsCommand.getOrCommandsParticle(aInfo), true);
+
             if (buildCommands.contains(CommmandThatRunsCommand.getOrCommandsParticle(aInfo)))
                 tab = buildCommands.split(CommmandThatRunsCommand.getOrCommandsParticleRegex(aInfo));
             else {
