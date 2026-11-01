@@ -1,5 +1,8 @@
 package com.ssomar.score;
 
+import lombok.var;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +41,17 @@ class SsomarDevTest {
                             fail(e);
                         }
                     });
+        }
+    }
+
+    @Test
+    public void showApi() {
+        System.out.println("BUKKIT: " + org.bukkit.Bukkit.class.getProtectionDomain().getCodeSource().getLocation());
+        try {
+            Class.forName("io.papermc.paper.persistence.PersistentDataKey");
+            System.out.println("PersistentDataKey: present");
+        } catch (ClassNotFoundException e) {
+            System.out.println("PersistentDataKey: MISSING");
         }
     }
 }
