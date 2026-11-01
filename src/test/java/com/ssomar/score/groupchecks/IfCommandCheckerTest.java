@@ -1,16 +1,14 @@
 package com.ssomar.score.groupchecks;
 import com.ssomar.score.SCore;
-import lombok.var;
 import org.bukkit.World;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
-import org.mockbukkit.mockbukkit.plugin.PluginMock;
 
 
-public class IfCommandChecker {
+public class IfCommandCheckerTest {
     private ServerMock server;
     private SCore plugin;
     private World world;
@@ -32,8 +30,6 @@ public class IfCommandChecker {
     }
 
     @Test
-    public void thisTestWillFail() {
-        System.out.println("[TEMP] RUN TEST");
-    }
+    public void thisTestWillFail() {System.out.println("[TEMP] RUN TEST");}
 
 }
