@@ -1,9 +1,12 @@
 package com.ssomar.score.groupchecks;
 import com.ssomar.score.SCore;
+import mockbukkitutils.TestEntity;
 import mockbukkitutils.TestPlayer;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -19,6 +22,7 @@ import org.mockbukkit.mockbukkit.inventory.ItemStackMock;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -55,6 +59,7 @@ public class IfCommandCheckerTest {
 
         evaluateBlockIF();
         evaluateItemIF();
+        evaluateEntityIF();
 
     }
 
@@ -152,5 +157,42 @@ public class IfCommandCheckerTest {
         server.getScheduler().performTicks(5);
         result = playerMock.getInventory().getItem(0);
         Assertions.assertNotEquals(Material.GREEN_WOOL, result.getType(), "FLAG 4");
+    }
+
+    /**
+     * Checks various entity IF executions. Relies on CONSOLEMESSAGE block cmd to report to console for effects
+     */
+    private void evaluateEntityIF() {
+        Location spawnLoc = new Location(world, 0,0,0);
+        TestEntity entity = new TestEntity(server, "Test Entity", java.util.UUID.randomUUID());
+        server.registerEntity(entity);
+        entity.teleport(spawnLoc);
+        String entityUUID = entity.getUniqueId().toString();
+
+        String result;
+
+        /// should succeed
+        server.dispatchCommand(console,"score run-entity-command entity:"+entityUUID+" IF 1=1 SET_ENTITY_NAME name:FLAG 1");
+        server.getScheduler().performTicks(5);
+        result = entity.getCustomName();
+        Assertions.assertEquals("FLAG 1", result, "FLAG 1");
+
+        /// should fail
+        server.dispatchCommand(console,"score run-entity-command entity:"+entityUUID+" IF 1=2 SET_ENTITY_NAME name:FLAG 2");
+        server.getScheduler().performTicks(5);
+        result = entity.getCustomName();
+        Assertions.assertNotEquals("FLAG 2", result, "FLAG 2");
+
+        /// should succeed
+        server.dispatchCommand(console,"score run-entity-command entity:"+entityUUID+" IF 1=2||3=3 SET_ENTITY_NAME name:FLAG 3");
+        server.getScheduler().performTicks(5);
+        result = entity.getCustomName();
+        Assertions.assertEquals("FLAG 3", result, "FLAG 3");
+
+        /// should fail
+        server.dispatchCommand(console,"score run-entity-command entity:"+entityUUID+" IF 1=2&&3=3 SET_ENTITY_NAME name:FLAG 4");
+        server.getScheduler().performTicks(5);
+        result = entity.getCustomName();
+        Assertions.assertNotEquals("FLAG 4", result, "FLAG 4");
     }
 }
