@@ -103,7 +103,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.2</version>
                 <configuration>
+                    <!-- MockBukkit ByteBuddy needs this -->
                     <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+                    <!-- Excluding dependencies that loads guava. This project itself has to be the one loading
+                     guava so Mockbukkit doesn't commplain about guava related libraries-->
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>com.github.SaberLLC:Saber-Factions</classpathDependencyExclude>
+                        <classpathDependencyExclude>io.lumine:Mythic-Dist</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
                     <testRelease>21</testRelease>
                 </configuration>
             </plugin>
@@ -496,13 +503,11 @@
             <version>2.6.1</version>
             <scope>provided</scope>
         </dependency>-->
-
         <dependency>
-            <groupId>com.massivecraft</groupId>
-            <artifactId>Factions</artifactId>
-            <version>1.6.9.5-U0.6.33</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/SaberFactions.jar</systemPath>
+            <groupId>com.github.SaberLLC</groupId>
+            <artifactId>Saber-Factions</artifactId>
+            <version>4.1.4-STABLE</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -549,7 +554,7 @@
         <dependency>
             <groupId>io.lumine</groupId>
             <artifactId>Mythic-Dist</artifactId>
-            <version>5.0.3-SNAPSHOT</version>
+            <version>5.13.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -1066,6 +1071,12 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.54.1.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.7.2-jre</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

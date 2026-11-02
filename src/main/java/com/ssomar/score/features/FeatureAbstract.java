@@ -1,6 +1,6 @@
 package com.ssomar.score.features;
 
-import com.google.common.base.Charsets;
+import java.nio.charset.StandardCharsets;
 import com.ssomar.score.SCore;
 import com.ssomar.score.config.GeneralConfig;
 import com.ssomar.score.menu.GUI;
@@ -132,7 +132,7 @@ public abstract class FeatureAbstract<FINAL_VALUE_CLASS, FEATURE_CLASS> implemen
         try {
             File file = parent.getFile();
             if (file.exists()) {
-                Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
+                Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
 
                 try {
                     writer.write(((FileConfiguration) config).saveToString());

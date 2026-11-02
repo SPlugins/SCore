@@ -1,6 +1,6 @@
 package com.ssomar.score.sparticles;
 
-import com.google.common.base.Charsets;
+import com.dfsek.terra.lib.google.common.base.Charsets;
 import com.ssomar.score.splugin.SPlugin;
 import com.ssomar.score.utils.emums.CustomColor;
 import lombok.Getter;
