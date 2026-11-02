@@ -547,7 +547,7 @@
         <dependency>
             <groupId>com.ssomar.sevents</groupId>
             <artifactId>SEvents</artifactId>
-            <version>1.26.10.16</version>
+            <version>1.26.11.2</version>
             <scope>compile</scope>
         </dependency>
 
