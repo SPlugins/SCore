@@ -977,9 +977,17 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
             case "run-entity-command":
                 Optional<Entity> entityOptional = Optional.empty();
                 StringBuilder entityCmd = new StringBuilder();
+                Optional<Player> entityPlayerOpt = Optional.empty();
 
                 for (final String arg : args)
-                    if (arg.startsWith("entity:")) {
+                    if (arg.startsWith("player:")) {
+                        final String playerName = arg.replace("player:", "");
+                        try {
+                            entityPlayerOpt = Optional.ofNullable(Bukkit.getPlayer(UUID.fromString(playerName)));
+                        } catch (final Exception e) {
+                            entityPlayerOpt = Optional.ofNullable(Bukkit.getPlayer(playerName));
+                        }
+                    } else if (arg.startsWith("entity:")) {
                         final String entityName = arg.replace("entity:", "");
 
                         try {
@@ -988,7 +996,6 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                         }
                     } else
                         entityCmd.append(arg).append(" ");
-
                 if (!entityOptional.isPresent()) {
                     SendMessage.sendMessageNoPlch(sender, "&4[SCore] &cError: &7&oYou must specify an entity with &6entity:ENTITY_UUID&c.");
 
@@ -1001,6 +1008,7 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
 
                 infoEntity.setEntityUUID(entityOptional.get().getUniqueId());
                 infoEntity.setReceiverUUID(entityOptional.get().getUniqueId());
+                infoEntity.setLauncherUUID(entityPlayerOpt.isPresent() ? entityPlayerOpt.get().getUniqueId() : null);
 
                 final EntityRunCommandsBuilder entityRunCommandsBuilder = new EntityRunCommandsBuilder(Collections.singletonList(entityCmd.toString()), infoEntity);
                 CommandsExecutor.runCommands(entityRunCommandsBuilder);

@@ -32,7 +32,7 @@ public class If extends EntityCommand {
         StringPlaceholder sp = aInfo.getSp();
         if (sp == null) sp = new StringPlaceholder();
         sp.setEntityPlcHldr(entity.getUniqueId());
-        sp.setPlayerPlcHldr(p.getUniqueId(), aInfo.getSlot());
+        if (p != null) sp.setPlayerPlcHldr(p.getUniqueId(), aInfo.getSlot());
         sp.reloadAllPlaceholders();
 
         List<Entity> targets = new ArrayList<>();
