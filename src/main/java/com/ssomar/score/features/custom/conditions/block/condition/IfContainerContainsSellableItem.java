@@ -1,5 +1,6 @@
 package com.ssomar.score.features.custom.conditions.block.condition;
 
+import com.ssomar.score.utils.backward_compatibility.SnapshotUtils;
 import com.ssomar.score.SCore;
 import com.ssomar.score.features.FeatureParentInterface;
 import com.ssomar.score.features.FeatureSettingsSCore;
@@ -30,7 +31,7 @@ public class IfContainerContainsSellableItem extends BlockConditionFeature<Boole
             Block b = request.getBlock();
             if(playerOpt.isPresent()) {
                 /* Single getState() call: it snapshots the whole container inventory NBT. */
-                BlockState state = b.getState();
+                BlockState state = SnapshotUtils.getStateNoSnapshot(b);
                 if (state instanceof Container) {
                     Container container = (Container) state;
                     Inventory inv = container.getInventory();

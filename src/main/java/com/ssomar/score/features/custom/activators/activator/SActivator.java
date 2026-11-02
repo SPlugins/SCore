@@ -52,6 +52,17 @@ public abstract class SActivator<X extends FeatureInterface<X, X>, Y extends GUI
 
     public abstract LoopFeatures getLoopFeatures();
 
+    /**
+     * True when the plugin keeps the LOOP countdown of this activator per placed object
+     * (ExecutableBlocks: loopTimerPerBlock) instead of one countdown shared by every object of the config.
+     * The LoopManager then offers the activator on every cycle and the plugin checks, object by object,
+     * whether its own countdown is over (see LoopManager#getLoopTicks). False by default: EI, EE and the
+     * other plugins keep the shared countdown.
+     */
+    public boolean isLoopTimerPerObject() {
+        return false;
+    }
+
     public abstract ScheduleFeatures getScheduleFeatures();
 
     public abstract Runnable getRunnableForAll();
