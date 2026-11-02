@@ -103,6 +103,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.2</version>
                 <configuration>
+                    <!-- MockBukkit ByteBuddy needs this -->
+                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+                    <!-- Excluding dependencies that loads guava. This project itself has to be the one loading
+                     guava so Mockbukkit doesn't commplain about guava related libraries-->
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>com.github.SaberLLC:Saber-Factions</classpathDependencyExclude>
+                        <classpathDependencyExclude>io.lumine:Mythic-Dist</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
                     <testRelease>21</testRelease>
                 </configuration>
             </plugin>
@@ -267,35 +275,47 @@
                                 <configuration>
                                     <target>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\ExecutableItems\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\ExecutableItems\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\ExecutableEvents\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\ExecutableEvents\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\CustomPiglinsTrades\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\CustomPiglinsTrades\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\ExecutableBlocks\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\ExecutableBlocks\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\GitHub\MyFurniture\src\main\resources\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\GitHub\MyFurniture\src\main\resources\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.13.2\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.8.8\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.14.4\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.9.4\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.4\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.10.2\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.4 - Copy\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.11.2\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.6\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.12.2\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.8\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.13.2\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.10\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.14.4\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.11\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.4\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\PAPERSPIGOT 26.1.2\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.4 - Copy\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                              tofile="E:\Razer\Documents\Server Files\FOLIA 1.21.11\plugins\SCore.jar"/>
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.6\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.8\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.10\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 1.21.11\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 26.1.2\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\PAPERSPIGOT 26.3\plugins\SCore.jar"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                              tofile="D:\Razer\Documents\Server Files\FOLIA 1.21.11\plugins\SCore.jar"/>
                                         <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
                                               tofile="/Users/josefmikourquico/Documents/Server Files/PAPERSPIGOT 1.21.4/plugins/SCore.jar"/>
                                     </target>
@@ -483,13 +503,11 @@
             <version>2.6.1</version>
             <scope>provided</scope>
         </dependency>-->
-
         <dependency>
-            <groupId>com.massivecraft</groupId>
-            <artifactId>Factions</artifactId>
-            <version>1.6.9.5-U0.6.33</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/SaberFactions.jar</systemPath>
+            <groupId>com.github.SaberLLC</groupId>
+            <artifactId>Saber-Factions</artifactId>
+            <version>4.1.4-STABLE</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -536,7 +554,7 @@
         <dependency>
             <groupId>io.lumine</groupId>
             <artifactId>Mythic-Dist</artifactId>
-            <version>5.0.3-SNAPSHOT</version>
+            <version>5.13.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -559,7 +577,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>26.3.build.26-alpha</version>
+            <version>26.3.build.166-beta</version>
             <scope>provided</scope>
         </dependency>
 
@@ -581,13 +599,6 @@
             <groupId>com.github.LoneDev6</groupId>
             <artifactId>api-itemsadder</artifactId>
             <version>3.2.3c</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql..</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.46</version>
             <scope>provided</scope>
         </dependency>
 
@@ -1035,6 +1046,38 @@
             <artifactId>junit-jupiter</artifactId>
             <version>5.11.4</version>
             <scope>test</scope>
+        </dependency>
+        <!-- for mockbukkit -->
+        <dependency>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v26.3</artifactId>
+            <version>4.119.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.18.10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>1.18.10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.54.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.7.2-jre</version>
+            <!-- provided: the server ships Guava; compile would shade 3 MB of com.google.common into SCore.jar -->
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

@@ -1,8 +1,7 @@
 package com.ssomar.score.data;
 
-
-import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
+import com.mysql.cj.jdbc.MysqlDataSource;
 import com.ssomar.score.config.GeneralConfig;
 
 import java.sql.Connection;
