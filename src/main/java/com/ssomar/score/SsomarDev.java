@@ -8,7 +8,7 @@ import java.util.Set;
 public class SsomarDev {
 
     /* This setting is turned to false when building the plugin for production */
-    private static boolean enableDebug = true;
+    private static boolean enableDebug = false;
 
 
     // version 1 of the testmsg
