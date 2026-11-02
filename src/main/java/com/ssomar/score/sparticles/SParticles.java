@@ -1,6 +1,6 @@
 package com.ssomar.score.sparticles;
 
-import com.dfsek.terra.lib.google.common.base.Charsets;
+import java.nio.charset.StandardCharsets;
 import com.ssomar.score.splugin.SPlugin;
 import com.ssomar.score.utils.emums.CustomColor;
 import lombok.Getter;
@@ -103,7 +103,7 @@ public class SParticles {
 
 
         try {
-            Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
+            Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
 
             try {
                 writer.write(config.saveToString());
