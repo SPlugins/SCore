@@ -87,6 +87,7 @@ public class PlayerCommandManager extends CommandManager<SCommand> {
         commands.add(new Chat());
         // ForceDrop is handled by MixedCommandsManager (supports both slot and ei_id modes)
         commands.add(OpenChest.getInstance());
+        commands.add(new EICooldownReset());
         commands.add(new EICooldown());
         commands.add(new EBCooldown());
         commands.add(new EECooldown());
