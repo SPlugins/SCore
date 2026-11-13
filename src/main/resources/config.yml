@@ -12,6 +12,7 @@ globalSilenceOutputs: # You can blacklist sentences that are sent to the console
   - "blacklist the sentence here"
 disableCustomMetadataOnEntities: false # to disable the metadata fromSpawner and bowForce to be added to entities
 beforeDeathIgnoreCancelledDamage: false # true: PLAYER_BEFORE_DEATH and ENTITY_BEFORE_DEATH are checked after the other plugins and don't run when one of them cancelled the damage (a damage cap, a protected region...)
+rightClickBeforeOtherPlugins: false # true: the right click activators (PLAYER_RIGHT_CLICK...) run before the other plugins, for plugins that change the item in hand on a right click (ex. a PyroFarming grow station empties a water bucket). The cancellations of the other plugins (crates, protections) are then not seen
 
 #MIN : it will save only the modified settings
 #NORMAL : it will save modified settings + frequently used settings
