@@ -10,6 +10,17 @@ import java.util.*;
 
 public abstract class RunCommandsBuilder {
 
+    /* DELAY / DELAYTICK / RANDOM RUN values: a NUMBER variable or a %math_% result is written "5.0", Integer.parseInt threw
+     * in the constructor and every command of the activator was lost. Same rule as LOOP START: the integer part, 0 if invalid */
+    static int parseIntLenient(String s) {
+        try {
+            return Double.valueOf(s.trim()).intValue();
+        } catch (NumberFormatException | NullPointerException e) {
+            return 0;
+        }
+    }
+
+
     public static SendMessage sm = new SendMessage();
     /* Commands to run */
     private List<String> commands;
@@ -304,7 +315,7 @@ public abstract class RunCommandsBuilder {
                     SsomarDev.testMsg("secondPart: "+secondPart, true);
                     secondPart = actionInfo.getSp().replacePlaceholder(secondPart, true);
                 }
-                nbRandom = Integer.parseInt(secondPart);
+                nbRandom = parseIntLenient(secondPart);
                 inRandom = true;
                 continue;
             } else if (RandomEnd.checkContains(command) && !AllCommandsManager.getInstance().startsWithCommandThatRunCommands(command)) {
@@ -409,13 +420,13 @@ public abstract class RunCommandsBuilder {
                 if (secondPart.contains("%")) {
                     secondPart = actionInfo.getSp().replacePlaceholder(secondPart, true);
                 }
-                delay = delay + (Integer.parseInt(secondPart));
+                delay = delay + parseIntLenient(secondPart);
             } else if (delaySecStr != null && !runsCommands) {
                 String secondPart = delaySecStr.replaceAll("DELAY ", "").replaceAll(" ", "");
                 if (secondPart.contains("%")) {
                     secondPart = actionInfo.getSp().replacePlaceholder(secondPart, true);
                 }
-                delay = delay + (Integer.parseInt(secondPart) * 20);
+                delay = delay + (parseIntLenient(secondPart) * 20);
             } else {
                 //SsomarDev.testMsg(" insert command step3 : "+command, true);
                 this.insertFinalCommands(delay, command);
