@@ -26,6 +26,8 @@ public class RomanNumber {
     }
 
     public static String toRoman(int number) {
+        /* No roman number below 0 (0 is "O"): floorKey would return null (NPE) */
+        if (number < 0) return String.valueOf(number);
         int l = map.floorKey(number);
         if (number == l) {
             return map.get(number);

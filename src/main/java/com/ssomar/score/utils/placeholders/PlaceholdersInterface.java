@@ -2,7 +2,6 @@ package com.ssomar.score.utils.placeholders;
 
 import com.ssomar.score.utils.numbers.RomanNumber;
 
-import java.util.regex.Matcher;
 
 public abstract class PlaceholdersInterface {
 
@@ -31,72 +30,55 @@ public abstract class PlaceholdersInterface {
         /* Most calls are for a placeholder the string doesn't contain: return before isNumeric, which parses the value (and throws for a word) */
         if (!s.contains(placeholder)) return s;
 
-        String result = s;
-        if(optionalTagSurroundValue == null) optionalTagSurroundValue = "";
-        if(optionalTagEndBeforeSurround == null) optionalTagEndBeforeSurround = "";
+        if (optionalTagSurroundValue == null) optionalTagSurroundValue = "";
+        if (optionalTagEndBeforeSurround == null) optionalTagEndBeforeSurround = "";
+        String before = optionalTagSurroundValue;
+        String after = optionalTagEndBeforeSurround + optionalTagSurroundValue;
 
-        if(!isNumeric(value)){
+        /* Literal replacements only: the placeholder name and the value may contain regex characters ('(', '$'...),
+         * with replaceAll a `while (contains)` loop could never end (server freeze) */
+        if (!isNumeric(value)) {
             // it may not be a number, example: https://discord.com/channels/701066025516531753/1311795346157994146/1437107585554583664
-            //Utils.sendConsoleMsg(SCore.NAME_COLOR+" &cInvalid value &6"+value+" &c used in placeholder calculation. String : &6"+s);
-
-            // Matcher.quoteReplacement: prevents '$' / '\' in the value from being treated
-            // as regex back-references in the replacement string (EI #50).
-            String safeReplacement = Matcher.quoteReplacement(optionalTagSurroundValue + value + optionalTagEndBeforeSurround + optionalTagSurroundValue);
-            while (result.contains(placeholder)) {
-                result = result.replaceAll(placeholder, safeReplacement);
-            }
-            return result;
+            return s.replace(placeholder, before + value + after);
         }
 
-
-        if(result.contains(placeholder)) {
-            while (result.contains(placeholder + "+")) {
-                String suit = result.split(placeholder + "\\+")[1];
-                StringBuilder sb = new StringBuilder();
-                for (char c : suit.toCharArray()) {
-                    /* . is accepted because we accept double , not , because its used as separator for list so it can cause issue */
-                    if ((c < '0' || c > '9') && !(c == '.')) break;
-                    sb.append(c);
-                }
-                if (isNumeric(sb.toString())) {
-                    double d = Double.parseDouble(sb.toString()) + Double.parseDouble(value);
-                    String finalValue = String.valueOf(d);
-                    if (isInteger) finalValue = String.valueOf((int) d);
-                    if (convertToRoman) finalValue = RomanNumber.toRoman((int) d);
-                    result = result.replaceFirst(placeholder + "\\+" + sb, optionalTagSurroundValue + finalValue +optionalTagEndBeforeSurround + optionalTagSurroundValue);
-                } else {
-                    result = result.replaceFirst(placeholder + "\\+" + sb, optionalTagSurroundValue+value+ optionalTagEndBeforeSurround+optionalTagSurroundValue);
-                }
-            }
-
-            while (result.contains(placeholder + "-")) {
-                String suit = result.split(placeholder + "-")[1];
-                StringBuilder sb = new StringBuilder();
-                for (char c : suit.toCharArray()) {
-                    /* . is accepted because we accept double , not , because its used as separator for list so it can cause issue */
-                    if ((c < '0' || c > '9') && !(c == '.')) break;
-                    sb.append(c);
-                }
-                if (isNumeric(sb.toString())) {
-                    double d = Double.parseDouble(value) - Double.parseDouble(sb.toString());
-                    String finalValue = String.valueOf(d);
-                    if (isInteger) finalValue = String.valueOf((int) d);
-                    if (convertToRoman) finalValue = RomanNumber.toRoman((int) d);
-                    result = result.replaceFirst(placeholder + "-" + sb, optionalTagSurroundValue + finalValue+optionalTagEndBeforeSurround+optionalTagSurroundValue);
-                } else {
-                    result = result.replaceFirst(placeholder + "-" + sb, optionalTagSurroundValue+value+optionalTagEndBeforeSurround+optionalTagSurroundValue);
+        /* One pass over the string. %placeholder%+N / %placeholder%-N are calculated; a sign not followed by a number
+         * stays in the text (%x%-%y% used to lose its '-', and a trailing '-' threw) */
+        double numValue = Double.parseDouble(value);
+        StringBuilder out = new StringBuilder();
+        int from = 0;
+        int idx;
+        while ((idx = s.indexOf(placeholder, from)) >= 0) {
+            out.append(s, from, idx);
+            int end = idx + placeholder.length();
+            String replacement = convertToRoman ? toRomanOrRaw(value) : value;
+            if (end < s.length() && (s.charAt(end) == '+' || s.charAt(end) == '-')) {
+                int j = end + 1;
+                /* . is accepted because we accept double , not , because its used as separator for list so it can cause issue */
+                while (j < s.length() && ((s.charAt(j) >= '0' && s.charAt(j) <= '9') || s.charAt(j) == '.')) j++;
+                String number = s.substring(end + 1, j);
+                if (isNumeric(number)) {
+                    double d = s.charAt(end) == '+' ? numValue + Double.parseDouble(number) : numValue - Double.parseDouble(number);
+                    replacement = String.valueOf(d);
+                    if (isInteger) replacement = String.valueOf((int) d);
+                    if (convertToRoman) replacement = toRomanOrRaw(String.valueOf((int) d));
+                    end = j;
                 }
             }
-            while (result.contains(placeholder)) {
-                if (convertToRoman) {
-                    try {
-                        int i = Integer.valueOf(value);
-                        result = result.replaceAll(placeholder, optionalTagSurroundValue+RomanNumber.toRoman(i)+optionalTagEndBeforeSurround+optionalTagSurroundValue);
-                    } catch (Exception ignored) {
-                    }
-                } else result = result.replaceAll(placeholder, optionalTagSurroundValue+value+optionalTagEndBeforeSurround+optionalTagSurroundValue);
-            }
+            out.append(before).append(replacement).append(after);
+            from = end;
         }
-        return result;
+        out.append(s.substring(from));
+        return out.toString();
+    }
+
+    /* Roman number of an integer value, the value itself when it has none (negative, decimal) */
+    private static String toRomanOrRaw(String value) {
+        try {
+            int i = Integer.parseInt(value);
+            if (i >= 0) return RomanNumber.toRoman(i);
+        } catch (NumberFormatException ignored) {
+        }
+        return value;
     }
 }
