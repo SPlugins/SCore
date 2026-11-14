@@ -1,6 +1,5 @@
 package com.ssomar.score.data;
 
-
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import com.ssomar.score.config.GeneralConfig;
