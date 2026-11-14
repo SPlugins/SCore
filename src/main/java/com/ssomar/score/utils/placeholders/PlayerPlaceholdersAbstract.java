@@ -288,8 +288,8 @@ public class PlayerPlaceholdersAbstract extends PlaceholdersInterface implements
 
                 toReplace = replaceCalculPlaceholder(toReplace, "%" + particle + "_last_damage_taken%", lastDamageTaken + "", false);
                 toReplace = replaceCalculPlaceholder(toReplace, "%" + particle + "_last_damage_taken_int%", ((int) lastDamageTaken) + "", true);
-                toReplace = replaceCalculPlaceholder(toReplace, "%" + particle + "_last_damage_dealt%", lastDamageTaken + "", false);
-                toReplace = replaceCalculPlaceholder(toReplace, "%" + particle + "_last_damage_dealt_int%", ((int) lastDamageTaken) + "", true);
+                toReplace = replaceCalculPlaceholder(toReplace, "%" + particle + "_last_damage_dealt%", lastDamageDealt + "", false);
+                toReplace = replaceCalculPlaceholder(toReplace, "%" + particle + "_last_damage_dealt_int%", ((int) lastDamageDealt) + "", true);
 
                 toReplace = replaceCalculPlaceholder(toReplace, "%" + particle + "_pitch%", pitch + "", false);
                 toReplace = replaceCalculPlaceholder(toReplace, "%" + particle + "_pitch_int%", ((int) pitch) + "", true);

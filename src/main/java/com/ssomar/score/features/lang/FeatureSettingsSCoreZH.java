@@ -719,6 +719,7 @@ public enum FeatureSettingsSCoreZH implements FeatureSettingsInterface {
     glow("glow", "物品发光", SCore.is1v20v5Plus() ? new String[]{"&7&o物品发光效果"} : new String[]{"&7&o物品发光效果", "&4⚠ &c这会添加一个无用的附魔", "&c并隐藏附魔标签"}, Material.BEACON),
     disableStack("disableStack", "禁用堆叠", new String[]{"&7&o禁止此物品进行堆叠", "&7&o强制单个物品独立存在"}, null),
     keepItemOnDeath("keepItemOnDeath", "死亡不掉落", new String[]{"&7&o玩家死亡时不掉落此物品"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     storeItemInfo("storeItemInfo", "存储物品信息", new String[]{"&7&o存储物品的额外信息", "&7&o比如物品的拥有者等"}, null),
     customModelData_ei("customModelData", "自定义模型数据", new String[]{"&7&o物品的自定义模型数据", "&7&o用于自定义物品外观", "&2✔ &a&o详见Wiki教程！"}, FixedMaterial.getMaterial(Arrays.asList("BLUE_GLAZED_TERRACOTTA"))),
     nbt("nbt", "NBT标签", new String[]{"&7&oNBT标签功能", "&7&o需要插件 &eNBTAPI"}, Material.NAME_TAG),

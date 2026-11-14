@@ -525,6 +525,7 @@ public enum FeatureSettingsSCoreIT implements FeatureSettingsInterface {
     disableStack("disableStack", "Disabilita Stack", new String[]{"&7&oDisabilita l'impilamento dell'oggetto?"}, null),
     customStackSize("customStackSize", "Dimensione Stack Personalizzata", new String[]{"&7&oPersonalizza la dimensione dello stack"}, Material.BUCKET),
     keepItemOnDeath("keepItemOnDeath", "Mantieni Oggetto alla Morte", new String[]{"&7&oMantieni l'oggetto alla morte?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     storeItemInfo("storeItemInfo", "Memorizza Info Oggetto", new String[]{"&7&oMemorizza le info dell'oggetto?", "&7&oMemorizza info come il proprietario"}, null),
     keepDefaultAttributes("keepDefaultAttributes", "Mantieni Attributi Predefiniti", new String[]{"&7&oMantieni gli attributi predefiniti", "&7&oSolo per 1.19+"}, null),
     ignoreKeepDefaultAttributesFeature("ignoreKeepDefaultAttributesFeature", "Ignora Funzione Attributi Predefiniti", new String[]{

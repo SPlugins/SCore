@@ -453,6 +453,7 @@ public enum FeatureSettingsSCorePL implements FeatureSettingsInterface {
     itemsAdderID("itemsAdderID", "ItemsAdder", new String[]{"&7&oID bloku itemsAdder"}, Material.DIAMOND_BLOCK),
     keepDefaultAttributes("keepDefaultAttributes", "Zachowaj domyślne atrybuty", new String[]{"&7&oZachowaj domyślne atrybuty", "&7&oTylko dla 1.19+"}, null),
     keepItemOnDeath("keepItemOnDeath", "Zachowaj przedmiot przy śmierci", new String[]{"&7&oZachować przedmiot przy śmierci?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     knockbackStrength("knockbackStrength", "Siła odrzutu", new String[]{}, Material.CHAINMAIL_CHESTPLATE),
     level("level", "Poziom", new String[]{"&7&oPoziom zaklęcia"}, Material.BEACON),
     leverUUID("leverUUID", "UUID dźwigni", new String[]{"&7&oUUID dźwigni"}, GUI.CLOCK),

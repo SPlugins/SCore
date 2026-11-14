@@ -486,6 +486,7 @@ public enum FeatureSettingsSCoreES implements FeatureSettingsInterface {
     itemTextures("itemTextures", "Item Textures", new String[]{"&7&oThe item textures"}, FixedMaterial.getMaterial(Arrays.asList("BLUE_GLAZED_TERRACOTTA"))),
     keepDefaultAttributes("keepDefaultAttributes", "Mantener Atributos Predeterminados", new String[]{"&7&oMantener los atributos predeterminados", "&7&oSolo para 1.19+"}, null),
     keepItemOnDeath("keepItemOnDeath", "Mantener objeto al morir", new String[]{"&7&o¿Mantener el objeto al morir?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     knockbackStrength("knockbackStrength", "Fuerza de Retroceso", new String[]{}, Material.CHAINMAIL_CHESTPLATE),
     level("level", "Nivel", new String[]{"&7&oEl nivel del encantamiento"}, Material.BEACON),
     leverUUID("leverUUID", "UUID de palanca", new String[]{"&7&oUUID de la palanca"}, GUI.CLOCK),

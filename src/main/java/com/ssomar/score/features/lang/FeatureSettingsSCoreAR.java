@@ -458,6 +458,7 @@ public enum FeatureSettingsSCoreAR implements FeatureSettingsInterface {
     itemTextures("itemTextures", "Item Textures", new String[]{"&7&oThe item textures"}, FixedMaterial.getMaterial(Arrays.asList("BLUE_GLAZED_TERRACOTTA"))),
     keepDefaultAttributes("keepDefaultAttributes", "حفظ_السمات_الافتراضية", new String[]{"&7&oحفظ_السمات_الافتراضية", "&7&oفقط_للإصدار_1.19+"}, null),
     keepItemOnDeath("keepItemOnDeath", "احتفاظ_بالعنصر_عند_الموت", new String[]{"&7&oالاحتفاظ_بالعنصر_عند_الموت؟"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     knockbackStrength("knockbackStrength", "قوة_الدفع", new String[]{}, Material.CHAINMAIL_CHESTPLATE),
     level("level", "المستوى", new String[]{"&7&oمستوى_التعويذة"}, Material.BEACON),
     leverUUID("leverUUID", "معرف_الرافعة", new String[]{"&7&oمعرف_UUID_للرافعة"}, GUI.CLOCK),

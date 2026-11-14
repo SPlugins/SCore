@@ -39,7 +39,8 @@ public class PlaceholderLastDamageDealtEvent implements Listener {
         }
         if (damager instanceof Player) {
             //SsomarDev.testMsg("onEntityDamageByEntityEvent >> " +damager + " >> " + e.getFinalDamage(), true);
-            UUID uuid = e.getDamager().getUniqueId();
+            /* the shooter for a projectile, not the arrow */
+            UUID uuid = damager.getUniqueId();
             lastDamageDealt.put(uuid, e.getFinalDamage());
         }
     }

@@ -42,7 +42,8 @@ public class Smelt extends BlockCommand {
         if(event && aInfo.isEventFromCustomBreakCommand() && aInfo.getBreakCause() == BlockBreakEventExtension.BreakCause.SMELT) return;
 
         if (SafeBreak.verifSafeBreak(pUUID, block)) {
-            ItemStack itemInHand = p.getInventory().getItemInMainHand();
+            /* No player (EB loop, EE...): no tool, so no fortune */
+            ItemStack itemInHand = p != null ? p.getInventory().getItemInMainHand() : null;
 
             ItemStack smelted = getSmeltedItem(block.getType());
             if (smelted == null) return;
@@ -53,7 +54,7 @@ public class Smelt extends BlockCommand {
             // Determine the amount of smelted item to drop
             int amountToDrop = 1;
             Enchantment fortune = SCore.is1v20v5Plus() ? Enchantment.FORTUNE : Enchantment.getByName("LOOT_BONUS_BLOCKS");
-            if (itemInHand.containsEnchantment(fortune)) {
+            if (itemInHand != null && itemInHand.containsEnchantment(fortune)) {
                 int fortuneLevel = itemInHand.getEnchantmentLevel(fortune);
                 amountToDrop = ThreadLocalRandom.current().nextInt(fortuneLevel + 1) + 1;
             }
@@ -74,8 +75,8 @@ public class Smelt extends BlockCommand {
         if (whitelist.contains(blockMat)) {
             Enchantment fortune = SCore.is1v20v5Plus() ? Enchantment.FORTUNE : Enchantment.getByName("LOOT_BONUS_BLOCKS");
 
-            ItemStack itemInHand = p.getInventory().getItemInMainHand();
-            if (!itemInHand.isEmpty() && itemInHand.containsEnchantment(fortune)) {
+            ItemStack itemInHand = p != null ? p.getInventory().getItemInMainHand() : null;
+            if (itemInHand != null && !itemInHand.isEmpty() && itemInHand.containsEnchantment(fortune)) {
                 int fortuneLevel = itemInHand.getEnchantmentLevel(fortune);
                 amountToDrop = ThreadLocalRandom.current().nextInt(fortuneLevel + 1) + 1;
             }

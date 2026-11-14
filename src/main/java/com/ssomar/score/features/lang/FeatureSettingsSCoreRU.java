@@ -559,6 +559,7 @@ public enum FeatureSettingsSCoreRU implements FeatureSettingsInterface {
     disableStack("disableStack", "Отключить Стакирование", new String[]{"&7&oОтключить стакирование предметов?"}, null),
     customStackSize("customStackSize", "Размер Стака", new String[]{"&7&oНастроить размер стака"}, Material.BUCKET),
     keepItemOnDeath("keepItemOnDeath", "Сохранять при Смерти", new String[]{"&7&oСохранять предмет при смерти?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     storeItemInfo("storeItemInfo", "Хранить Информацию", new String[]{"&7&oХранить информацию о предмете?", "&7&oХранит такую информацию как владелец"}, null),
     unbreakable("unbreakable", "Неразрушимый", new String[]{"&7&oПредмет неразрушимый?"}, Material.BEDROCK),
     usage("usage", "Использование", new String[]{"&7&oИспользование предмета", "&a-1 &7&o= Бесконечно", "&aУвеличить &7&oили &cУменьшить &7&oэто использование с", "&eUsageModification &7&oв ваших активаторах"}, Material.BUCKET),

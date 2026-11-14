@@ -484,6 +484,7 @@ public enum FeatureSettingsSCoreEN implements FeatureSettingsInterface {
     itemsAdderID("itemsAdderID", "ItemsAdder", new String[]{"&7&oThe itemsAdderBlock ID"}, Material.DIAMOND_BLOCK),
     keepDefaultAttributes("keepDefaultAttributes", "Keep Default Attributes", new String[]{"&7&oKeep the default attributes", "&7&oOnly for 1.19+"}, null),
     keepItemOnDeath("keepItemOnDeath", "Keep item on death", new String[]{"&7&oKeep the item on death ?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     knockbackStrength("knockbackStrength", "Knockback Strength", new String[]{}, Material.CHAINMAIL_CHESTPLATE),
     level("level", "Level", new String[]{"&7&oThe level of the enchantment"}, Material.BEACON),
     leverUUID("leverUUID", "lever UUID", new String[]{"&7&oUUID of the lever"}, GUI.CLOCK),

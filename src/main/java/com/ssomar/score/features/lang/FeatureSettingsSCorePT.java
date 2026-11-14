@@ -501,6 +501,7 @@ public enum FeatureSettingsSCorePT implements FeatureSettingsInterface {
     disableStack("disableStack", "Desativar Agrupamento", new String[]{"&7&oDesativar empilhamento do item?"}, null),
     customStackSize("customStackSize", "Tamanho Personalizado da Pilha", new String[]{"&7&oPersonalize o tamanho da pilha"}, Material.BUCKET),
     keepItemOnDeath("keepItemOnDeath", "Manter Item ao Morrer", new String[]{"&7&oManter o item após a morte?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     storeItemInfo("storeItemInfo", "Armazenar Informações do Item", new String[]{"&7&oArmazenar informações do item?", "&7&oArmazena dados como o dono"}, null),
     keepDefaultAttributes("keepDefaultAttributes", "Manter Atributos Padrão", new String[]{"&7&oManter os atributos padrão", "&7&oApenas para versões 1.19+"}, null),
     ignoreKeepDefaultAttributesFeature("ignoreKeepDefaultAttributesFeature", "Ignorar Atributos Padrão", new String[]{"&7&oPara novo item DEIXE FALSO", "&7&ou caso contrário, mantenha verdadeiro", "&7&oSe for atualizar itens antigos, mude para FALSO", "&7&oMas cuidado, isso pode mudar tags do item", "&7&oe impactar comerciantes/receitas personalizadas", "&7&oSomente para versões 1.19+"}, null),
