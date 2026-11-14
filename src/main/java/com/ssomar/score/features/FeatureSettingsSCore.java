@@ -542,6 +542,7 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
     disableStack(getFeatureSettings("disableStack", true)),
     customStackSize(getFeatureSettings("customStackSize", true)),
     keepItemOnDeath(getFeatureSettings("keepItemOnDeath")),
+    keepWhenTakenByOtherPlugins(getFeatureSettings("keepWhenTakenByOtherPlugins", SavingVerbosityLevel.SAVE_ONLY_WHEN_DIFFERENT_DEFAULT)),
     storeItemInfo(getFeatureSettings("storeItemInfo")),
     keepDefaultAttributes(getFeatureSettings("keepDefaultAttributes")),
     ignoreKeepDefaultAttributesFeature(getFeatureSettings("ignoreKeepDefaultAttributesFeature")),

@@ -502,6 +502,7 @@ public enum FeatureSettingsSCoreHI implements FeatureSettingsInterface {
     disableStack("disableStack", "स्टैक अक्षम करें", new String[]{"&7&oक्या आइटम स्टैक को अक्षम करें?"}, null),
     customStackSize("customStackSize", "कस्टम स्टैक आकार", new String[]{"&7&oस्टैक आकार को अनुकूलित करें"}, Material.BUCKET),
     keepItemOnDeath("keepItemOnDeath", "मृत्यु पर आइटम रखें", new String[]{"&7&oक्या मृत्यु पर आइटम रखें?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     storeItemInfo("storeItemInfo", "आइटम जानकारी सहेजें", new String[]{"&7&oआइटम जानकारी सहेजें?", "&7&oजैसे कि मालिक की जानकारी"}, null),
     keepDefaultAttributes("keepDefaultAttributes", "डिफ़ॉल्ट विशेषताएं रखें", new String[]{"&7&oडिफ़ॉल्ट विशेषताएं रखें", "&7&oकेवल 1.19+ के लिए"}, null),
     ignoreKeepDefaultAttributesFeature("ignoreKeepDefaultAttributesFeature", "डिफ़ॉल्ट विशेषता को नजरअंदाज करें", new String[]{"&7&oनए आइटम के लिए इसे FALSE रखें", "&7&oअन्यथा आप इसे TRUE रख सकते हैं", "&7&oयदि आप पुराने आइटम अपडेट करना चाहते हैं तो FALSE करें", "&7&oध्यान दें: इससे टैग बदल सकते हैं", "&7&oइससे दुकानदार या कस्टम क्राफ्ट प्रभावित हो सकते हैं", "&7&oकेवल 1.19+ के लिए"}, null),

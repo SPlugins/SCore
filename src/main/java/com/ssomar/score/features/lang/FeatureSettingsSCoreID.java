@@ -499,6 +499,7 @@ public enum FeatureSettingsSCoreID implements FeatureSettingsInterface {
     itemTextures("itemTextures", "Item Textures", new String[]{"&7&oThe item textures"}, FixedMaterial.getMaterial(Arrays.asList("BLUE_GLAZED_TERRACOTTA"))),
     keepDefaultAttributes("keepDefaultAttributes", "Pertahankan Atribut Default", new String[]{"&7&oPertahankan atribut default", "&7&oHanya untuk 1.19+"}, null),
     keepItemOnDeath("keepItemOnDeath", "Pertahankan Item Saat Mati", new String[]{"&7&oPertahankan item saat mati?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     knockbackStrength("knockbackStrength", "Kekuatan Knockback", new String[]{}, Material.CHAINMAIL_CHESTPLATE),
     level("level", "Level", new String[]{"&7&oLevel dari enchantment"}, Material.BEACON),
     leverUUID("leverUUID", "UUID Tuas", new String[]{"&7&oUUID dari tuas"}, GUI.CLOCK),

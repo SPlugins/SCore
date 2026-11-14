@@ -507,6 +507,7 @@ public enum FeatureSettingsSCoreFR implements FeatureSettingsInterface {
     disableStack("disableStack", "Désactiver Empilage", new String[]{"&7&oDésactiver l'empilage d'items ?"}, null),
     customStackSize("customStackSize", "Taille d'Empilage Personnalisée", new String[]{"&7&oPersonnaliser la taille d'empilage"}, Material.BUCKET),
     keepItemOnDeath("keepItemOnDeath", "Conserver Item à la Mort", new String[]{"&7&oConserver l'item à la mort ?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Garder si pris par un plugin", new String[]{"&7&oUn autre plugin prend l'item", "&7&oau clic droit (machine, grow", "&7&ostation...) : il est rendu,", "&7&oson contenant vide retiré"}, null),
     storeItemInfo("storeItemInfo", "Stocker Info Item", new String[]{"&7&oStocker les infos de l'item ?", "&7&oStocke les infos de l'item comme le propriétaire"}, null),
 
     keepDefaultAttributes("keepDefaultAttributes", "Garder Attributs par Défaut", new String[]{"&7&oGarder les attributs par défaut", "&7&oUniquement pour 1.19+"}, null),

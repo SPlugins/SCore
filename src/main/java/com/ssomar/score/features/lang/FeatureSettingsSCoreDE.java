@@ -499,6 +499,7 @@ public enum FeatureSettingsSCoreDE implements FeatureSettingsInterface {
     itemsAdderID("itemsAdderID", "ItemsAdder", new String[]{"&7&oDie ItemsAdderBlock-ID"}, Material.DIAMOND_BLOCK),
     keepDefaultAttributes("keepDefaultAttributes", "Standard-Attribute behalten", new String[]{"&7&oStandard-Attribute behalten", "&7&oNur für 1.19+"}, null),
     keepItemOnDeath("keepItemOnDeath", "Gegenstand beim Tod behalten", new String[]{"&7&oGegenstand beim Tod behalten?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     knockbackStrength("knockbackStrength", "Rückstoßstärke", new String[]{}, Material.CHAINMAIL_CHESTPLATE),
     level("level", "Level", new String[]{"&7&oDas Level der Verzauberung"},  Material.BEACON),
     leverUUID("leverUUID", "Hebel-UUID", new String[]{"&7&oUUID des Hebels"}, GUI.CLOCK),

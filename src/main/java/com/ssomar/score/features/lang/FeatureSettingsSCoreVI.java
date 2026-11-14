@@ -449,6 +449,7 @@ public enum FeatureSettingsSCoreVI implements FeatureSettingsInterface {
     itemsAdderID("itemsAdderID", "ItemsAdder", new String[]{"&7&oID của itemsAdderBlock"}, Material.DIAMOND_BLOCK),
     keepDefaultAttributes("keepDefaultAttributes", "Giữ thuộc tính mặc định", new String[]{"&7&oGiữ thuộc tính mặc định", "&7&oChỉ dành cho 1.19+"}, null),
     keepItemOnDeath("keepItemOnDeath", "Giữ vật phẩm khi chết", new String[]{"&7&oGiữ vật phẩm khi chết?"}, Material.BONE),
+    keepWhenTakenByOtherPlugins("keepWhenTakenByOtherPlugins", "Keep when taken by other plugins", new String[]{"&7&oAnother plugin takes the item", "&7&oon a right click (machine,", "&7&ogrow station...): it is given", "&7&oback, its empty container removed"}, null),
     knockbackStrength("knockbackStrength", "Sức mạnh đẩy lùi", new String[]{}, Material.CHAINMAIL_CHESTPLATE),
     level("level", "Cấp độ", new String[]{"&7&oCấp độ của phù phép"}, Material.BEACON),
     leverUUID("leverUUID", "UUID của cần gạt", new String[]{"&7&oUUID của cần gạt"}, GUI.CLOCK),
