@@ -1,6 +1,6 @@
 package com.ssomar.score.config;
 
-import com.google.common.base.Charsets;
+import java.nio.charset.StandardCharsets;
 import com.ssomar.score.SCore;
 import com.ssomar.score.utils.logging.Utils;
 import lombok.Getter;
@@ -70,7 +70,7 @@ public abstract class Config {
         this.config = YamlConfiguration.loadConfiguration(this.pdfile);
         if(converter(this.config)){
             try {
-                Writer writer = new OutputStreamWriter(new FileOutputStream(pdfile), Charsets.UTF_8);
+                Writer writer = new OutputStreamWriter(new FileOutputStream(pdfile), StandardCharsets.UTF_8);
 
                 try {
                     writer.write(config.saveToString());

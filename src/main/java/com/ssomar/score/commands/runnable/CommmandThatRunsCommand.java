@@ -2,7 +2,9 @@ package com.ssomar.score.commands.runnable;
 
 import com.ssomar.score.SCore;
 import com.ssomar.score.SsomarDev;
+import com.ssomar.score.commands.runnable.block.BlockRunCommandsBuilder;
 import com.ssomar.score.commands.runnable.entity.EntityRunCommandsBuilder;
+import com.ssomar.score.commands.runnable.item.ItemRunCommandsBuilder;
 import com.ssomar.score.commands.runnable.player.PlayerRunCommandsBuilder;
 import com.ssomar.score.commands.runnable.mixed_player_entity.commands.MobAround;
 import com.ssomar.score.commands.runnable.player.commands.If;
@@ -14,10 +16,12 @@ import com.ssomar.score.features.types.list.ListDetailedEntityFeature;
 import com.ssomar.score.utils.emums.Comparator;
 import com.ssomar.score.utils.emums.PlaceholdersCdtType;
 import com.ssomar.score.utils.logging.Utils;
+import com.ssomar.score.utils.placeholders.PlaceholdersInterface;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
-import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -169,6 +173,27 @@ public interface CommmandThatRunsCommand {
      *         <code>false</code> if no player is hit
      */
     static boolean runPlayerCommands(Collection<? extends org.bukkit.entity.Player> players, List<String> argsCommands, ActionInfo aInfo) {
+        return runPlayerCommands(players, argsCommands, aInfo, null);
+    }
+
+    /** Placeholder of AROUND / MOB_AROUND: the number of targets found. */
+    String AROUND_TARGET_COUNT = "%around_target_count%";
+
+    /**
+     * Replaces {@link #AROUND_TARGET_COUNT} (with the +N / -N shorthand) in the commands of an AROUND / MOB_AROUND.
+     * Nothing is replaced when {@code aroundTargetCount} is null (the other commands that run commands).
+     * https://discord.com/channels/701066025516531753/1560808343042400396
+     */
+    static String replaceAroundTargetCount(String s, Integer aroundTargetCount) {
+        if (s == null || aroundTargetCount == null || !s.contains(AROUND_TARGET_COUNT)) return s;
+        return PlaceholdersInterface.replaceCalculPlaceholder(s, AROUND_TARGET_COUNT, String.valueOf(aroundTargetCount), true);
+    }
+
+    /**
+     * @param aroundTargetCount number of targets of the AROUND that runs these commands, for %around_target_count%,
+     *                          or null when the caller is not an AROUND
+     */
+    static boolean runPlayerCommands(Collection<? extends org.bukkit.entity.Player> players, List<String> argsCommands, ActionInfo aInfo, Integer aroundTargetCount) {
         int cpt = 0;
         for (Player target : players) {
             ActionInfo aInfo2 = aInfo.clone();
@@ -200,6 +225,7 @@ public interface CommmandThatRunsCommand {
                 String s = tab[m];
 
                 s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+                s = replaceAroundTargetCount(s, aroundTargetCount);
                 s = resolveNestedPlaceholders(s, sp, aInfo);
                 if (m == 0) {
                     //SsomarDev.testMsg("receive : s = " + s, true);
@@ -400,6 +426,14 @@ public interface CommmandThatRunsCommand {
     /* True > an entity has been hit
      *  False > no entity hit */
     static boolean runEntityCommands(Collection<? extends Entity> entities, List<String> argsCommands, ActionInfo aInfo) {
+        return runEntityCommands(entities, argsCommands, aInfo, null);
+    }
+
+    /**
+     * @param aroundTargetCount number of targets of the MOB_AROUND that runs these commands, for %around_target_count%,
+     *                          or null when the caller is not a MOB_AROUND
+     */
+    static boolean runEntityCommands(Collection<? extends Entity> entities, List<String> argsCommands, ActionInfo aInfo, Integer aroundTargetCount) {
 
         ListDetailedEntityFeature whiteList = null;
         ListDetailedEntityFeature blackList = null;
@@ -474,6 +508,7 @@ public interface CommmandThatRunsCommand {
             for (int m = 0; m < tab.length; m++) {
                 String s = tab[m];
                 s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+                s = replaceAroundTargetCount(s, aroundTargetCount);
                 s = resolveNestedPlaceholders(s, sp, aInfo);
 
                 while (s.startsWith(" ")) {
@@ -495,5 +530,120 @@ public interface CommmandThatRunsCommand {
         }
 
         return cpt > 0;
+    }
+
+    /**
+     * Currently used by <code>IF</code> of block commands.<br/>
+     * Executes commands and SCore commands on each block inside the collection of blocks with ActionInfo and Player information.
+     * <br/><br/>
+     * (The method was written in the same style as the above runPlayerCommands and runEntityCommands methods, but it is not used by any other command yet.
+     * When there's time, a review is needed to see if the code can be refactored to avoid duplication.)
+     * @param blocks
+     * @param argsCommands
+     * @param aInfo
+     * @param playerExecutor
+     */
+    static void runBlockCommands(Collection<? extends Block> blocks, List<String> argsCommands, ActionInfo aInfo, Player playerExecutor) {
+
+        for (Block block : blocks) {
+            StringPlaceholder sp = new StringPlaceholder();
+            sp.setBlockPlcHldr(block);
+            if (playerExecutor != null) sp.setPlayerPlcHldr(playerExecutor.getUniqueId(), aInfo.getSlot());
+
+            ActionInfo aInfo2 = aInfo.clone();
+            aInfo2.setBlock(block);
+            if (playerExecutor != null) aInfo2.setReceiverUUID(playerExecutor.getUniqueId());
+            aInfo2.setStep(aInfo.getStep() + 1);
+
+            /* regroup the last args that correspond to the commands */
+            StringBuilder prepareCommands = new StringBuilder();
+            for (String s : argsCommands) {
+                prepareCommands.append(s);
+                prepareCommands.append(" ");
+            }
+            prepareCommands.deleteCharAt(prepareCommands.length() - 1);
+
+            String buildCommands = prepareCommands.toString();
+            String[] tab;
+
+            if (buildCommands.contains(CommmandThatRunsCommand.getOrCommandsParticle(aInfo)))
+                tab = buildCommands.split(CommmandThatRunsCommand.getOrCommandsParticleRegex(aInfo));
+            else {
+                tab = new String[1];
+                tab[0] = buildCommands;
+            }
+            List<String> commands = new ArrayList<>();
+            for (int m = 0; m < tab.length; m++) {
+                String s = tab[m];
+                s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+
+                while (s.startsWith(" ")) {
+                    s = s.substring(1);
+                }
+                while (s.endsWith(" ")) {
+                    s = s.substring(0, s.length() - 1);
+                }
+                if (s.startsWith("/")) s = s.substring(1);
+
+                SsomarDev.testMsg("s: " + s, true);
+                commands.add(s);
+            }
+            commands = sp.replacePlaceholders(commands);
+            BlockRunCommandsBuilder blockBuilder = new BlockRunCommandsBuilder(commands, aInfo2);
+            CommandsExecutor.runCommands(blockBuilder);
+        }
+
+    }
+
+    static void runItemCommands(Collection<? extends ItemStack> items, List<String> argsCommands, ActionInfo aInfo, Player playerExecutor) {
+        // Implementation for running item commands
+        for (ItemStack item : items) {
+            StringPlaceholder sp = new StringPlaceholder();
+            if (item.hasItemMeta()) sp.setItem(item.getItemMeta().getDisplayName());
+            if (playerExecutor != null) sp.setPlayerPlcHldr(playerExecutor.getUniqueId(), aInfo.getSlot());
+
+            ActionInfo aInfo2 = aInfo.clone();
+            aInfo2.setItemStack(item);
+            aInfo2.setStep(aInfo.getStep() + 1);
+
+
+            /* regroup the last args that correspond to the commands */
+            StringBuilder prepareCommands = new StringBuilder();
+            for (String s : argsCommands) {
+                prepareCommands.append(s);
+                prepareCommands.append(" ");
+            }
+            prepareCommands.deleteCharAt(prepareCommands.length() - 1);
+
+            String buildCommands = prepareCommands.toString();
+            String[] tab;
+            //SsomarDev.testMsg(">>>>>>>>> GETOR PARTICLE: " + CommmandThatRunsCommand.getOrCommandsParticle(aInfo), true);
+            if (buildCommands.contains(CommmandThatRunsCommand.getOrCommandsParticle(aInfo)))
+                tab = buildCommands.split(CommmandThatRunsCommand.getOrCommandsParticleRegex(aInfo));
+            else {
+                tab = new String[1];
+                tab[0] = buildCommands;
+            }
+            List<String> commands = new ArrayList<>();
+            for (int m = 0; m < tab.length; m++) {
+                String s = tab[m];
+                s = CommmandThatRunsCommand.replaceStepParticlePlaceholder(s, aInfo);
+
+                while (s.startsWith(" ")) {
+                    s = s.substring(1);
+                }
+                while (s.endsWith(" ")) {
+                    s = s.substring(0, s.length() - 1);
+                }
+                if (s.startsWith("/")) s = s.substring(1);
+
+                SsomarDev.testMsg("s: " + s, true);
+                commands.add(s);
+            }
+            commands = sp.replacePlaceholders(commands);
+            ItemRunCommandsBuilder itemRunCommandsBuilder = new ItemRunCommandsBuilder(commands, aInfo2);
+            CommandsExecutor.runCommands(itemRunCommandsBuilder);
+
+        }
     }
 }

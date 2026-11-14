@@ -130,7 +130,7 @@ public class Around extends BlockCommand {
                         targets = targets.subList(0, limit);
                     }
 
-                    CommmandThatRunsCommand.runPlayerCommands(targets, sCommandToExec.getOtherArgs(), sCommandToExec.getActionInfo());
+                    CommmandThatRunsCommand.runPlayerCommands(targets, sCommandToExec.getOtherArgs(), sCommandToExec.getActionInfo(), targets.size());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

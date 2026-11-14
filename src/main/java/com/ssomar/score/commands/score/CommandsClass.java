@@ -14,6 +14,8 @@ import com.ssomar.score.commands.runnable.block.BlockCommandManager;
 import com.ssomar.score.commands.runnable.block.BlockRunCommandsBuilder;
 import com.ssomar.score.commands.runnable.entity.EntityCommandManager;
 import com.ssomar.score.commands.runnable.entity.EntityRunCommandsBuilder;
+import com.ssomar.score.commands.runnable.item.ItemCommandManager;
+import com.ssomar.score.commands.runnable.item.ItemRunCommandsBuilder;
 import com.ssomar.score.commands.runnable.player.PlayerCommandManager;
 import com.ssomar.score.commands.runnable.player.PlayerRunCommandsBuilder;
 import com.ssomar.score.commands.score.clear.ClearCommand;
@@ -58,6 +60,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -86,7 +89,9 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
     @NotNull
     private final SCore main;
 
-    private final String[] commands = new String[]{"clear", "cooldowns", "hardnesses", "hardnesses-create", "hardnesses-delete", "inspect-loop", "particles", "particles-info", "particles-toggle", "projectiles", "projectiles-create", "projectiles-delete", "reload", "run-entity-command", "run-block-command", "run-player-command", "variables", "variables-create", "variables-define", "variables-delete", "webhook", "no-translated"};
+    private final String[] commands = new String[]{"clear", "cooldowns", "hardnesses", "hardnesses-create", "hardnesses-delete", "inspect-loop", "particles", "particles-info",
+            "particles-toggle", "projectiles", "projectiles-create", "projectiles-delete", "reload", "run-entity-command", "run-block-command", "run-player-command", "variables",
+            "variables-create", "variables-define", "variables-delete", "webhook", "no-translated", "run-item-command"};
 
     /**
      * Called when a {@link CommandSender} types /score.
@@ -972,9 +977,17 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
             case "run-entity-command":
                 Optional<Entity> entityOptional = Optional.empty();
                 StringBuilder entityCmd = new StringBuilder();
+                Optional<Player> entityPlayerOpt = Optional.empty();
 
                 for (final String arg : args)
-                    if (arg.startsWith("entity:")) {
+                    if (arg.startsWith("player:")) {
+                        final String playerName = arg.replace("player:", "");
+                        try {
+                            entityPlayerOpt = Optional.ofNullable(Bukkit.getPlayer(UUID.fromString(playerName)));
+                        } catch (final Exception e) {
+                            entityPlayerOpt = Optional.ofNullable(Bukkit.getPlayer(playerName));
+                        }
+                    } else if (arg.startsWith("entity:")) {
                         final String entityName = arg.replace("entity:", "");
 
                         try {
@@ -983,7 +996,6 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                         }
                     } else
                         entityCmd.append(arg).append(" ");
-
                 if (!entityOptional.isPresent()) {
                     SendMessage.sendMessageNoPlch(sender, "&4[SCore] &cError: &7&oYou must specify an entity with &6entity:ENTITY_UUID&c.");
 
@@ -996,6 +1008,7 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
 
                 infoEntity.setEntityUUID(entityOptional.get().getUniqueId());
                 infoEntity.setReceiverUUID(entityOptional.get().getUniqueId());
+                infoEntity.setLauncherUUID(entityPlayerOpt.isPresent() ? entityPlayerOpt.get().getUniqueId() : null);
 
                 final EntityRunCommandsBuilder entityRunCommandsBuilder = new EntityRunCommandsBuilder(Collections.singletonList(entityCmd.toString()), infoEntity);
                 CommandsExecutor.runCommands(entityRunCommandsBuilder);
@@ -1003,7 +1016,6 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                 break;
             case "run-block-command":
                 Optional<Player> playerOpt2 = Optional.empty();
-                Optional<Block> blockOpt = Optional.empty();
                 StringBuilder blockCmd = new StringBuilder();
                 Optional<World> world = Optional.empty();
                 double x = 0;
@@ -1041,6 +1053,48 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                 /* Run from an activator triggered by a block broken by a command: its ActionInfo stays in that chain (BreakChain) */
                 SCore.schedulerHook.runLocationTask(BreakChain.wrap(BreakChain.current(), ()->{run_rest_of_blockCmd(sender, finalWorld, finalX, finalY, finalZ, blockCmd, finalPlayerOpt);}), new Location(world.get(),x,y,z),0);
 
+                break;
+            case "run-item-command":
+                Optional<Player> playerOpt3 = Optional.empty();
+                Optional<ItemStack> itemStackOpt = Optional.empty();
+                StringBuilder itemCmd = new StringBuilder();
+                for (final String arg : args) {
+                    if (arg.startsWith("player:")) {
+                        final String playerName = arg.replace("player:", "");
+                        try {
+                            playerOpt3 = Optional.ofNullable(Bukkit.getPlayer(UUID.fromString(playerName)));
+                        } catch (final Exception e) {
+                            playerOpt3 = Optional.ofNullable(Bukkit.getPlayer(playerName));
+                        }
+                    } else if (arg.startsWith("slot:")) {
+                        final String slot = arg.replace("slot:", "");
+                        // no player, no item to check, no use running further
+                        if (!playerOpt3.isPresent()) break;
+                        itemStackOpt = Optional.ofNullable(playerOpt3.get().getInventory().getItem(Integer.parseInt(slot)));
+                    } else {
+                        itemCmd.append(arg).append(" ");
+                    }
+                }
+                itemCmd = new StringBuilder(itemCmd.toString().trim());
+
+                if (!playerOpt3.isPresent()) break;
+                if (!itemStackOpt.isPresent()) break;
+
+                ActionInfo itemAInfo = new ActionInfo("run-item-command", new StringPlaceholder());
+                itemAInfo.setLauncherUUID(playerOpt3.get().getUniqueId());
+                itemAInfo.setItemStack(itemStackOpt.get());
+
+                final StringPlaceholder sp2 = new StringPlaceholder();
+
+                sp2.setPlayerPlcHldr(playerOpt3.get().getUniqueId());
+                sp2.setItem(itemStackOpt.get().getType().toString());
+                itemAInfo.setSp(sp2);
+
+                StringBuilder finalItemCmd = itemCmd;
+                SCore.schedulerHook.runEntityTask(()->{
+                    final ItemRunCommandsBuilder itemRunCommandsBuilder = new ItemRunCommandsBuilder(Collections.singletonList(finalItemCmd.toString()), itemAInfo);
+                    CommandsExecutor.runCommands(itemRunCommandsBuilder);
+                    }, ()->{}, playerOpt3.get(), 0);
                 break;
             default:
                 break;
@@ -1118,6 +1172,7 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                 arguments.add("run-player-command");
                 arguments.add("run-entity-command");
                 arguments.add("run-block-command");
+                arguments.add("run-item-command");
 
                 final List<String> argumentsPerm = new ArrayList<>();
 
@@ -1215,6 +1270,23 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                             arguments.add("block:");
                         else if (args.length == 3 && args[1].startsWith("block:")) {
                             arguments.addAll(BlockCommandManager.getInstance().getCommandsDisplay().values());
+
+                            for (int i = 0; i < arguments.size(); i++) {
+                                final String arg = arguments.get(i);
+
+                                if (arg.length() > 50)
+                                    arguments.set(i, arg.substring(0, 45) + "...");
+                            }
+                        }
+
+                        break;
+                    case "run-item-command":
+                        if (args.length == 2)
+                            arguments.add("player:");
+                        if (args.length == 3)
+                            arguments.add("slot:");
+                        else if (args.length == 4 && args[1].startsWith("player:") && args[2].startsWith("slot:")) {
+                            arguments.addAll(ItemCommandManager.getInstance().getCommandsDisplay().values());
 
                             for (int i = 0; i < arguments.size(); i++) {
                                 final String arg = arguments.get(i);

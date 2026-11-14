@@ -55,7 +55,7 @@ import java.sql.SQLException;
 
 import static com.ssomar.score.usedapi.Dependency.PROTOCOL_LIB;
 
-public final class SCore extends JavaPlugin implements SPlugin {
+public class SCore extends JavaPlugin implements SPlugin {
 
     public static final String NAME = "SCore";
     public static final String NAME_COLOR = "&eSCore";
