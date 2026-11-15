@@ -45,7 +45,8 @@ public class SafeBreak {
         if (playerUUID == null) {
             SsomarDev.testMsg("> [#s0013] Player is null", DEBUG);
             if (breakEB(null, block, drop)) return true;
-            block.breakNaturally();
+            /* drop=false (REMOVEBLOCK, MINEINCUBE drop:false...) must be respected without a player too */
+            breakBlockNaturallyWith(block, Optional.empty(), drop);
             return true;
         }
         SsomarDev.testMsg("> [#s0011] Player is not null", DEBUG);

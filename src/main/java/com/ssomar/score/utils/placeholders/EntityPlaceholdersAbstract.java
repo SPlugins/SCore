@@ -151,10 +151,11 @@ public class EntityPlaceholdersAbstract extends PlaceholdersInterface implements
             toReplace = toReplace.replaceAll(StringPlaceholder.start + particle + "_uuid_array"+StringPlaceholder.end, PlayerPlaceholdersAbstract.convertedUUID(entityUUID));
 
             // remove this try chat and find the good version to start
-            try{
+            /* Only when asked: createSnapshot() saves the whole entity (full NBT) */
+            if (toReplace.contains("_serialized%")) try{
                 EntitySnapshot entitySnapshot = entity.createSnapshot();
                 if (entitySnapshot != null) {
-                    toReplace = toReplace.replaceAll(StringPlaceholder.start + particle + "_serialized"+StringPlaceholder.end, entitySnapshot.getAsString());
+                    toReplace = toReplace.replaceAll(StringPlaceholder.start + particle + "_serialized"+StringPlaceholder.end, java.util.regex.Matcher.quoteReplacement(entitySnapshot.getAsString()));
                 }
             } catch (Exception | Error ignore){}
 

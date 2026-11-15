@@ -452,7 +452,8 @@ public abstract class SObjectWithFileLoader<T extends SObjectWithFile> {
         Collections.sort(listFiles);
 
         for (String s : listFiles) {
-            File fileEntry = new File(getConfigsPath() + "/" + s);
+            /* relative to the folder searched: from the root, a sub folder (folder:packs/swords) was never found */
+            File fileEntry = new File(folder, s);
             if (fileEntry.isDirectory()) {
                 if (fileEntry.getName().equals(folderName))
                     return fileEntry;
