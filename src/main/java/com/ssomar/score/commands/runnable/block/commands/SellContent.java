@@ -31,6 +31,8 @@ import java.util.Set;
 /* STRIKELIGHTNING */
 public class SellContent extends BlockCommand {
 
+    private static boolean excellentShopApiWarned = false;
+
     public SellContent() {
         CommandSetting priceBoost = new CommandSetting("priceBoost", 0, Double.class, 1.0);
         CommandSetting deleteUnsellable = new CommandSetting("deleteUnsellable", 1, Boolean.class, false);
@@ -94,17 +96,30 @@ public class SellContent extends BlockCommand {
                     }
                     else if (SCore.hasExcellentShop && (reference.equalsIgnoreCase("ExcellentShop") || autoReference)) {
 
-                        int quantity = item.getAmount();
-                        // get the shops the player has access to
-                        Set<VirtualShop> shops = ShopAPI.getVirtualShop().getShops(p);
-                        // get price of said item
-                        Product best = ShopUtils.findBestProduct(item, TradeType.SELL, shops);
-                        // best == null means no shop buys this item; deleteUnsellable is handled below
-                        if (best != null) {
-                            // price is the best available price among shops this player can access
-                            double sellPrice = best.getFinalPrice(TradeType.SELL, p);
-                            amount += sellPrice * quantity;
-                            item.setAmount(0);
+                        try {
+                            int quantity = item.getAmount();
+                            // get the shops the player has access to
+                            Set<VirtualShop> shops = ShopAPI.getVirtualShop().getShops(p);
+                            // get price of said item
+                            Product best = ShopUtils.findBestProduct(item, TradeType.SELL, shops);
+                            // best == null means no shop buys this item; deleteUnsellable is handled below
+                            if (best != null) {
+                                // The price is for one unit of the product (getUnitSize() items, 16 for "16 emeralds"):
+                                // sell the whole units, the rest of the stack stays in the container
+                                int unitSize = Math.max(1, best.getUnitSize());
+                                int units = quantity / unitSize;
+                                if (units > 0) {
+                                    double sellPrice = best.getFinalPrice(TradeType.SELL, p);
+                                    amount += sellPrice * units;
+                                    item.setAmount(quantity - units * unitSize);
+                                }
+                            }
+                        } catch (LinkageError e) {
+                            // Another ExcellentShop API (4.x): nothing sold, the items stay
+                            if (!excellentShopApiWarned) {
+                                excellentShopApiWarned = true;
+                                SCore.plugin.getLogger().warning("SELL_CONTENT: this ExcellentShop version is not supported (" + e + "), use ExcellentShop 5.1+");
+                            }
                         }
                     }
                     if(deleteUnsellable) item.setAmount(0);
