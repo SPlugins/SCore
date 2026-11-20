@@ -91,7 +91,7 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
 
     private final String[] commands = new String[]{"clear", "cooldowns", "hardnesses", "hardnesses-create", "hardnesses-delete", "inspect-loop", "particles", "particles-info",
             "particles-toggle", "projectiles", "projectiles-create", "projectiles-delete", "reload", "run-entity-command", "run-block-command", "run-player-command", "variables",
-            "variables-create", "variables-define", "variables-delete", "webhook", "no-translated", "run-item-command"};
+            "variables-create", "variables-define", "variables-delete", "webhook", "no-translated", "run-item-command", "hub"};
 
     /**
      * Called when a {@link CommandSender} types /score.
@@ -141,7 +141,8 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
         if (sender instanceof Player) {
             player = (Player) sender;
 
-            if (!(player.hasPermission("score.cmd." + command) || player.hasPermission("score.cmds") || player.hasPermission("score.*"))) {
+            if (!(player.hasPermission("score.cmd." + command) || player.hasPermission("score.cmds") || player.hasPermission("score.*")
+                    || (command.equalsIgnoreCase("hub") && player.hasPermission("score.hub")))) {
                 player.sendMessage(StringConverter.coloredString("&4[SCore] &cYou don't have the permission to execute this command: &6score.cmd." + command + "&c."));
 
                 return;
@@ -149,6 +150,13 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
         }
 
         switch (command.toLowerCase()) {
+            case "hub":
+                if (player == null) {
+                    sender.sendMessage(StringConverter.coloredString("&4[SCore] &cThe SPlugins Hub can only be opened by a player."));
+                    break;
+                }
+                com.ssomar.score.hub.SPluginsHub.open(player, args.length > 0 ? com.ssomar.score.hub.HubAlias.modeArgPublic(args[0]) : null);
+                break;
             case "no-translated":
                 SendMessage.sendMessageNoPlch(sender, "&4[SCore] &cNo translated text sent in your console. &7(You can send it to Ssomar in the suggestions channel on the discord).");
                 Utils.sendConsoleFlatMsg(SCore.plugin, FeatureSettingsSCore.getAllNonTranslated());
@@ -1180,6 +1188,9 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                     if (sender.hasPermission("score.cmd." + command) || sender.hasPermission("score.cmds") || sender.hasPermission("score.*"))
                         argumentsPerm.add(str);
 
+                if (sender.hasPermission("score.hub") || sender.hasPermission("score.cmd.hub") || sender.hasPermission("score.cmds") || sender.hasPermission("score.*"))
+                    argumentsPerm.add("hub");
+
                 Collections.sort(argumentsPerm);
                 return argumentsPerm.stream()
                         .filter(element -> element.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
@@ -1188,6 +1199,12 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
 
             if (args.length >= 2) {
                 switch (args[0].toLowerCase()) {
+                    case "hub":
+                        if (args.length == 2) {
+                            for (String m : new String[]{"auto", "chest", "classic", "pinned"})
+                                if (m.startsWith(args[1].toLowerCase())) arguments.add(m);
+                        }
+                        return arguments;
                     case "cooldowns":
                         if (args.length == 2) {
                             arguments.add("clear");

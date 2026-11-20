@@ -104,6 +104,10 @@ public class EventsHandler {
 
         main.getServer().getPluginManager().registerEvents(new JoinQuitListener(), main);
 
+        /* SCore Screens (chest version of the screens) + SPlugins Hub (opt-in join messages) */
+        main.getServer().getPluginManager().registerEvents(new com.ssomar.score.screen.internal.ScreenListener(), main);
+        main.getServer().getPluginManager().registerEvents(new com.ssomar.score.hub.HubListener(), main);
+
         // Config-phase pack dispatch — sends packs during PlayerLinksSendEvent (before world join)
         // Only sends if the URL is already cached (non-blocking). JoinQuitListener is NOT skipped.
         if (SCore.is1v20v5Plus()) {

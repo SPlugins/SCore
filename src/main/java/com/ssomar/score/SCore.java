@@ -628,6 +628,8 @@ public class SCore extends JavaPlugin implements SPlugin {
 
         /* Commands part */
         this.getCommand("score").setExecutor(commandClass);
+        /* /splugins (SPlugins Hub) only if no other plugin uses it */
+        if (GeneralConfig.getInstance().isHubSpluginsAlias()) com.ssomar.score.hub.HubAlias.register();
 
 
         //this.getCommand("/").setExecutor(new TestCmdClass());
@@ -857,6 +859,10 @@ public class SCore extends JavaPlugin implements SPlugin {
 
         // Unregister all packs
         PackManager.getInstance().removeAllPacks();
+        try {
+            com.ssomar.score.screen.Screens.closeAll();
+        } catch (Throwable ignored) {
+        }
 
         try {
             Database.getInstance().connect().close();
@@ -871,6 +877,7 @@ public class SCore extends JavaPlugin implements SPlugin {
         Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Run delayed saving tasks...");
         RunnableManager.getInstance().forceRunTasks();
         Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Run delayed saving tasks done !");
+        com.ssomar.score.screen.Screens.closeAll();
         GeneralConfig.getInstance().reload();
 
         FeatureSettingsSCore.reload();

@@ -31,6 +31,11 @@
                 </includes>
             </resource>
             <resource>
+                <targetPath>hub</targetPath>
+                <filtering>false</filtering>
+                <directory>${basedir}/src/main/resources/hub/</directory>
+            </resource>
+            <resource>
                 <targetPath>com/ssomar/score/configs/locale</targetPath>
                 <filtering>true</filtering>
                 <directory>${basedir}/src/main/resources/locale/</directory>

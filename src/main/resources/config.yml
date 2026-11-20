@@ -49,3 +49,27 @@ blockLists:
     - GOLD_ORE
     - DIAMOND_ORE
     - EMERALD_ORE
+# SCore Screens: menus drawn in front of the player (text displays), with a chest menu when that is not possible.
+# Nothing opens a screen unless you run a command that uses it (for example /score hub).
+screens:
+  enabled: true
+  # AUTO = PINNED (panel fixed to the camera, needs the pack below) if possible, else FLOATING (1.19.4+), else CHEST
+  prefer-mode: AUTO
+  # Send the small SCore Screens resource pack (cursor shader) to the players who have the permission score.hub
+  pinned-pack: false
+  # Screen ids or plugin names always shown as a chest menu, example: [ "splugins:hub" ]
+  forced-chest: []
+
+# SPlugins Hub (/score hub, /splugins): dashboard of your SPlugins plugins, help, news. Permission score.hub (OP).
+hub:
+  # Add the /splugins command if no other plugin uses it
+  splugins-alias: true
+  # Read the public SPlugins catalog (versions, packs, news) with an anonymous request. Nothing about your server is sent.
+  remote-catalog: true
+  # Show a clickable line to the players with score.hub when they join
+  join-notification: false
+  # Remind the players with score.hub to leave a review after some days
+  review-reminder: false
+  review-reminder-days: 14
+  # 1.21.6+: add a "SPlugins Hub" button in the pause menu (a datapack is written, restart needed)
+  pause-menu-button: false
