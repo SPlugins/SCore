@@ -525,31 +525,55 @@ public final class SPluginsHub {
         return rows;
     }
 
+    /**
+     * Everything of splugins.net/store, in its order: the bundles, the official plugins (a Premium edition stays
+     * listed while only the Free one is installed), the packs, then what the members sell; the Pack Studio last.
+     */
     private static List<Row> discoverRows(HubCatalog cat) {
         List<Row> rows = new ArrayList<>();
         Set<String> done = new HashSet<>();
+        for (HubCatalog.Entry e : cat.bundles) {
+            List<String> l = new ArrayList<>();
+            if (e.pitch != null && !e.pitch.isEmpty()) l.add("&7" + e.pitch);
+            if (!e.items.isEmpty()) l.add(TM.g(Text.HUB_DISCOVER_BUNDLE).replace("%items%", String.join(", ", e.items)));
+            l.add(TM.g(Text.HUB_DISCOVER_PRICE).replace("%price%", e.priceText()));
+            l.add(TM.g(Text.HUB_CLICK_LINK));
+            rows.add(new Row("&6&l" + e.name + "  &7" + e.priceText(), "ENDER_CHEST", l, link(e.name, e.url), true).logo(e.icon).image(e.icon));
+        }
+        Map<KnownPlugin, Boolean> installed = new HashMap<>();
+        for (InstalledPlugin ip : InstalledPlugin.scan()) installed.put(ip.getKnown(), ip.getPremium());
         for (HubCatalog.Entry e : cat.plugins) {
             KnownPlugin k = KnownPlugin.byKey(e.key);
-            if (k != null && InstalledPlugin.isInstalled(k)) continue;
             if (k == KnownPlugin.SCORE) continue;
+            boolean upgrade = false;
+            if (k != null && installed.containsKey(k)) {
+                // installed: only the Premium edition of a plugin used in Free is still worth showing
+                Boolean premium = installed.get(k);
+                if (!"premium".equalsIgnoreCase(e.edition) || !Boolean.FALSE.equals(premium)) continue;
+                upgrade = true;
+            }
             String dedupe = (e.key == null || e.key.isEmpty() ? e.name : e.key) + "/" + e.edition;
             if (!done.add(dedupe)) continue;
             List<String> l = new ArrayList<>();
+            if (upgrade) l.add(TM.g(Text.HUB_DISCOVER_UPGRADE));
             if (e.pitch != null && !e.pitch.isEmpty()) l.add("&7" + e.pitch);
             l.add(TM.g(Text.HUB_DISCOVER_PRICE).replace("%price%", e.priceText()));
             l.add(TM.g(Text.HUB_CLICK_LINK));
             String ed = e.edition == null || e.edition.isEmpty() ? "" : " &8(" + e.edition + ")";
-            rows.add(new Row("&f&l" + e.name + ed + "  &7" + e.priceText(), k != null ? k.getIcon() : "CHEST", l, link(e.name, e.url), e.salePercent > 0)
+            rows.add(new Row("&f&l" + e.name + ed + "  &7" + e.priceText(), k != null ? k.getIcon() : "CHEST", l, link(e.name, e.url), e.salePercent > 0 || upgrade)
                     .logo(logo(k, e))
                     .image(e.banner != null && !e.banner.isEmpty() ? e.banner : e.icon));
         }
-        for (HubCatalog.Entry e : cat.packs) {
+        List<HubCatalog.Entry> packs = new ArrayList<>();
+        for (HubCatalog.Entry e : cat.packs) if (e.official) packs.add(e);
+        for (HubCatalog.Entry e : cat.packs) if (!e.official) packs.add(e);
+        for (HubCatalog.Entry e : packs) {
             List<String> l = new ArrayList<>();
-            l.add(TM.g(Text.HUB_DISCOVER_PACK));
+            l.add(e.official ? TM.g(Text.HUB_DISCOVER_PACK) : TM.g(Text.HUB_DISCOVER_COMMUNITY));
             if (e.pitch != null && !e.pitch.isEmpty()) l.add("&7" + e.pitch);
             l.add(TM.g(Text.HUB_DISCOVER_PRICE).replace("%price%", e.priceText()));
             l.add(TM.g(Text.HUB_CLICK_LINK));
-            rows.add(new Row("&d" + e.name + "  &7" + e.priceText(), "CHEST", l, link(e.name, e.url), e.salePercent > 0)
+            rows.add(new Row((e.official ? "&d" : "&b") + e.name + "  &7" + e.priceText(), "CHEST", l, link(e.name, e.url), e.salePercent > 0)
                     .logo(e.icon)
                     .image(e.banner != null && !e.banner.isEmpty() ? e.banner : e.icon));
         }
