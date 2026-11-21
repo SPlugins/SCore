@@ -19,8 +19,33 @@ public final class LoadErrorCollector {
     private LoadErrorCollector() {
     }
 
+    /** lines captured on this thread while {@link #capture} runs (dry-run validation), instead of the global list */
+    private static final ThreadLocal<List<String>> CAPTURE = new ThreadLocal<>();
+
+    /** Run {@code r} and return the error lines it printed; they are not kept as load errors of the server. */
+    public static List<String> capture(Runnable r) {
+        List<String> got = new ArrayList<>();
+        List<String> before = CAPTURE.get();
+        CAPTURE.set(got);
+        try {
+            r.run();
+        } finally {
+            CAPTURE.set(before);
+        }
+        return got;
+    }
+
+    public static boolean isCapturing() {
+        return CAPTURE.get() != null;
+    }
+
     public static void record(String decoloredLine) {
         if (decoloredLine == null) return;
+        List<String> cap = CAPTURE.get();
+        if (cap != null) {
+            if (!decoloredLine.trim().isEmpty()) cap.add(decoloredLine.trim());
+            return;
+        }
         if (!decoloredLine.contains("ERROR")) return;
         synchronized (LINES) {
             LINES.addLast(decoloredLine.trim());

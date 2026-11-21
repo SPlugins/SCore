@@ -32,6 +32,10 @@ public class GeneralConfig extends Config {
     private boolean hubReviewReminder;
     private int hubReviewReminderDays;
     private boolean hubPauseMenuButton;
+    /* SPlugins assistant (section ai:), off by default */
+    private boolean aiEnabled;
+    private String aiUrl;
+    private String aiServerName;
 
     private boolean useMySQL;
 
@@ -143,6 +147,9 @@ public class GeneralConfig extends Config {
         hubReviewReminder = config.getBoolean("hub.review-reminder", false);
         hubReviewReminderDays = Math.max(1, config.getInt("hub.review-reminder-days", 14));
         hubPauseMenuButton = config.getBoolean("hub.pause-menu-button", false);
+        aiEnabled = config.getBoolean("ai.enabled", false);
+        aiUrl = config.getString("ai.url", "https://splugins.net/api/v1/server");
+        aiServerName = config.getString("ai.server-name", "");
     }
 
     public boolean isVerbosityNormal() {

@@ -9,6 +9,11 @@ public class Utils {
 
     public static void sendConsoleMsg(String msg) {
         try {
+            // a dry-run validation (assistant tool) keeps its messages for the answer, out of the console
+            if (com.ssomar.score.hub.LoadErrorCollector.isCapturing()) {
+                if (msg != null) com.ssomar.score.hub.LoadErrorCollector.record(StringConverter.decoloredString(msg));
+                return;
+            }
             if (msg != null && msg.contains("ERROR")) com.ssomar.score.hub.LoadErrorCollector.record(StringConverter.decoloredString(msg));
         } catch (Throwable ignored) {
         }
