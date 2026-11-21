@@ -624,7 +624,7 @@ public final class SPluginsHub {
         }
         HubCatalog.Link studio = linkOf(cat, "studio");
         rows.add(new Row(TM.g(Text.HUB_DISCOVER_STUDIO), "ANVIL", lore(TM.g(Text.HUB_DISCOVER_STUDIO_LORE), TM.g(Text.HUB_CLICK_LINK)),
-                link("Pack Studio", linkUrl(cat, "studio", "https://splugins.net/forge")), true)
+                link("Pack Studio", linkUrl(cat, "studio", "https://splugins.net/custom-minecraft-pack")), true)
                 .logo(studio != null && studio.icon.startsWith("http") ? studio.icon : STUDIO_LOGO)
                 .image(studio != null && !studio.image.isEmpty() ? studio.image : STUDIO_BANNER));
         if (rows.size() == 1) rows.add(0, new Row(TM.g(Text.HUB_DISCOVER_EMPTY), "PAPER", new ArrayList<String>(), none(), false));
