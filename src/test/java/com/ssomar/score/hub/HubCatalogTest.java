@@ -2,6 +2,8 @@ package com.ssomar.score.hub;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,5 +62,22 @@ class HubCatalogTest {
         assertEquals(1700000000000L, HubCatalog.time(1700000000L));
         assertEquals(1700000000000L, HubCatalog.time(1700000000000L));
         assertTrue(HubCatalog.time("2026-11-20") > 0);
+    }
+
+    @Test
+    void readsTheBundlesAndTheCommunityPacksOfTheStore() {
+        HubCatalog c = HubCatalog.parse("{\"plugins\":[],\"packs\":[{\"name\":\"Deep Dark Pack\",\"kind\":\"premium\",\"official\":true,\"price\":12.99,\"url\":\"u1\"},"
+                + "{\"name\":\"Member Pack\",\"kind\":\"community\",\"official\":false,\"access\":\"paid\",\"price\":5,\"url\":\"u2\"}],"
+                + "\"bundles\":[{\"id\":3,\"title\":\"Starter Bundle\",\"pitch\":\"All you need\",\"discountPercent\":20,\"fullPrice\":50,\"price\":40,"
+                + "\"currency\":\"EUR\",\"url\":\"https://splugins.net/bundles/3\",\"resources\":[{\"id\":900,\"name\":\"ExecutableItems\",\"icon\":\"https://x/icon.png\"},{\"id\":923,\"name\":\"Deep Dark Pack\",\"icon\":null}]},"
+                + "{\"title\":\"no url\"}]}");
+        assertEquals(1, c.bundles.size());
+        HubCatalog.Entry b = c.bundles.get(0);
+        assertEquals("Starter Bundle", b.name);
+        assertEquals(Arrays.asList("ExecutableItems", "Deep Dark Pack"), b.items);
+        assertEquals("https://x/icon.png", b.icon);
+        assertEquals("40.00€ (-20%)", b.priceText());
+        assertTrue(c.packs.get(0).official);
+        assertFalse(c.packs.get(1).official);
     }
 }

@@ -25,6 +25,8 @@ public final class HubCatalog {
 
     public final List<Entry> plugins = new ArrayList<>();
     public final List<Entry> packs = new ArrayList<>();
+    /** the bundles of splugins.net/store (several products at a lower price) */
+    public final List<Entry> bundles = new ArrayList<>();
     public final List<News> news = new ArrayList<>();
     public final List<News> promotions = new ArrayList<>();
     public final List<Link> links = new ArrayList<>();
@@ -32,6 +34,10 @@ public final class HubCatalog {
 
     public static final class Entry {
         public String key, edition, name, pitch, access, currency, url, icon, banner, kind, saleLabel, latestVersion;
+        /** a bundle: the names of what it contains */
+        public final List<String> items = new ArrayList<>();
+        /** a pack sold by a member (the community section of the store) */
+        public boolean official = true;
         public double price, salePrice;
         public int salePercent, tokenCost;
         public long saleEndsAt;
@@ -161,6 +167,8 @@ public final class HubCatalog {
         if (a != null) for (int i = 0; i < a.length(); i++) c.plugins.add(entry(a.optJSONObject(i)));
         a = root.optJSONArray("packs");
         if (a != null) for (int i = 0; i < a.length(); i++) c.packs.add(entry(a.optJSONObject(i)));
+        a = root.optJSONArray("bundles");
+        if (a != null) for (int i = 0; i < a.length(); i++) c.bundles.add(bundle(a.optJSONObject(i)));
         a = root.optJSONArray("news");
         if (a != null) for (int i = 0; i < a.length(); i++) c.news.add(news(a.optJSONObject(i)));
         a = root.optJSONArray("promotions");
@@ -181,8 +189,35 @@ public final class HubCatalog {
         }
         c.plugins.removeIf(Objects::isNull);
         c.packs.removeIf(Objects::isNull);
+        c.bundles.removeIf(Objects::isNull);
         c.news.removeIf(Objects::isNull);
         return c;
+    }
+
+    /** a bundle of the catalog: {title, pitch, discountPercent, fullPrice, price, currency, url, resources[{name, icon}]} */
+    private static Entry bundle(JSONObject o) {
+        if (o == null || o.optString("url", "").isEmpty()) return null;
+        Entry e = new Entry();
+        e.kind = "bundle";
+        e.name = o.optString("title", "Bundle");
+        e.pitch = o.optString("pitch", "");
+        e.access = "paid";
+        e.currency = o.optString("currency", "EUR");
+        e.url = o.optString("url", "");
+        double full = o.optDouble("fullPrice", 0), price = o.optDouble("price", full);
+        e.price = full > 0 ? full : price;
+        e.salePercent = o.optInt("discountPercent", 0);
+        e.salePrice = e.salePercent > 0 ? price : 0;
+        e.icon = "";
+        e.banner = "";
+        JSONArray r = o.optJSONArray("resources");
+        if (r != null) for (int i = 0; i < r.length(); i++) {
+            JSONObject x = r.optJSONObject(i);
+            if (x == null) continue;
+            e.items.add(x.optString("name", ""));
+            if (e.icon.isEmpty() && !x.isNull("icon")) e.icon = x.optString("icon", "");
+        }
+        return e;
     }
 
     private static Entry entry(JSONObject o) {
@@ -198,6 +233,7 @@ public final class HubCatalog {
         e.url = o.optString("url", "");
         e.icon = o.isNull("icon") ? "" : o.optString("icon", "");
         e.banner = o.isNull("banner") ? "" : o.optString("banner", "");
+        e.official = o.optBoolean("official", true) && !"community".equals(e.kind);
         if (e.key.isEmpty() || o.isNull("key")) e.key = "";
         e.price = o.optDouble("price", 0);
         e.salePrice = o.optDouble("salePrice", 0);
