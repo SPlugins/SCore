@@ -185,7 +185,7 @@ public final class HubAssistant {
         @Override
         public void error(Player p, String code, String message, String upgradeUrl) {
             SPluginsHub.refreshIfOpen(p);
-            String line = "quota".equals(code) ? TM.g(Text.AI_QUOTA) : TM.g(Text.AI_ERROR).replace("%error%", message);
+            String line = "quota".equalsIgnoreCase(code) ? TM.g(Text.AI_QUOTA) : TM.g(Text.AI_ERROR).replace("%error%", message);
             p.sendMessage(StringConverter.coloredString(line));
             if (upgradeUrl != null && !upgradeUrl.isEmpty()) HubLinks.send(p, TM.g(Text.AI_UPGRADE), upgradeUrl, "assistant");
         }

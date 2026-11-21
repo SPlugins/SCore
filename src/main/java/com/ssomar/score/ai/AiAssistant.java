@@ -106,7 +106,7 @@ public final class AiAssistant {
                     return;
                 }
                 if (!res.ok()) {
-                    if ("unlinked".equals(res.errorCode())) AiLink.forget();
+                    if ("unlinked".equalsIgnoreCase(res.errorCode())) AiLink.forget();
                     view.error(p, res.errorCode(), res.errorMessage(), res.body.optString("upgradeUrl", ""));
                     return;
                 }
