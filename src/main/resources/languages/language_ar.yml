@@ -128,6 +128,10 @@ hub:
     community: "&7من صنع المجتمع"
     upgrade: "&eأنت تستخدم النسخة المجانية: النسخة المميزة تزيل القيود"
     studio: "&d★ Pack Studio"
+    sub: "&b&l★ اشتراك SPlugins"
+    subPlugins: "&7الإضافات المميزة مشمولة"
+    subPacks: "&7حزمة عناصر جديدة كل أسبوع"
+    subChat: "&7دردشة ذكاء اصطناعي مميزة ودور Subscriber على Discord"
     studioLore: "&7اطلب حزمة مخصصة لخادمك"
     price: "&7السعر: &f%price%"
   news:

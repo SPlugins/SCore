@@ -128,6 +128,10 @@ hub:
     community: "&7समुदाय द्वारा बनाया गया"
     upgrade: "&eआप Free संस्करण उपयोग कर रहे हैं: Premium सीमाएँ हटाता है"
     studio: "&d★ Pack Studio"
+    sub: "&b&l★ SPlugins सदस्यता"
+    subPlugins: "&7Premium प्लगइन शामिल"
+    subPacks: "&7हर हफ्ते एक नया आइटम पैक"
+    subChat: "&7Premium AI चैट और Discord पर Subscriber भूमिका"
     studioLore: "&7अपने सर्वर के लिए कस्टम पैक ऑर्डर करें"
     price: "&7कीमत: &f%price%"
   news:

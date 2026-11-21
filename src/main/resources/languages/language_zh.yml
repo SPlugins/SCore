@@ -128,6 +128,10 @@ hub:
     community: "&7由社区制作"
     upgrade: "&e你在使用免费版：高级版没有限制"
     studio: "&d★ Pack Studio"
+    sub: "&b&l★ SPlugins 订阅"
+    subPlugins: "&7包含高级版插件"
+    subPacks: "&7每周一个新的物品包"
+    subChat: "&7高级 AI 聊天与 Discord 订阅者身份"
     studioLore: "&7为你的服务器定制专属内容包"
     price: "&7价格：&f%price%"
   news:

@@ -27,8 +27,7 @@ public final class SPluginsHub {
 
     public enum Tab {
         HOME(Text.HUB_TAB_HOME, "NETHER_STAR"), ASSISTANT(Text.HUB_TAB_ASSISTANT, "ENCHANTED_BOOK"), MANAGE(Text.HUB_TAB_MANAGE, "COMPARATOR"), HELP(Text.HUB_TAB_HELP, "BOOK"),
-        DISCOVER(Text.HUB_TAB_DISCOVER, "SPYGLASS"), NEWS(Text.HUB_TAB_NEWS, "BELL"), LINKS(Text.HUB_TAB_LINKS, "COMPASS"),
-        SUPPORT(Text.HUB_TAB_SUPPORT, "EMERALD");
+        DISCOVER(Text.HUB_TAB_DISCOVER, "SPYGLASS"), NEWS(Text.HUB_TAB_NEWS, "BELL"), LINKS(Text.HUB_TAB_LINKS, "COMPASS");
 
         final Text label;
         final String icon;
@@ -339,10 +338,11 @@ public final class SPluginsHub {
 
         w.add(ScreenWidget.builder("title", WidgetKind.LABEL).at(0.04, 0.02).size(1.2, 0.07).text("&b&lSPlugins &f&lHub").textScale(1.2).hiddenInChest().build());
         boolean newNews = HubData.hasUnseenNews(p, cat);
-        double tabW = 0.255;
+        // the tabs share the width left of the close button (0.04 .. 2.16)
+        double tabStep = 2.12 / Tab.values().length, tabW = tabStep - 0.01;
         for (Tab t : Tab.values()) {
             String label = TM.g(t.label) + (t == Tab.NEWS && newNews ? TM.g(Text.HUB_TAB_NEW_BADGE) : "");
-            w.add(ScreenWidget.builder("tab:" + t.name(), WidgetKind.BUTTON).at(0.04 + t.ordinal() * 0.265, 0.11).size(tabW, 0.09)
+            w.add(ScreenWidget.builder("tab:" + t.name(), WidgetKind.BUTTON).at(0.04 + t.ordinal() * tabStep, 0.11).size(tabW, 0.09)
                     .text(label).icon(t.icon).selected(t == st.tab).glow(t == st.tab).chestSlot(t.ordinal()).build());
         }
         // the screen modes have no room for the word: just the cross (the chest item keeps the full name)
@@ -401,6 +401,22 @@ public final class SPluginsHub {
         return new ScreenLayout(TM.g(Text.HUB_TITLE) + " &8- " + TM.g(st.tab.label), W, H, w, 6);
     }
 
+    /* pictures of Discover (media.ssomar.com), used when the catalog gives none */
+    static final int ULTIMATE_BUNDLE_ID = 1;
+    static final String ULTIMATE_LOGO = "https://media.ssomar.com/media/d27825a8-7a75-4e98-9f2f-560a464121d4.png", ULTIMATE_BANNER = "https://media.ssomar.com/media/c516b987-4c48-4bdf-b550-6b3f68915787.png",
+            STUDIO_LOGO = "https://media.ssomar.com/media/feb88d3f-fb68-497f-b355-0eb02d5162ba.png", STUDIO_BANNER = "https://media.ssomar.com/media/3266c2d6-e3f0-4758-934a-3d60499033d4.png",
+            SUB_LOGO = "https://media.ssomar.com/media/e8a549eb-3379-41b5-a253-8e2c6af8b8f5.png", SUB_BANNER = "https://media.ssomar.com/media/76e45188-7b59-4d63-88fb-9f1849d05dc8.png",
+            SUBSCRIPTION_URL = "https://splugins.net/subscription?utm_source=minecraft&utm_medium=splugins-hub";
+
+    static boolean isSubscriberPack(HubCatalog.Entry e) {
+        return "subscriber".equalsIgnoreCase(e.kind) || e.tokenCost > 0;
+    }
+
+    static HubCatalog.Link linkOf(HubCatalog cat, String id) {
+        for (HubCatalog.Link l : cat.links) if (id.equals(l.id) && l.url != null && !l.url.isEmpty()) return l;
+        return null;
+    }
+
     /** picture of the hovered row (Discover, News), on the right of the rows; an icon where images can't be drawn */
     static final double PREVIEW_W = 0.84, PREVIEW_H = 0.6;
 
@@ -429,9 +445,7 @@ public final class SPluginsHub {
             case NEWS:
                 return newsRows(cat);
             case LINKS:
-                return linkRows(cat, false);
-            case SUPPORT:
-                return linkRows(cat, true);
+                return linkRows(cat);
             default:
                 return new ArrayList<>();
         }
@@ -558,8 +572,18 @@ public final class SPluginsHub {
             if (!e.items.isEmpty()) l.add(TM.g(Text.HUB_DISCOVER_BUNDLE).replace("%items%", String.join(", ", e.items)));
             l.add(TM.g(Text.HUB_DISCOVER_PRICE).replace("%price%", e.priceText()));
             l.add(TM.g(Text.HUB_CLICK_LINK));
-            rows.add(new Row("&6&l" + e.name + "  &7" + e.priceText(), "ENDER_CHEST", l, link(e.name, e.url), true).logo(e.icon).image(e.icon));
+            String[] own = e.id == ULTIMATE_BUNDLE_ID ? new String[]{ULTIMATE_LOGO, ULTIMATE_BANNER} : new String[]{e.icon, e.icon};
+            String logo = !e.icon.isEmpty() && !e.banner.isEmpty() ? e.icon : own[0];
+            String banner = !e.banner.isEmpty() ? e.banner : own[1];
+            rows.add(new Row("&6&l" + e.name + "  &7" + e.priceText(), "ENDER_CHEST", l, link(e.name, e.url), true).logo(logo).image(banner));
         }
+        // the subscription: premium plugins, a pack every week, premium AI chat
+        HubCatalog.Link sub = linkOf(cat, "subscription");
+        rows.add(new Row(TM.g(Text.HUB_DISCOVER_SUB), "NETHER_STAR",
+                lore(TM.g(Text.HUB_DISCOVER_SUB_PLUGINS), TM.g(Text.HUB_DISCOVER_SUB_PACKS), TM.g(Text.HUB_DISCOVER_SUB_CHAT), TM.g(Text.HUB_CLICK_LINK)),
+                link("Subscription", sub != null ? sub.url : SUBSCRIPTION_URL), true)
+                .logo(sub != null && !sub.icon.isEmpty() && sub.icon.startsWith("http") ? sub.icon : SUB_LOGO)
+                .image(sub != null && !sub.image.isEmpty() ? sub.image : SUB_BANNER));
         Map<KnownPlugin, Boolean> installed = new HashMap<>();
         for (InstalledPlugin ip : InstalledPlugin.scan()) installed.put(ip.getKnown(), ip.getPremium());
         for (HubCatalog.Entry e : cat.plugins) {
@@ -585,8 +609,9 @@ public final class SPluginsHub {
                     .image(e.banner != null && !e.banner.isEmpty() ? e.banner : e.icon));
         }
         List<HubCatalog.Entry> packs = new ArrayList<>();
-        for (HubCatalog.Entry e : cat.packs) if (e.official) packs.add(e);
-        for (HubCatalog.Entry e : cat.packs) if (!e.official) packs.add(e);
+        // not the Subscriber Packs (1 SToken): they come with the subscription, promoted above
+        for (HubCatalog.Entry e : cat.packs) if (e.official && !isSubscriberPack(e)) packs.add(e);
+        for (HubCatalog.Entry e : cat.packs) if (!e.official && !isSubscriberPack(e)) packs.add(e);
         for (HubCatalog.Entry e : packs) {
             List<String> l = new ArrayList<>();
             l.add(e.official ? TM.g(Text.HUB_DISCOVER_PACK) : TM.g(Text.HUB_DISCOVER_COMMUNITY));
@@ -597,8 +622,11 @@ public final class SPluginsHub {
                     .logo(e.icon)
                     .image(e.banner != null && !e.banner.isEmpty() ? e.banner : e.icon));
         }
+        HubCatalog.Link studio = linkOf(cat, "studio");
         rows.add(new Row(TM.g(Text.HUB_DISCOVER_STUDIO), "ANVIL", lore(TM.g(Text.HUB_DISCOVER_STUDIO_LORE), TM.g(Text.HUB_CLICK_LINK)),
-                link("Pack Studio", linkUrl(cat, "studio", "https://splugins.net/forge")), true));
+                link("Pack Studio", linkUrl(cat, "studio", "https://splugins.net/forge")), true)
+                .logo(studio != null && studio.icon.startsWith("http") ? studio.icon : STUDIO_LOGO)
+                .image(studio != null && !studio.image.isEmpty() ? studio.image : STUDIO_BANNER));
         if (rows.size() == 1) rows.add(0, new Row(TM.g(Text.HUB_DISCOVER_EMPTY), "PAPER", new ArrayList<String>(), none(), false));
         return rows;
     }
@@ -626,23 +654,11 @@ public final class SPluginsHub {
         return rows;
     }
 
-    private static List<Row> linkRows(HubCatalog cat, boolean support) {
+    private static List<Row> linkRows(HubCatalog cat) {
         List<Row> rows = new ArrayList<>();
-        if (support) {
-            for (HubCatalog.Link l : links(cat)) {
-                if (!l.id.startsWith("review")) continue;
-                String platform = l.label;
-                rows.add(new Row(TM.g(Text.HUB_SUPPORT_REVIEW).replace("%platform%", platform), "SUNFLOWER", lore(TM.g(Text.HUB_SUPPORT_REVIEW_LORE), TM.g(Text.HUB_CLICK_LINK)),
-                        link(platform, l.url), true));
-            }
-            rows.add(new Row(TM.g(Text.HUB_SUPPORT_SUGGEST), "WRITABLE_BOOK", lore(TM.g(Text.HUB_CLICK_LINK)),
-                    link("Suggestions", linkUrl(cat, "suggestions", "https://discord.gg/splugins")), false));
-            rows.add(new Row(TM.g(Text.HUB_SUPPORT_DONATE), "EMERALD", lore(TM.g(Text.HUB_CLICK_LINK)),
-                    link("Donate", linkUrl(cat, "donate", "https://donate.ssomar.com")), false));
-            return rows;
-        }
         for (HubCatalog.Link l : links(cat)) {
-            if (l.id.startsWith("review") || l.id.equals("suggestions") || l.id.equals("studio")) continue;
+            // the Pack Studio and the subscription are promoted in Discover
+            if (l.id.startsWith("review") || l.id.equals("suggestions") || l.id.equals("studio") || l.id.equals("subscription")) continue;
             rows.add(new Row("&b" + l.label, l.icon == null || l.icon.isEmpty() ? "COMPASS" : l.icon, lore("&8" + l.url, TM.g(Text.HUB_CLICK_LINK)),
                     link(l.label, l.url), false));
         }
