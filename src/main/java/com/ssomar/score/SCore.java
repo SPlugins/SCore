@@ -638,6 +638,14 @@ public class SCore extends JavaPlugin implements SPlugin {
         } catch (Throwable t) {
             getLogger().warning("[SCore Screens] screen modes unavailable, menus open as chests: " + t);
         }
+        /* SPlugins assistant: read tools of SCore (every SPlugins plugin through its loaders), server link */
+        try {
+            com.ssomar.score.ai.AiTools.registerBuiltins(this);
+            com.ssomar.score.ai.AiLink.init();
+            getServer().getPluginManager().registerEvents(new com.ssomar.score.hub.HubAssistant.ChatInput(), this);
+        } catch (Throwable t) {
+            getLogger().warning("[SCore AI] assistant unavailable: " + t);
+        }
 
 
         //this.getCommand("/").setExecutor(new TestCmdClass());
@@ -892,6 +900,7 @@ public class SCore extends JavaPlugin implements SPlugin {
             com.ssomar.score.screen.internal.pack.ScreenPack.init();
             com.ssomar.score.hub.HubPauseMenu.install();
             com.ssomar.score.hub.HubCatalog.reset();
+            com.ssomar.score.ai.AiLink.init();
         } catch (Throwable t) {
             getLogger().warning("[SCore Screens] " + t);
         }

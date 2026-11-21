@@ -34,7 +34,34 @@ public abstract class SObjectWithFileLoader<T extends SObjectWithFile> {
 
     private String objectName;
 
+    /** every loader of every SPlugins plugin (items, blocks, events...), for the assistant tools of SCore */
+    private static final java.util.List<SObjectWithFileLoader<?>> LOADERS = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    public static java.util.List<SObjectWithFileLoader<?>> getLoaders() {
+        return java.util.Collections.unmodifiableList(LOADERS);
+    }
+
+    public SPlugin getSPlugin() {
+        return sPlugin;
+    }
+
+    public String getObjectNameLowerCase() {
+        return objectName;
+    }
+
+    /**
+     * Load an object from YAML text without registering it anywhere (assistant "validate" tool): the same checks
+     * and error messages as a real load.
+     */
+    public Optional<T> loadDryRun(String yaml, String id) throws org.bukkit.configuration.InvalidConfigurationException {
+        YamlConfiguration config = new YamlConfiguration();
+        config.loadFromString(yaml);
+        return getObject(config, id, true, !sPlugin.isLotOfWork(), "");
+    }
+
     public SObjectWithFileLoader(SPlugin sPlugin, String defaultObjectsPath, SObjectWithFileManager<T> sObjectManager, int maxFreeObjects) {
+        LOADERS.removeIf(l -> l.getClass() == getClass());
+        LOADERS.add(this);
         this.sPlugin = sPlugin;
         this.logger = sPlugin.getPlugin().getServer().getLogger();
         this.defaultObjectsPath = defaultObjectsPath;

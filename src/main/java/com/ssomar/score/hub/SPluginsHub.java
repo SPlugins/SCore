@@ -26,7 +26,7 @@ public final class SPluginsHub {
     private static final int SCREEN_ROWS = 8, CHEST_ROWS = 36;
 
     public enum Tab {
-        HOME(Text.HUB_TAB_HOME, "NETHER_STAR"), MANAGE(Text.HUB_TAB_MANAGE, "COMPARATOR"), HELP(Text.HUB_TAB_HELP, "BOOK"),
+        HOME(Text.HUB_TAB_HOME, "NETHER_STAR"), ASSISTANT(Text.HUB_TAB_ASSISTANT, "ENCHANTED_BOOK"), MANAGE(Text.HUB_TAB_MANAGE, "COMPARATOR"), HELP(Text.HUB_TAB_HELP, "BOOK"),
         DISCOVER(Text.HUB_TAB_DISCOVER, "SPYGLASS"), NEWS(Text.HUB_TAB_NEWS, "BELL"), LINKS(Text.HUB_TAB_LINKS, "COMPASS"),
         SUPPORT(Text.HUB_TAB_SUPPORT, "EMERALD");
 
@@ -41,7 +41,7 @@ public final class SPluginsHub {
 
     /** What a content row does when clicked. */
     static final class Action {
-        enum Type {MANAGE, LINK, RUN, ERRORS, DIAGNOSTIC, NONE}
+        enum Type {MANAGE, LINK, RUN, ERRORS, DIAGNOSTIC, AI_LINK, AI_ASK, AI_NEW, AI_ERRORS, AI_UNLINK, NONE}
 
         final Type type;
         final String a, b;
@@ -227,9 +227,26 @@ public final class SPluginsHub {
                     p.sendMessage(StringConverter.coloredString(TM.g(Text.HUB_HELP_DIAGNOSTIC_CONSOLE)));
                 }
                 break;
+            case AI_LINK:
+            case AI_ASK:
+            case AI_NEW:
+            case AI_ERRORS:
+            case AI_UNLINK:
+                HubAssistant.run(p, s, a.type.name(), a.a);
+                break;
             default:
                 break;
         }
+    }
+
+    /** refresh the Hub of a player if it is open (the Assistant tab after a link, for example) */
+    static void refreshIfOpen(Player p) {
+        State st = STATES.get(p.getUniqueId());
+        if (st != null) refresh(p, st);
+    }
+
+    static Action action(Action.Type type, String a, boolean confirm) {
+        return new Action(type, a, null, confirm);
     }
 
     /** "Back" of a link window: the Hub again, on the same tab / page / plugin, unless it is still open */
@@ -249,10 +266,10 @@ public final class SPluginsHub {
 
         w.add(ScreenWidget.builder("title", WidgetKind.LABEL).at(0.04, 0.02).size(1.2, 0.07).text("&b&lSPlugins &f&lHub").textScale(1.2).hiddenInChest().build());
         boolean newNews = HubData.hasUnseenNews(p, cat);
-        double tabW = 0.29;
+        double tabW = 0.255;
         for (Tab t : Tab.values()) {
             String label = TM.g(t.label) + (t == Tab.NEWS && newNews ? TM.g(Text.HUB_TAB_NEW_BADGE) : "");
-            w.add(ScreenWidget.builder("tab:" + t.name(), WidgetKind.BUTTON).at(0.04 + t.ordinal() * 0.30, 0.11).size(tabW, 0.09)
+            w.add(ScreenWidget.builder("tab:" + t.name(), WidgetKind.BUTTON).at(0.04 + t.ordinal() * 0.265, 0.11).size(tabW, 0.09)
                     .text(label).icon(t.icon).selected(t == st.tab).glow(t == st.tab).chestSlot(t.ordinal()).build());
         }
         // the screen modes have no room for the word: just the cross (the chest item keeps the full name)
@@ -323,6 +340,8 @@ public final class SPluginsHub {
         switch (st.tab) {
             case HOME:
                 return homeRows(cat);
+            case ASSISTANT:
+                return HubAssistant.rows(p);
             case MANAGE:
                 return manageRows(st, cat);
             case HELP:
@@ -429,6 +448,9 @@ public final class SPluginsHub {
         int errors = LoadErrorCollector.linesOf(k.getPluginName()).size();
         rows.add(new Row(TM.g(Text.HUB_MANAGE_ERRORS) + " &8(" + errors + ")", errors > 0 ? "REDSTONE" : "LIME_DYE", new ArrayList<String>(),
                 new Action(Action.Type.ERRORS, k.getPluginName(), null, false), errors > 0));
+        if (errors > 0 && HubAssistant.enabled())
+            rows.add(new Row(TM.g(Text.AI_ERRORS).replace("%count%", "" + errors), "ENCHANTED_BOOK", lore(TM.g(Text.AI_ASK_LORE)),
+                    new Action(Action.Type.AI_ERRORS, k.getKey(), null, false), true));
         return rows;
     }
 
@@ -556,7 +578,7 @@ public final class SPluginsHub {
         return def;
     }
 
-    private static List<String> lore(String... lines) {
+    static List<String> lore(String... lines) {
         return new ArrayList<>(Arrays.asList(lines));
     }
 

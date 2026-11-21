@@ -15,8 +15,17 @@ import io.papermc.paper.registry.data.dialog.type.MultiActionType;
 import net.kyori.adventure.text.event.ClickCallback;
 import org.bukkit.entity.Player;
 
+import com.ssomar.score.ai.AiAnswer;
+import com.ssomar.score.languages.messages.TM;
+import com.ssomar.score.languages.messages.Text;
+import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
+
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Paper 1.21.6+ dialogs for the Hub links: a small native window with one button ("Open in Browser" / "Copy to
@@ -87,5 +96,71 @@ final class HubDialogs {
         ActionButton b = ActionButton.builder(Component.translatable("chat.copy")).width(200)
                 .action(DialogAction.staticAction(ClickEvent.copyToClipboard(toCopy))).build();
         show(p, title, body == null || body.isEmpty() ? null : legacy(body), b, back);
+    }
+
+    /* ------------------------------------------------------------------ assistant */
+
+    private static ClickCallback.Options once() {
+        return ClickCallback.Options.builder().uses(1).lifetime(Duration.ofMinutes(30)).build();
+    }
+
+    private static ActionButton serverButton(Component label, int width, Player p, Runnable r) {
+        return ActionButton.builder(label).width(width).action(DialogAction.customClick((response, audience) ->
+                SCore.schedulerHook.runEntityTask(r, null, p, 1L), once())).build();
+    }
+
+    /** the link code, with a button that opens splugins.net/link with the code filled in */
+    static void linkCode(Player p, String line, String url, Runnable back) {
+        ActionButton open = ActionButton.builder(Component.translatable("chat.link.open")).width(200)
+                .action(DialogAction.staticAction(ClickEvent.openUrl(url))).build();
+        show(p, TM.g(Text.AI_DIALOG_TITLE), legacy(line), open, back);
+    }
+
+    /** the question window: a multi-line text field, Send, Back */
+    static void question(Player p, String prefill, Consumer<String> onSend, Runnable back) {
+        TextDialogInput input = DialogInput.text("q", legacy(TM.g(Text.AI_ASK))).width(300).maxLength(4000)
+                .initial(prefill == null ? "" : (prefill.length() > 4000 ? prefill.substring(0, 4000) : prefill))
+                .multiline(TextDialogInput.MultilineOptions.create(12, 120)).build();
+        ActionButton send = ActionButton.builder(legacy(TM.g(Text.AI_SEND))).width(150)
+                .action(DialogAction.customClick((response, audience) -> {
+                    String text = response.getText("q");
+                    SCore.schedulerHook.runEntityTask(() -> onSend.accept(text), null, p, 1L);
+                }, once())).build();
+        ActionButton exit = serverButton(Component.translatable("gui.back"), 150, p, back == null ? () -> { } : back);
+        DialogBase base = DialogBase.builder(legacy(TM.g(Text.AI_DIALOG_TITLE)))
+                .canCloseWithEscape(true).pause(false).afterAction(DialogBase.DialogAfterAction.CLOSE)
+                .body(Collections.singletonList(DialogBody.plainMessage(legacy(TM.g(Text.AI_DIALOG_CONTEXT)), 300)))
+                .inputs(Collections.singletonList(input)).build();
+        MultiActionType type = DialogType.multiAction(Collections.singletonList(send)).exitAction(exit).columns(1).build();
+        p.showDialog(Dialog.create(f -> f.empty().base(base).type(type)));
+    }
+
+    /** the answer: paragraphs, configs (preview + Copy), links (Open), Reply, Back */
+    static void answer(Player p, AiAnswer a, Runnable reply, Runnable back) {
+        List<DialogBody> body = new ArrayList<>();
+        int n = 0;
+        for (String para : a.paragraphs) {
+            if (body.size() >= 40) break;
+            body.add(DialogBody.plainMessage(Component.text(para), 400));
+        }
+        List<ActionButton> buttons = new ArrayList<>();
+        for (AiAnswer.Code c : a.codes) {
+            n++;
+            buttons.add(ActionButton.builder(legacy(TM.g(Text.AI_COPY).replace("%n%", "" + n))).width(150)
+                    .action(DialogAction.staticAction(ClickEvent.copyToClipboard(c.text))).build());
+        }
+        int links = 0;
+        for (AiAnswer.Link l : a.links) {
+            if (++links > 4) break;
+            buttons.add(ActionButton.builder(Component.text("➜ " + l.label)).width(150)
+                    .tooltip(Component.text(l.url)).action(DialogAction.staticAction(ClickEvent.openUrl(l.url))).build());
+        }
+        buttons.add(serverButton(legacy(TM.g(Text.AI_REPLY)), 150, p, reply));
+        ActionButton exit = serverButton(Component.translatable("gui.back"), 150, p, back == null ? () -> { } : back);
+        DialogBase base = DialogBase.builder(legacy(TM.g(Text.AI_DIALOG_TITLE)))
+                .canCloseWithEscape(true).pause(false).afterAction(DialogBase.DialogAfterAction.CLOSE)
+                .body(body).build();
+        MultiActionType type = DialogType.multiAction(buttons).exitAction(exit).columns(2).build();
+        p.showDialog(Dialog.create(f -> f.empty().base(base).type(type)));
     }
 }

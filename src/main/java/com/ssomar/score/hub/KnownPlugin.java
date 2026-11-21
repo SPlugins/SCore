@@ -56,6 +56,8 @@ public enum KnownPlugin {
     /** main command without the slash, or null */
     public String getCommand() { return command; }
     public String getIcon() { return icon; }
+    /** docs folder on splugins.net, also the plugin id of the assistant ("" if none) */
+    public String getDocsSlug() { return docsSlug; }
     public String getDocsUrl() { return "https://splugins.net/docs" + (docsSlug.isEmpty() ? "" : "/" + docsSlug); }
 
     public static KnownPlugin byKey(String key) {
