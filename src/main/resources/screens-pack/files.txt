@@ -1,0 +1,13 @@
+assets/minecraft/font/default.json
+assets/minecraft/shaders/core/rendertype_text.vsh
+assets/minecraft/shaders/core/rendertype_text_see_through.vsh
+assets/score/textures/screens/pointer.png
+pack.mcmeta
+s_1_21_6/assets/minecraft/shaders/core/rendertype_text.vsh
+s_1_21_6/assets/minecraft/shaders/core/rendertype_text_see_through.vsh
+s_1_21_9/assets/minecraft/shaders/core/rendertype_text.vsh
+s_1_21_9/assets/minecraft/shaders/core/rendertype_text_see_through.vsh
+s_26_1/assets/minecraft/shaders/core/rendertype_text.vsh
+s_26_1/assets/minecraft/shaders/core/rendertype_text_see_through.vsh
+s_26_2/assets/minecraft/shaders/core/text.vsh
+s_26_3/assets/minecraft/shaders/core/text.vsh

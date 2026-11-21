@@ -101,7 +101,15 @@ public enum Text implements TextInterface {
     HUB_SUPPORT_DONATE("hub.support.donate", "&dDonate"),
     HUB_JOIN("hub.join", "&7[&bSPlugins Hub&7] Dashboard, help and news: &e&n/score hub"),
     HUB_REVIEW_REMINDER("hub.reviewReminder", "&7[&bSPlugins&7] Enjoying our plugins? A review helps a lot: &e&n/score hub"),
-    HUB_MODE("hub.mode", "&8Shown as a chest menu (%reason%)");
+    HUB_MODE("hub.mode", "&8Shown as a chest menu (%reason%)"),
+    HUB_CURSOR_TITLE("hub.cursorTitle", "&fCan you see the arrow cursor?"),
+    HUB_CURSOR_HINT("hub.cursorHint", "&7Turn your head to move it onto &aYes&7, then click"),
+    HUB_CURSOR_YES("hub.cursorYes", "&a✔ Yes"),
+    HUB_CURSOR_NO("hub.cursorNo", "&c✘ No"),
+    HUB_SNEAK_HINT("hub.sneakHint", "&8Sneak to close"),
+    HUB_PAUSE_BODY("hub.pauseBody", "Dashboard, help and news of your SPlugins plugins (admins only)"),
+    HUB_PAUSE_BUTTON("hub.pauseButton", "Open the SPlugins Hub"),
+    HUB_PAUSE_DENIED("hub.pauseDenied", "&cThe SPlugins Hub is for the server admins (permission score.hub)");
 
 
     private String key;

@@ -630,6 +630,14 @@ public class SCore extends JavaPlugin implements SPlugin {
         this.getCommand("score").setExecutor(commandClass);
         /* /splugins (SPlugins Hub) only if no other plugin uses it */
         if (GeneralConfig.getInstance().isHubSpluginsAlias()) com.ssomar.score.hub.HubAlias.register();
+        /* SCore Screens: FLOATING / PINNED renderers (1.19.4+), cursor pack (opt-in), Hub pause menu button (opt-in) */
+        try {
+            com.ssomar.score.screen.internal.display.DisplayScreenRenderer.install();
+            com.ssomar.score.screen.internal.pack.ScreenPack.init();
+            com.ssomar.score.hub.HubPauseMenu.install();
+        } catch (Throwable t) {
+            getLogger().warning("[SCore Screens] screen modes unavailable, menus open as chests: " + t);
+        }
 
 
         //this.getCommand("/").setExecutor(new TestCmdClass());
@@ -861,6 +869,7 @@ public class SCore extends JavaPlugin implements SPlugin {
         PackManager.getInstance().removeAllPacks();
         try {
             com.ssomar.score.screen.Screens.closeAll();
+            com.ssomar.score.screen.internal.pack.ScreenPack.stop();
         } catch (Throwable ignored) {
         }
 
@@ -879,6 +888,13 @@ public class SCore extends JavaPlugin implements SPlugin {
         Utils.sendConsoleMsg(SCore.NAME_COLOR + " &7Run delayed saving tasks done !");
         com.ssomar.score.screen.Screens.closeAll();
         GeneralConfig.getInstance().reload();
+        try {
+            com.ssomar.score.screen.internal.pack.ScreenPack.init();
+            com.ssomar.score.hub.HubPauseMenu.install();
+            com.ssomar.score.hub.HubCatalog.reset();
+        } catch (Throwable t) {
+            getLogger().warning("[SCore Screens] " + t);
+        }
 
         FeatureSettingsSCore.reload();
 

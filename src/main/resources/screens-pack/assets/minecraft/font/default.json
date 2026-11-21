@@ -1,0 +1,13 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "score:screens/pointer.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\udbff\udff0"
+      ]
+    }
+  ]
+}

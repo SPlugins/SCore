@@ -61,6 +61,8 @@ public final class SPluginsHub {
         final List<String> lore;
         final Action action;
         final boolean glow;
+        /** picture shown in the preview of the screen modes (Discover, News), null if none */
+        String image;
 
         Row(String text, String icon, List<String> lore, Action action, boolean glow) {
             this.text = text;
@@ -68,6 +70,11 @@ public final class SPluginsHub {
             this.lore = lore;
             this.action = action;
             this.glow = glow;
+        }
+
+        Row image(String url) {
+            this.image = url == null || url.isEmpty() ? null : url;
+            return this;
         }
     }
 
@@ -77,6 +84,8 @@ public final class SPluginsHub {
         String managed;
         ScreenMode mode = ScreenMode.CHEST;
         final Map<String, Action> actions = new HashMap<>();
+        /** row id -> {image url, icon} for the preview */
+        final Map<String, String[]> previews = new HashMap<>();
         String confirmId;
         long confirmUntil;
         String chestNote;
@@ -90,6 +99,8 @@ public final class SPluginsHub {
     public static void open(Player p, ScreenMode forced) {
         State st = STATES.computeIfAbsent(p.getUniqueId(), u -> new State());
         if (forced != null) Screens.setPlayerMode(p, forced);
+        // asking for PINNED again runs the cursor test again (after installing a shader pack fix, for example)
+        if (forced == ScreenMode.PINNED) com.ssomar.score.screen.internal.ScreenData.setCursorSeen(p.getUniqueId(), null);
         HubCatalog.refreshIfOld();
         // first build for the chest page size, rebuilt below if a screen mode opened
         st.mode = ScreenMode.CHEST;
@@ -122,8 +133,14 @@ public final class SPluginsHub {
         if (in instanceof ScreenInput.Hover) {
             String id = ((ScreenInput.Hover) in).getWidgetId();
             ScreenWidget w = id == null ? null : s.getLayout().get(id);
-            String hint = w == null || w.getLore().isEmpty() ? TM.g(Text.HUB_HINT) : String.join("  ", w.getLore());
-            s.setText("hint", hint);
+            String hint = w == null || w.getLore().isEmpty() ? defaultHint() : String.join("  ", w.getLore());
+            ScreenLayout l = s.getLayout();
+            ScreenWidget hintW = l.get("hint");
+            if (hintW != null) l = l.with(hintW.toBuilder().text(hint).build());
+            String[] pv = id == null ? null : st.previews.get(id);
+            ScreenWidget prev = l.get("preview");
+            if (pv != null && prev != null && !pv[0].equals(prev.getImageUrl())) l = l.with(preview(pv));
+            s.setLayout(l);
             return;
         }
         if (!(in instanceof ScreenInput.Click)) return;
@@ -224,16 +241,28 @@ public final class SPluginsHub {
         int pages = Math.max(1, (rows.size() + perPage - 1) / perPage);
         st.page = Math.max(0, Math.min(st.page, pages - 1));
         int from = st.page * perPage;
+        st.previews.clear();
+        boolean preview = false;
+        if (st.mode != ScreenMode.CHEST)
+            for (int i = from; i < Math.min(rows.size(), from + perPage); i++) if (rows.get(i).image != null) preview = true;
+        double rowW = preview ? W - 0.08 - PREVIEW_W - 0.04 : W - 0.08;
+        String[] first = null;
         for (int i = from; i < Math.min(rows.size(), from + perPage); i++) {
             Row r = rows.get(i);
             int idx = i - from;
             String id = "row:" + i;
             WidgetKind kind = r.action.type == Action.Type.NONE ? WidgetKind.LABEL : WidgetKind.TILE;
-            ScreenWidget.Builder b = ScreenWidget.builder(id, kind).at(0.04, ROW_TOP + idx * ROW_STEP).size(W - 0.08, ROW_H)
+            ScreenWidget.Builder b = ScreenWidget.builder(id, kind).at(0.04, ROW_TOP + idx * ROW_STEP).size(rowW, ROW_H)
                     .text(r.text).icon(r.icon).lore(r.lore).glow(r.glow).chestSlot(9 + idx);
             w.add(b.build());
             if (r.action.type != Action.Type.NONE) st.actions.put(id, r.action);
+            if (r.image != null) {
+                String[] pv = {r.image, r.icon};
+                st.previews.put(id, pv);
+                if (first == null) first = pv;
+            }
         }
+        if (preview && first != null) w.add(preview(first));
 
         double barV = ROW_TOP + SCREEN_ROWS * ROW_STEP + 0.02;
         if (st.tab == Tab.MANAGE && st.managed != null)
@@ -247,11 +276,23 @@ public final class SPluginsHub {
         List<String> info = new ArrayList<>();
         info.add(TM.g(Text.HUB_CATALOG_SOURCE).replace("%source%", cat.source));
         if (st.chestNote != null) info.add(TM.g(Text.HUB_MODE).replace("%reason%", st.chestNote));
-        w.add(ScreenWidget.builder("info", WidgetKind.LABEL).at(1.9, barV).size(0.46, 0.08).text("&8SCore " + SCore.plugin.getDescription().getVersion())
+        w.add(ScreenWidget.builder("info", WidgetKind.LABEL).at(1.9, barV).size(0.46, 0.08).text("&7SCore " + SCore.plugin.getDescription().getVersion())
                 .lore(info).icon("BOOK").chestSlot(53).build());
-        w.add(ScreenWidget.builder("hint", WidgetKind.LABEL).at(0.04, barV + 0.09).size(W - 0.08, 0.07).text(TM.g(Text.HUB_HINT)).textScale(0.8).hiddenInChest().build());
+        w.add(ScreenWidget.builder("hint", WidgetKind.LABEL).at(0.04, barV + 0.09).size(W - 0.08, 0.07).text(defaultHint()).textScale(0.8).hiddenInChest().build());
 
         return new ScreenLayout(TM.g(Text.HUB_TITLE) + " &8- " + TM.g(st.tab.label), W, H, w, 6);
+    }
+
+    /** picture of the hovered row (Discover, News), on the right of the rows; an icon where images can't be drawn */
+    static final double PREVIEW_W = 0.84, PREVIEW_H = 0.6;
+
+    static ScreenWidget preview(String[] pv) {
+        return ScreenWidget.builder("preview", WidgetKind.IMAGE).at(W - 0.04 - PREVIEW_W, ROW_TOP).size(PREVIEW_W, PREVIEW_H)
+                .image(pv[0]).icon(pv[1]).hiddenInChest().build();
+    }
+
+    static String defaultHint() {
+        return TM.g(Text.HUB_HINT) + "  " + TM.g(Text.HUB_SNEAK_HINT);
     }
 
     static List<Row> rows(Player p, State st, HubCatalog cat) {
@@ -388,7 +429,8 @@ public final class SPluginsHub {
             l.add(TM.g(Text.HUB_DISCOVER_PRICE).replace("%price%", e.priceText()));
             l.add(TM.g(Text.HUB_CLICK_LINK));
             String ed = e.edition == null || e.edition.isEmpty() ? "" : " &8(" + e.edition + ")";
-            rows.add(new Row("&f&l" + e.name + ed + "  &7" + e.priceText(), k != null ? k.getIcon() : "CHEST", l, link(e.name, e.url), e.salePercent > 0));
+            rows.add(new Row("&f&l" + e.name + ed + "  &7" + e.priceText(), k != null ? k.getIcon() : "CHEST", l, link(e.name, e.url), e.salePercent > 0)
+                    .image(e.banner != null && !e.banner.isEmpty() ? e.banner : e.icon));
         }
         for (HubCatalog.Entry e : cat.packs) {
             List<String> l = new ArrayList<>();
@@ -396,7 +438,8 @@ public final class SPluginsHub {
             if (e.pitch != null && !e.pitch.isEmpty()) l.add("&7" + e.pitch);
             l.add(TM.g(Text.HUB_DISCOVER_PRICE).replace("%price%", e.priceText()));
             l.add(TM.g(Text.HUB_CLICK_LINK));
-            rows.add(new Row("&d" + e.name + "  &7" + e.priceText(), "CHEST", l, link(e.name, e.url), e.salePercent > 0));
+            rows.add(new Row("&d" + e.name + "  &7" + e.priceText(), "CHEST", l, link(e.name, e.url), e.salePercent > 0)
+                    .image(e.banner != null && !e.banner.isEmpty() ? e.banner : e.icon));
         }
         rows.add(new Row(TM.g(Text.HUB_DISCOVER_STUDIO), "ANVIL", lore(TM.g(Text.HUB_DISCOVER_STUDIO_LORE), TM.g(Text.HUB_CLICK_LINK)),
                 link("Pack Studio", linkUrl(cat, "studio", "https://splugins.net/forge")), true));
@@ -414,14 +457,14 @@ public final class SPluginsHub {
             if (n.end > 0) l.add(TM.g(Text.HUB_NEWS_UNTIL).replace("%date%", df.format(new Date(n.end))));
             if (!n.url.isEmpty()) l.add(TM.g(Text.HUB_CLICK_LINK));
             rows.add(new Row("&6&l" + n.title + (n.discount > 0 ? " &e-" + n.discount + "%" : ""), "GOLD_INGOT", l,
-                    n.url.isEmpty() ? none() : link(n.title, n.url), true));
+                    n.url.isEmpty() ? none() : link(n.title, n.url), true).image(n.image));
         }
         for (HubCatalog.News n : cat.news) {
             List<String> l = new ArrayList<>();
             if (n.date > 0) l.add("&8" + df.format(new Date(n.date)));
             if (!n.text.isEmpty()) l.add("&7" + n.text);
             if (!n.url.isEmpty()) l.add(TM.g(Text.HUB_CLICK_LINK));
-            rows.add(new Row("&f" + n.title, "PAPER", l, n.url.isEmpty() ? none() : link(n.title, n.url), false));
+            rows.add(new Row("&f" + n.title, "PAPER", l, n.url.isEmpty() ? none() : link(n.title, n.url), false).image(n.image));
         }
         if (rows.isEmpty()) rows.add(new Row(TM.g(Text.HUB_NEWS_EMPTY), "PAPER", new ArrayList<String>(), none(), false));
         return rows;

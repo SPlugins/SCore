@@ -31,7 +31,7 @@ public final class HubCatalog {
     public String source = "jar";
 
     public static final class Entry {
-        public String key, edition, name, pitch, access, currency, url, icon, kind, saleLabel, latestVersion;
+        public String key, edition, name, pitch, access, currency, url, icon, banner, kind, saleLabel, latestVersion;
         public double price, salePrice;
         public int salePercent, tokenCost;
         public long saleEndsAt;
@@ -72,6 +72,12 @@ public final class HubCatalog {
         }
         refreshIfOld();
         return c;
+    }
+
+    /** /score reload: forget the copy in memory, so a changed hub.catalog-url is read again at the next opening */
+    public static void reset() {
+        current = null;
+        lastFetch = 0;
     }
 
     public static void refreshIfOld() {
@@ -191,6 +197,7 @@ public final class HubCatalog {
         e.currency = o.optString("currency", "EUR");
         e.url = o.optString("url", "");
         e.icon = o.isNull("icon") ? "" : o.optString("icon", "");
+        e.banner = o.isNull("banner") ? "" : o.optString("banner", "");
         if (e.key.isEmpty() || o.isNull("key")) e.key = "";
         e.price = o.optDouble("price", 0);
         e.salePrice = o.optDouble("salePrice", 0);

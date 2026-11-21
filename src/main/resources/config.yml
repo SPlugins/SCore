@@ -55,7 +55,8 @@ screens:
   enabled: true
   # AUTO = PINNED (panel fixed to the camera, needs the pack below) if possible, else FLOATING (1.19.4+), else CHEST
   prefer-mode: AUTO
-  # Send the small SCore Screens resource pack (cursor shader) to the players who have the permission score.hub
+  # PINNED needs the small SCore Screens resource pack (cursor shader, 1.21.4+). true = send it to the players who have
+  # the permission score.hub only (on top of your other packs, they can refuse it). Other players never receive it.
   pinned-pack: false
   # Screen ids or plugin names always shown as a chest menu, example: [ "splugins:hub" ]
   forced-chest: []
@@ -71,5 +72,6 @@ hub:
   # Remind the players with score.hub to leave a review after some days
   review-reminder: false
   review-reminder-days: 14
-  # 1.21.6+: add a "SPlugins Hub" button in the pause menu (a datapack is written, restart needed)
+  # Paper 1.21.6+: add a "SPlugins Hub" button in the pause menu and the quick actions (a datapack is written in the
+  # main world, restart needed). Vanilla shows the button to every player; it opens the Hub only for score.hub.
   pause-menu-button: false
