@@ -644,6 +644,10 @@ public class SCore extends JavaPlugin implements SPlugin {
         com.ssomar.score.features.custom.customlists.CustomListsManager.getInstance().load();
 
         if (SCore.hasPlaceholderAPI) {
+            /* Create the glow teams here, on the main thread. Otherwise the first %score_cmd-glow% request creates
+             * them, and plugins like TAB resolve placeholders on their own async threads, which corrupts the main
+             * scoreboard team map (players then fail to join with "Couldn't place player in world"). */
+            com.ssomar.score.features.custom.drop.glowdrop.GlowDropManager.getInstance();
             new PlaceholderAPISCoreExpansion(this).register();
         }
 

@@ -43,7 +43,7 @@ public class GlowDropManager {
         }
     }
 
-    public static GlowDropManager getInstance() {
+    public static synchronized GlowDropManager getInstance() {
         if (instance == null) {
             instance = new GlowDropManager();
         }
