@@ -141,7 +141,9 @@ public final class AiAssistant {
                     }
                     AiClient.post("/bridge/result", result, token, 10_000);
                 }
-                if (r.body.optBoolean("done", false)) return;
+                // the site may say "done" for a turn it has not created yet (our first poll can arrive before the
+                // /chat request reached it): only our own /chat answer ends the bridge
+                if (r.body.optBoolean("done", false)) Thread.sleep(300);
             } catch (Throwable t) {
                 failures++;
                 try {
