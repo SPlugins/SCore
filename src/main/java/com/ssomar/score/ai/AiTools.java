@@ -45,10 +45,11 @@ public final class AiTools {
     }
 
     /** declarations sent with a question; the write tools only for an admin allowed to confirm changes */
-    public static JSONArray declarations(boolean includeWrite) {
+    public static JSONArray declarations(java.util.function.Predicate<String> hasPermission) {
         JSONArray a = new JSONArray();
         for (AiTool t : TOOLS.values()) {
-            if (t.isWrite() && !includeWrite) continue;
+            String perm = t.permission();
+            if (perm != null && !hasPermission.test(perm)) continue;
             a.put(new JSONObject().put("name", t.name()).put("description", t.description())
                     .put("inputSchema", t.inputSchema()).put("write", t.isWrite()));
         }
@@ -60,6 +61,7 @@ public final class AiTools {
         for (AiTool t : ServerTools.all()) register(score, t);
         for (AiTool t : ObjectTools.all()) register(score, t);
         for (AiTool t : WriteTools.all()) register(score, t);
+        for (AiTool t : com.ssomar.score.ai.tools.TicketTools.all()) register(score, t);
     }
 
     /* small helpers for schemas */

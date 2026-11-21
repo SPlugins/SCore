@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class AiAssistant {
 
-    static final int CHAT_TIMEOUT_MS = 600_000, POLL_TIMEOUT_MS = 35_000, TOOL_TIMEOUT_S = 10, CONFIRM_TIMEOUT_S = 180, MAX_RESULT = 100_000;
+    static final int CHAT_TIMEOUT_MS = 600_000, POLL_TIMEOUT_MS = 35_000, TOOL_TIMEOUT_S = 10, CONFIRM_TIMEOUT_S = 300, MAX_RESULT = 100_000;
 
     /** the admins who may confirm the changes proposed by the assistant (write tools) */
     public static final String WRITE_PERMISSION = "score.ai.write";
@@ -35,14 +35,23 @@ public final class AiAssistant {
         /** code: unlinked, quota, rate_limited, too_long, ai_error, network...; upgradeUrl may be empty */
         void error(Player p, String code, String message, String upgradeUrl);
 
-        /** show a change proposed by a write tool; decide(true) applies it, decide(false) refuses it (once) */
-        void confirm(Player p, AiChange change, java.util.function.Consumer<Boolean> decide);
+        /**
+         * show the changes proposed by a write tool in one form; decide gets one decision per change, in order
+         * (all refused when the admin closes the form), once
+         */
+        void confirm(Player p, List<AiChange> changes, java.util.function.Consumer<List<AiProposal.Decision>> decide);
 
-        /** the change was applied (result = what the tool returned) or could not be */
+        /** the change was applied (result = what the tool returned) or could not be; expired = answered too late */
         void applied(Player p, AiChange change, JSONObject result);
     }
 
     private static final Set<UUID> BUSY = ConcurrentHashMap.newKeySet();
+    private static final Map<UUID, String> PENDING = new ConcurrentHashMap<>();
+
+    /** the question being answered for this admin, or null */
+    public static String pendingQuestion(Player p) {
+        return PENDING.get(p.getUniqueId());
+    }
 
     private AiAssistant() {
     }
@@ -60,7 +69,7 @@ public final class AiAssistant {
     }
 
     /** the request body, built on the server thread (reads the plugins and the error lines) */
-    static JSONObject request(String question, String conversationId, String focus, String turnId, boolean write) {
+    static JSONObject request(String question, String conversationId, String focus, String turnId, java.util.function.Predicate<String> hasPermission) {
         JSONObject ctx = new JSONObject().put("diagnostic", DiagnosticReport.build());
         JSONObject errors = new JSONObject();
         List<String> plugins = new ArrayList<>();
@@ -74,7 +83,7 @@ public final class AiAssistant {
         }
         ctx.put("loadErrors", errors);
         return new JSONObject().put("message", question).put("conversationId", conversationId == null ? JSONObject.NULL : conversationId)
-                .put("plugins", new JSONArray(plugins)).put("context", ctx).put("tools", AiTools.declarations(write)).put("turnId", turnId);
+                .put("plugins", new JSONArray(plugins)).put("context", ctx).put("tools", AiTools.declarations(hasPermission)).put("turnId", turnId);
     }
 
     /** @return false if the player already has a question running or the server is not linked */
@@ -85,12 +94,13 @@ public final class AiAssistant {
         final String turnId = UUID.randomUUID().toString();
         final JSONObject body;
         try {
-            body = request(question.trim(), AiHistory.conversationId(p.getUniqueId()), focusPlugin, turnId, p.hasPermission(WRITE_PERMISSION));
+            body = request(question.trim(), AiHistory.conversationId(p.getUniqueId()), focusPlugin, turnId, p::hasPermission);
         } catch (Throwable t) {
             BUSY.remove(p.getUniqueId());
             view.error(p, "context", String.valueOf(t.getMessage()), "");
             return false;
         }
+        PENDING.put(p.getUniqueId(), question.trim());
         view.thinking(p);
         final AtomicBoolean done = new AtomicBoolean(false);
         SCore.schedulerHook.runAsyncTask(() -> bridge(token, turnId, done, p, view), 0);
@@ -104,6 +114,7 @@ public final class AiAssistant {
             } finally {
                 done.set(true);
                 BUSY.remove(p.getUniqueId());
+                PENDING.remove(p.getUniqueId());
             }
             final AiClient.Response res = r;
             final String fail = failure;
@@ -168,16 +179,22 @@ public final class AiAssistant {
     static String run(String name, JSONObject args, Player p, View view) throws Exception {
         AiTool tool = AiTools.get(name);
         if (tool == null) throw new IllegalArgumentException("unknown tool " + name);
-        if (tool.isWrite()) {
-            if (p == null || !p.isOnline()) throw new IllegalStateException("the admin left the game: nothing was changed");
-            if (!p.hasPermission(WRITE_PERMISSION))
-                throw new IllegalStateException("the admin does not have the permission " + WRITE_PERMISSION + ": give the configuration to copy instead");
-        }
+        if (tool.isWrite() && (p == null || !p.isOnline())) throw new IllegalStateException("the admin left the game: nothing was changed");
+        String perm = tool.permission();
+        if (perm != null && (p == null || !p.hasPermission(perm)))
+            throw new IllegalStateException("the admin does not have the permission " + perm + (tool.isWrite() ? ": give the configuration to copy instead" : ""));
         JSONObject a = args == null ? new JSONObject() : args;
         Object o = onServerThread(() -> tool.execute(a));
-        if (o instanceof AiChange) {
+        if (o instanceof AiChange || o instanceof AiProposal) {
             if (!tool.isWrite()) throw new IllegalStateException("only a write tool can propose a change");
-            return confirmAndApply(p, (AiChange) o, view).toString();
+            if (o instanceof AiChange) {
+                JSONArray r = confirmAndApply(p, java.util.Collections.singletonList((AiChange) o), view);
+                return r.getJSONObject(0).toString();
+            }
+            AiProposal prop = (AiProposal) o;
+            JSONObject out = new JSONObject().put("results", confirmAndApply(p, prop.getChanges(), view));
+            if (prop.getNotProposed().length() > 0) out.put("not_proposed", prop.getNotProposed());
+            return out.toString();
         }
         return o == null ? "" : o.toString();
     }
@@ -203,35 +220,54 @@ public final class AiAssistant {
         }
     }
 
-    /** the admin sees the change in the game; applied only on their yes (3 minutes at most) */
-    static JSONObject confirmAndApply(Player p, AiChange change, View view) throws Exception {
-        CompletableFuture<Boolean> decision = new CompletableFuture<>();
-        java.util.function.Consumer<Boolean> decide = b -> {
-            // a click after the 3 minutes (or a second click): nothing happens, the admin is told
-            if (!decision.complete(b) && Boolean.TRUE.equals(b))
-                view.applied(p, change, new JSONObject().put("applied", false).put("expired", true));
+    /**
+     * The admin sees the changes in one form; each is applied only if they ticked it (5 minutes at most). The
+     * result of each change carries the admin's comment, for the model.
+     */
+    static JSONArray confirmAndApply(Player p, List<AiChange> changes, View view) throws Exception {
+        CompletableFuture<List<AiProposal.Decision>> decision = new CompletableFuture<>();
+        java.util.function.Consumer<List<AiProposal.Decision>> decide = d -> {
+            // an answer after the 5 minutes (or a second one): nothing happens, the admin is told
+            if (!decision.complete(d) && d.stream().anyMatch(x -> x.apply))
+                view.applied(p, changes.get(0), new JSONObject().put("applied", false).put("expired", true));
         };
-        SCore.schedulerHook.runEntityTask(() -> view.confirm(p, change, decide), null, p, 0L);
-        Boolean yes;
+        SCore.schedulerHook.runEntityTask(() -> view.confirm(p, changes, decide), null, p, 0L);
+        List<AiProposal.Decision> answers;
         try {
-            yes = decision.get(CONFIRM_TIMEOUT_S, TimeUnit.SECONDS);
+            answers = decision.get(CONFIRM_TIMEOUT_S, TimeUnit.SECONDS);
         } catch (java.util.concurrent.TimeoutException e) {
-            decision.complete(false);
-            return new JSONObject().put("applied", false).put("reason", "the admin did not answer within 3 minutes: nothing was changed");
+            decision.complete(java.util.Collections.<AiProposal.Decision>emptyList());
+            JSONArray out = new JSONArray();
+            for (AiChange c : changes)
+                out.put(new JSONObject().put("target", c.getTarget()).put("applied", false).put("reason", "the admin did not answer within 5 minutes: nothing was changed"));
+            return out;
         }
-        if (!Boolean.TRUE.equals(yes))
-            return new JSONObject().put("applied", false).put("reason", "the admin refused this change: nothing was changed. Do not propose it again unless they ask.");
-        if (!p.isOnline()) return new JSONObject().put("applied", false).put("reason", "the admin left the game: nothing was changed");
-        JSONObject result;
-        try {
-            Object r = onServerThread(() -> change.apply(p.getName()));
-            result = r instanceof JSONObject ? (JSONObject) r : new JSONObject().put("applied", true).put("result", String.valueOf(r));
-        } catch (Exception e) {
-            result = new JSONObject().put("applied", false).put("reason", "could not apply the change: " + e.getMessage());
+        JSONArray out = new JSONArray();
+        for (int i = 0; i < changes.size(); i++) {
+            AiChange c = changes.get(i);
+            AiProposal.Decision d = i < answers.size() ? answers.get(i) : new AiProposal.Decision(false, "");
+            JSONObject r;
+            if (!d.apply) {
+                r = new JSONObject().put("applied", false).put("reason", d.comment.isEmpty()
+                        ? "the admin refused this change: nothing was changed. Do not propose it again unless they ask."
+                        : "the admin refused this change: nothing was changed. Follow their comment.");
+            } else if (!p.isOnline()) {
+                r = new JSONObject().put("applied", false).put("reason", "the admin left the game: nothing was changed");
+            } else {
+                try {
+                    Object res = c.isOffThread() ? c.apply(p.getName()) : onServerThread(() -> c.apply(p.getName()));
+                    r = res instanceof JSONObject ? (JSONObject) res : new JSONObject().put("applied", true).put("result", String.valueOf(res));
+                } catch (Exception e) {
+                    r = new JSONObject().put("applied", false).put("reason", "could not apply the change: " + e.getMessage());
+                }
+                final JSONObject res = r;
+                SCore.schedulerHook.runEntityTask(() -> view.applied(p, c, res), null, p, 0L);
+            }
+            r.put("target", c.getTarget());
+            if (!d.comment.isEmpty()) r.put("admin_comment", d.comment);
+            out.put(r);
         }
-        final JSONObject res = result;
-        SCore.schedulerHook.runEntityTask(() -> view.applied(p, change, res), null, p, 0L);
-        return result;
+        return out;
     }
 
     static String truncate(String s) {

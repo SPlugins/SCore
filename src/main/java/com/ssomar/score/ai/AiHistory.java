@@ -119,6 +119,11 @@ public final class AiHistory {
         save(u, c);
     }
 
+    /** /score reload: the conversations are read again from their files */
+    public static void reload() {
+        CACHE.clear();
+    }
+
     /** "New conversation" */
     public static synchronized void clear(UUID u) {
         CACHE.put(u, NONE);
