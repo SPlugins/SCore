@@ -67,7 +67,11 @@ public final class HubAssistant {
         rows.add(new SPluginsHub.Row(AiAssistant.isBusy(p) ? TM.g(Text.AI_THINKING) : TM.g(Text.AI_ASK), "WRITABLE_BOOK",
                 SPluginsHub.lore(TM.g(Text.AI_ASK_LORE)), SPluginsHub.action(SPluginsHub.Action.Type.AI_ASK, null, false), true));
         if (AiAssistant.hasConversation(p))
-            rows.add(new SPluginsHub.Row(TM.g(Text.AI_NEW), "BOOK", new ArrayList<String>(), SPluginsHub.action(SPluginsHub.Action.Type.AI_NEW, null, false), false));
+            rows.add(new SPluginsHub.Row(TM.g(Text.AI_NEW), "BOOK", SPluginsHub.lore(TM.g(Text.AI_NEW_LORE)), SPluginsHub.action(SPluginsHub.Action.Type.AI_NEW, null, false), false));
+        int history = com.ssomar.score.ai.AiHistory.list(p.getUniqueId()).size();
+        if (history > 0)
+            rows.add(new SPluginsHub.Row(TM.g(Text.AI_HISTORY).replace("%count%", "" + history), "BOOKSHELF", SPluginsHub.lore(TM.g(Text.AI_HISTORY_LORE)),
+                    SPluginsHub.action(SPluginsHub.Action.Type.AI_HISTORY, null, false), false));
         int errors = LoadErrorCollector.all().size();
         if (errors > 0)
             rows.add(new SPluginsHub.Row(TM.g(Text.AI_ERRORS).replace("%count%", "" + errors), "REDSTONE", SPluginsHub.lore(TM.g(Text.AI_ASK_LORE)),
@@ -185,6 +189,20 @@ public final class HubAssistant {
         if (!SPluginsHub.showConversation(p)) SPluginsHub.refreshIfOpen(p);
     }
 
+    /** the history of the conversations, most recent first: a click resumes one */
+    static List<SPluginsHub.Row> historyRows(Player p) {
+        List<SPluginsHub.Row> rows = new ArrayList<>();
+        java.text.SimpleDateFormat f = new java.text.SimpleDateFormat("dd/MM HH:mm");
+        for (com.ssomar.score.ai.AiHistory.Summary c : com.ssomar.score.ai.AiHistory.list(p.getUniqueId())) {
+            String title = c.title.length() > 60 ? c.title.substring(0, 60) + "…" : c.title;
+            String text = "&f" + title.replace("§", "") + (c.current ? TM.g(Text.AI_HISTORY_CURRENT) : "");
+            String lore = TM.g(Text.AI_HISTORY_ROW).replace("%date%", f.format(new java.util.Date(c.updated))).replace("%count%", "" + c.questions);
+            rows.add(new SPluginsHub.Row(text, c.current ? "KNOWLEDGE_BOOK" : "BOOK", SPluginsHub.lore(lore),
+                    SPluginsHub.action(SPluginsHub.Action.Type.AI_OPEN, c.key, false), c.current));
+        }
+        return rows;
+    }
+
     /* ------------------------------------------------------------------ conversation in the panel */
 
     static final double LINE_H = 0.058, LINE_STEP = 0.0625, COL_W = 0.52, BTN_H = 0.085, BTN_STEP = 0.095;
@@ -243,7 +261,11 @@ public final class HubAssistant {
                         new SPluginsHub.Action(SPluginsHub.Action.Type.LINK, l.label, l.url, false), x, y);
             }
         }
-        y = button(w, st, "ai:new", TM.g(Text.AI_NEW), "BOOK", !busy, SPluginsHub.action(SPluginsHub.Action.Type.AI_NEW, null, true), x, y);
+        y = button(w, st, "ai:new", TM.g(Text.AI_NEW), "BOOK", !busy, SPluginsHub.action(SPluginsHub.Action.Type.AI_NEW, null, false), x, y);
+        int history = com.ssomar.score.ai.AiHistory.list(p.getUniqueId()).size();
+        if (history > 1)
+            y = button(w, st, "ai:history", TM.g(Text.AI_HISTORY).replace("%count%", "" + history), "BOOKSHELF", !busy,
+                    SPluginsHub.action(SPluginsHub.Action.Type.AI_HISTORY, null, false), x, y);
         button(w, st, "ai:exit", TM.g(Text.HUB_BACK), "ARROW", true, SPluginsHub.action(SPluginsHub.Action.Type.AI_EXIT, null, false), x, y);
         return pages;
     }
