@@ -50,19 +50,24 @@ final class HubDialogs {
 
     /**
      * The window stays open after its button (the client's link confirmation comes back to it), and its exit button
-     * ("Back", also Escape) runs {@code back} on the server, which shows the Hub again as it was.
+     * ("Back") closes it from the server (after_action NONE also applies to it) and runs {@code back}, which shows
+     * the Hub again as it was. Escape just closes it.
      */
-    private static void show(Player p, String title, String body, ActionButton button, Runnable back) {
+    private static void show(Player p, String title, Component body, ActionButton button, Runnable back) {
         ActionButton exit = ActionButton.builder(Component.translatable("gui.back")).width(200)
-                .action(DialogAction.customClick((response, audience) -> {
-                    if (back != null) SCore.schedulerHook.runEntityTask(back, null, p, 1L);
-                }, ClickCallback.Options.builder().uses(1).lifetime(Duration.ofMinutes(30)).build())).build();
+                .action(DialogAction.customClick((response, audience) -> SCore.schedulerHook.runEntityTask(() -> {
+                    try {
+                        p.closeDialog();
+                    } catch (Throwable ignored) {
+                        // very old dialog API: the client keeps the window until Escape
+                    }
+                    if (back != null) back.run();
+                }, null, p, 1L), ClickCallback.Options.builder().uses(1).lifetime(Duration.ofMinutes(30)).build())).build();
         DialogBase base = DialogBase.builder(legacy(title))
                 .canCloseWithEscape(true)
                 .pause(false)
                 .afterAction(DialogBase.DialogAfterAction.NONE)
-                .body(body == null || body.isEmpty() ? Collections.emptyList()
-                        : Collections.singletonList(DialogBody.plainMessage(legacy(body), 300)))
+                .body(body == null ? Collections.emptyList() : Collections.singletonList(DialogBody.plainMessage(body, 300)))
                 .build();
         MultiActionType type = DialogType.multiAction(Collections.singletonList(button)).exitAction(exit).columns(1).build();
         Dialog dialog = Dialog.create(f -> f.empty().base(base).type(type));
@@ -73,13 +78,14 @@ final class HubDialogs {
     static void openUrl(Player p, String title, String url, Runnable back) {
         ActionButton b = ActionButton.builder(Component.translatable("chat.link.open")).width(200)
                 .action(DialogAction.staticAction(ClickEvent.openUrl(url))).build();
-        show(p, title, "§7" + url, b, back);
+        // plain text: "&utm_..." must not be read as a colour code
+        show(p, title, Component.text(url, net.kyori.adventure.text.format.NamedTextColor.GRAY), b, back);
     }
 
     /** "Copy to Clipboard" */
     static void copy(Player p, String title, String body, String toCopy, Runnable back) {
         ActionButton b = ActionButton.builder(Component.translatable("chat.copy")).width(200)
                 .action(DialogAction.staticAction(ClickEvent.copyToClipboard(toCopy))).build();
-        show(p, title, body, b, back);
+        show(p, title, body == null || body.isEmpty() ? null : legacy(body), b, back);
     }
 }
