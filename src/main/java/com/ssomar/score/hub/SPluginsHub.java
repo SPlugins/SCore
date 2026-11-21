@@ -193,8 +193,14 @@ public final class SPluginsHub {
                 refresh(p, st);
                 break;
             case LINK:
-                s.close();
-                HubLinks.send(p, a.a, a.b, st.tab.name().toLowerCase(Locale.ROOT));
+                // with a dialog window the Hub stays (screen modes) or comes back ("Back"), as it was
+                if (HubLinks.dialogsAvailable()) {
+                    if (s.getMode() == ScreenMode.CHEST) s.close();
+                    HubLinks.send(p, a.a, a.b, st.tab.name().toLowerCase(Locale.ROOT), () -> back(p));
+                } else {
+                    s.close();
+                    HubLinks.send(p, a.a, a.b, st.tab.name().toLowerCase(Locale.ROOT));
+                }
                 break;
             case RUN:
                 s.close();
@@ -207,9 +213,10 @@ public final class SPluginsHub {
                 for (int i = Math.max(0, lines.size() - 15); i < lines.size(); i++) p.sendMessage(StringConverter.coloredString("&c" + lines.get(i)));
                 break;
             case DIAGNOSTIC:
-                s.close();
+                if (!HubLinks.dialogsAvailable() || s.getMode() == ScreenMode.CHEST) s.close();
                 String report = DiagnosticReport.build();
-                if (!HubLinks.sendCopy(p, TM.g(Text.HUB_HELP_DIAGNOSTIC_READY), report)) {
+                if (!HubLinks.sendCopy(p, TM.g(Text.HUB_HELP_DIAGNOSTIC_READY), report, () -> back(p))) {
+                    s.close();
                     Utils.sendConsoleFlatMsg(SCore.plugin, report);
                     p.sendMessage(StringConverter.coloredString(TM.g(Text.HUB_HELP_DIAGNOSTIC_CONSOLE)));
                 }
@@ -217,6 +224,14 @@ public final class SPluginsHub {
             default:
                 break;
         }
+    }
+
+    /** "Back" of a link window: the Hub again, on the same tab / page / plugin, unless it is still open */
+    static void back(Player p) {
+        if (!p.isOnline() || !p.hasPermission("score.hub")) return;
+        ScreenSession cur = Screens.get(p);
+        if (cur != null && SCREEN_ID.equals(cur.getSpec().getId()) && cur.isOpen()) return;
+        open(p, null);
     }
 
     /* ------------------------------------------------------------------ layout */

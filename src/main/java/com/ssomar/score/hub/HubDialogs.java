@@ -10,8 +10,12 @@ import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import com.ssomar.score.SCore;
+import io.papermc.paper.registry.data.dialog.type.MultiActionType;
+import net.kyori.adventure.text.event.ClickCallback;
 import org.bukkit.entity.Player;
 
+import java.time.Duration;
 import java.util.Collections;
 
 /**
@@ -44,27 +48,38 @@ final class HubDialogs {
         return LegacyComponentSerializer.legacySection().deserialize(StringConverter.coloredString(s));
     }
 
-    private static void show(Player p, String title, String body, ActionButton button) {
+    /**
+     * The window stays open after its button (the client's link confirmation comes back to it), and its exit button
+     * ("Back", also Escape) runs {@code back} on the server, which shows the Hub again as it was.
+     */
+    private static void show(Player p, String title, String body, ActionButton button, Runnable back) {
+        ActionButton exit = ActionButton.builder(Component.translatable("gui.back")).width(200)
+                .action(DialogAction.customClick((response, audience) -> {
+                    if (back != null) SCore.schedulerHook.runEntityTask(back, null, p, 1L);
+                }, ClickCallback.Options.builder().uses(1).lifetime(Duration.ofMinutes(30)).build())).build();
         DialogBase base = DialogBase.builder(legacy(title))
                 .canCloseWithEscape(true)
+                .pause(false)
+                .afterAction(DialogBase.DialogAfterAction.NONE)
                 .body(body == null || body.isEmpty() ? Collections.emptyList()
                         : Collections.singletonList(DialogBody.plainMessage(legacy(body), 300)))
                 .build();
-        Dialog dialog = Dialog.create(f -> f.empty().base(base).type(DialogType.notice(button)));
+        MultiActionType type = DialogType.multiAction(Collections.singletonList(button)).exitAction(exit).columns(1).build();
+        Dialog dialog = Dialog.create(f -> f.empty().base(base).type(type));
         p.showDialog(dialog);
     }
 
     /** "Open in Browser" (the client still asks its usual link confirmation if the player turned it on) */
-    static void openUrl(Player p, String title, String url) {
+    static void openUrl(Player p, String title, String url, Runnable back) {
         ActionButton b = ActionButton.builder(Component.translatable("chat.link.open")).width(200)
                 .action(DialogAction.staticAction(ClickEvent.openUrl(url))).build();
-        show(p, title, "§7" + url, b);
+        show(p, title, "§7" + url, b, back);
     }
 
     /** "Copy to Clipboard" */
-    static void copy(Player p, String title, String body, String toCopy) {
+    static void copy(Player p, String title, String body, String toCopy, Runnable back) {
         ActionButton b = ActionButton.builder(Component.translatable("chat.copy")).width(200)
                 .action(DialogAction.staticAction(ClickEvent.copyToClipboard(toCopy))).build();
-        show(p, title, body, b);
+        show(p, title, body, b, back);
     }
 }

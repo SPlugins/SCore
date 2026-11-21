@@ -40,13 +40,19 @@ public final class HubLinks {
 
     /** Sends a clickable link line in the chat. */
     public static void send(Player p, String label, String url, String campaign) {
+        send(p, label, url, campaign, null);
+    }
+
+    /** true when the link went to a dialog window (its "Back" button runs {@code back}), false for a chat line */
+    public static boolean send(Player p, String label, String url, String campaign, Runnable back) {
         String tagged = tag(url, campaign);
         // Paper 1.21.6+: a native window with an "Open in Browser" button (a server can't open the browser itself)
         if (HubDialogs.available()) {
             try {
-                HubDialogs.openUrl(p, label, tagged);
-                return;
-            } catch (Throwable ignored) {
+                HubDialogs.openUrl(p, label, tagged, back);
+                return true;
+            } catch (Throwable t) {
+                warnOnce(t);
                 // fall back to the chat line
             }
         }
@@ -58,15 +64,33 @@ public final class HubLinks {
         } catch (Throwable t) {
             p.sendMessage(text + " " + tagged);
         }
+        return false;
+    }
+
+    private static boolean warned;
+
+    private static void warnOnce(Throwable t) {
+        if (warned) return;
+        warned = true;
+        com.ssomar.score.SCore.plugin.getLogger().log(java.util.logging.Level.WARNING, "[SCore Hub] link window unavailable, the chat is used", t);
+    }
+
+    public static boolean dialogsAvailable() {
+        return HubDialogs.available();
     }
 
     /** Sends a line that copies {@code toCopy} to the clipboard when clicked (1.15+), else returns false. */
     public static boolean sendCopy(Player p, String line, String toCopy) {
+        return sendCopy(p, line, toCopy, null);
+    }
+
+    public static boolean sendCopy(Player p, String line, String toCopy, Runnable back) {
         if (HubDialogs.available()) {
             try {
-                HubDialogs.copy(p, "SPlugins Hub", line, toCopy);
+                HubDialogs.copy(p, "SPlugins Hub", line, toCopy, back);
                 return true;
-            } catch (Throwable ignored) {
+            } catch (Throwable t) {
+                warnOnce(t);
                 // fall back to the chat line
             }
         }
