@@ -155,6 +155,10 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                     sender.sendMessage(StringConverter.coloredString("&4[SCore] &cThe SPlugins Hub can only be opened by a player."));
                     break;
                 }
+                if (args.length > 0 && args[0].equalsIgnoreCase("ai")) {
+                    com.ssomar.score.hub.HubAssistant.command(player, args);
+                    break;
+                }
                 com.ssomar.score.hub.SPluginsHub.open(player, args.length > 0 ? com.ssomar.score.hub.HubAlias.modeArgPublic(args[0]) : null);
                 break;
             case "no-translated":
@@ -1201,8 +1205,10 @@ public final class CommandsClass implements CommandExecutor, TabExecutor {
                 switch (args[0].toLowerCase()) {
                     case "hub":
                         if (args.length == 2) {
-                            for (String m : new String[]{"auto", "chest", "classic", "pinned"})
+                            for (String m : new String[]{"auto", "chest", "classic", "pinned", "ai"})
                                 if (m.startsWith(args[1].toLowerCase())) arguments.add(m);
+                        } else if (args.length == 3 && args[1].equalsIgnoreCase("ai") && "undo".startsWith(args[2].toLowerCase())) {
+                            arguments.add("undo");
                         }
                         return arguments;
                     case "cooldowns":

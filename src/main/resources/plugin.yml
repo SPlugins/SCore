@@ -16,6 +16,7 @@ permissions:
     children:
       score.cmds: true
       score.hub: true
+      score.ai.write: true
   score.cmds:
     description: Allows SCore commands
     default: op
@@ -25,6 +26,9 @@ permissions:
       score.cmd.particles-toggle: true
   score.hub:
     description: Opens the SPlugins Hub (/score hub, /splugins)
+    default: op
+  score.ai.write:
+    description: The SPlugins assistant may propose changes to the configurations, applied only after this admin confirms in the game (backup + undo)
     default: op
   score.cmd.reload:
     description: Allows the command /score reload

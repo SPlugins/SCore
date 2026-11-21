@@ -18,7 +18,11 @@ public interface AiTool {
     /** JSON Schema of the arguments ({"type": "object", "properties": {...}, "required": [...]}) */
     JSONObject inputSchema();
 
-    /** true if the tool changes something on the server (refused by the site in phase 2) */
+    /**
+     * true if the tool changes something on the server: it is only offered to admins with the permission
+     * score.ai.write, and its execute must return an {@link AiChange} (applied once the admin confirmed in the game)
+     * or a result that says why nothing is proposed.
+     */
     default boolean isWrite() {
         return false;
     }

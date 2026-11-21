@@ -59,6 +59,20 @@ public abstract class SObjectWithFileLoader<T extends SObjectWithFile> {
         return getObject(config, id, true, !sPlugin.isLotOfWork(), "");
     }
 
+    /** reload one object from its file (the assistant, after a change the admin confirmed) */
+    public void reloadObjectFromFile(String id) {
+        sObjectManager.reloadObject(id);
+    }
+
+    public boolean isObjectLoaded(String id) {
+        return sObjectManager.getLoadedObjectWithID(id).isPresent();
+    }
+
+    /** unload an object and delete its file */
+    public void deleteLoadedObject(String id) {
+        sObjectManager.deleteObject(id);
+    }
+
     public SObjectWithFileLoader(SPlugin sPlugin, String defaultObjectsPath, SObjectWithFileManager<T> sObjectManager, int maxFreeObjects) {
         LOADERS.removeIf(l -> l.getClass() == getClass());
         LOADERS.add(this);

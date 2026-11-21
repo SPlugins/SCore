@@ -3,7 +3,11 @@ package com.ssomar.score.hub;
 import com.ssomar.score.SCore;
 import com.ssomar.score.ai.AiAnswer;
 import com.ssomar.score.ai.AiAssistant;
+import com.ssomar.score.ai.AiBackups;
+import com.ssomar.score.ai.AiChange;
 import com.ssomar.score.ai.AiLink;
+import com.ssomar.score.ai.LineDiff;
+import org.json.JSONObject;
 import com.ssomar.score.config.GeneralConfig;
 import com.ssomar.score.languages.messages.TM;
 import com.ssomar.score.languages.messages.Text;
@@ -23,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * The Assistant tab of the Hub: link the server to a splugins.net account, ask questions (with the server context
@@ -60,6 +65,10 @@ public final class HubAssistant {
         if (errors > 0)
             rows.add(new SPluginsHub.Row(TM.g(Text.AI_ERRORS).replace("%count%", "" + errors), "REDSTONE", SPluginsHub.lore(TM.g(Text.AI_ASK_LORE)),
                     SPluginsHub.action(SPluginsHub.Action.Type.AI_ERRORS, null, false), false));
+        AiBackups.Entry last = p.hasPermission(AiAssistant.WRITE_PERMISSION) ? AiBackups.last() : null;
+        if (last != null)
+            rows.add(new SPluginsHub.Row(TM.g(Text.AI_UNDO).replace("%target%", last.target()), "CLOCK", SPluginsHub.lore(TM.g(Text.HUB_CONFIRM)),
+                    SPluginsHub.action(SPluginsHub.Action.Type.AI_UNDO, null, true), false));
         rows.add(new SPluginsHub.Row(TM.g(Text.AI_UNLINK), "BARRIER", SPluginsHub.lore(TM.g(Text.HUB_CONFIRM)),
                 SPluginsHub.action(SPluginsHub.Action.Type.AI_UNLINK, null, true), false));
         return rows;
@@ -87,6 +96,9 @@ public final class HubAssistant {
             case "AI_UNLINK":
                 AiLink.unlink(() -> SPluginsHub.refreshIfOpen(p));
                 SPluginsHub.refreshIfOpen(p);
+                break;
+            case "AI_UNDO":
+                undo(p);
                 break;
             default:
                 break;
@@ -183,6 +195,33 @@ public final class HubAssistant {
         }
 
         @Override
+        public void confirm(Player p, AiChange change, Consumer<Boolean> decide) {
+            String id = UUID.randomUUID().toString().substring(0, 8);
+            PENDING.put(id, decide);
+            LineDiff d = LineDiff.of(change.getBefore(), change.getAfter(), 2, 80);
+            if (HubLinks.dialogsAvailable()) {
+                ScreenSession cur = com.ssomar.score.screen.Screens.get(p);
+                if (cur != null) cur.holdClicksUntilLookAway();
+                try {
+                    HubDialogs.change(p, change, d, () -> decide(p, id, true), () -> decide(p, id, false));
+                    return;
+                } catch (Throwable t) {
+                    SCore.plugin.getLogger().warning("[SCore AI] change window unavailable, the chat is used: " + t);
+                }
+            }
+            chatChange(p, id, change, d);
+        }
+
+        @Override
+        public void applied(Player p, AiChange change, JSONObject result) {
+            SPluginsHub.refreshIfOpen(p);
+            if (result.optBoolean("expired", false)) p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_EXPIRED)));
+            else if (result.optBoolean("applied", false))
+                p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_APPLIED).replace("%target%", change.getTarget())));
+            else p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_ERROR).replace("%error%", result.optString("reason", "?"))));
+        }
+
+        @Override
         public void error(Player p, String code, String message, String upgradeUrl) {
             SPluginsHub.refreshIfOpen(p);
             String line = "quota".equalsIgnoreCase(code) ? TM.g(Text.AI_QUOTA) : TM.g(Text.AI_ERROR).replace("%error%", message);
@@ -207,6 +246,84 @@ public final class HubAssistant {
             } catch (Throwable ignored) {
                 p.sendMessage(l.url);
             }
+        }
+    }
+
+    /* ------------------------------------------------------------------ changes */
+
+    /** changes waiting for the admin's answer, by short id (window buttons or /score hub ai apply|refuse <id>) */
+    private static final Map<String, Consumer<Boolean>> PENDING = new ConcurrentHashMap<>();
+
+    static void decide(Player p, String id, boolean yes) {
+        Consumer<Boolean> d = PENDING.remove(id);
+        if (d == null) {
+            p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_EXPIRED)));
+            return;
+        }
+        if (!yes) p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_REFUSED)));
+        d.accept(yes);
+        if (!yes) SPluginsHub.refreshIfOpen(p);
+    }
+
+    static void chatChange(Player p, String id, AiChange c, LineDiff d) {
+        p.sendMessage(StringConverter.coloredString("&b&l" + StringConverter.decoloredString(TM.g(Text.AI_CHANGE_TITLE))));
+        String head = c.isCreation() ? TM.g(Text.AI_CHANGE_NEW).replace("%target%", c.getTarget())
+                : TM.g(Text.AI_CHANGE_EDIT).replace("%target%", c.getTarget()).replace("%added%", "" + d.added).replace("%removed%", "" + d.removed);
+        p.sendMessage(StringConverter.coloredString(head));
+        if (!c.getSummary().isEmpty()) p.sendMessage("§f" + c.getSummary());
+        int n = 0;
+        for (LineDiff.Line l : d.lines) {
+            if (++n > 30) {
+                p.sendMessage("§8  …");
+                break;
+            }
+            p.sendMessage((l.kind == '+' ? "§a+ " : l.kind == '-' ? "§c- " : l.kind == '…' ? "§8  … " : "§7  ") + l.text);
+        }
+        p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_CHANGE_NOTE)));
+        try {
+            TextComponent yes = new TextComponent(TextComponent.fromLegacyText(StringConverter.coloredString("&a&l[✔ " + StringConverter.decoloredString(TM.g(Text.AI_APPLY)) + "]")));
+            yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/score hub ai apply " + id));
+            TextComponent no = new TextComponent(TextComponent.fromLegacyText(StringConverter.coloredString("   &c&l[✘ " + StringConverter.decoloredString(TM.g(Text.AI_REFUSE)) + "]")));
+            no.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/score hub ai refuse " + id));
+            yes.addExtra(no);
+            p.spigot().sendMessage(yes);
+        } catch (Throwable t) {
+            p.sendMessage("/score hub ai apply " + id + "   /score hub ai refuse " + id);
+        }
+    }
+
+    static void undo(Player p) {
+        if (!p.hasPermission(AiAssistant.WRITE_PERMISSION)) {
+            p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_NO_WRITE)));
+            return;
+        }
+        try {
+            AiBackups.Entry e = AiBackups.undoLast(p.getName());
+            p.sendMessage(StringConverter.coloredString(e == null ? TM.g(Text.AI_UNDO_NONE) : TM.g(Text.AI_UNDONE).replace("%target%", e.target())));
+        } catch (Exception ex) {
+            p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_ERROR).replace("%error%", String.valueOf(ex.getMessage()))));
+        }
+        SPluginsHub.refreshIfOpen(p);
+    }
+
+    /** /score hub ai apply|refuse <id>, /score hub ai undo */
+    public static void command(Player p, String[] args) {
+        String sub = args.length > 1 ? args[1].toLowerCase(java.util.Locale.ROOT) : "";
+        switch (sub) {
+            case "apply":
+            case "refuse":
+                if (args.length < 3) return;
+                if (sub.equals("apply") && !p.hasPermission(AiAssistant.WRITE_PERMISSION)) {
+                    p.sendMessage(StringConverter.coloredString(TM.g(Text.AI_NO_WRITE)));
+                    return;
+                }
+                decide(p, args[2], sub.equals("apply"));
+                break;
+            case "undo":
+                undo(p);
+                break;
+            default:
+                p.sendMessage(StringConverter.coloredString("&7/score hub ai undo"));
         }
     }
 

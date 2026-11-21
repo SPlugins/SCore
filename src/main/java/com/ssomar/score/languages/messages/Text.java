@@ -135,7 +135,21 @@ public enum Text implements TextInterface {
     AI_DIALOG_CONTEXT("ai.dialogContext", "Your plugin versions and load errors are sent with the question. The assistant can read your SPlugins configurations; it can't change them."),
     AI_SEND("ai.send", "Send"),
     AI_REPLY("ai.reply", "Reply"),
-    AI_COPY("ai.copy", "Copy config %n%");
+    AI_COPY("ai.copy", "Copy config %n%"),
+    AI_DIALOG_CONTEXT_WRITE("ai.dialogContextWrite", "Your plugin versions and load errors are sent with the question. The assistant can read your SPlugins configurations and propose changes: nothing is changed without your confirmation, and every change can be undone."),
+    AI_CHANGE_TITLE("ai.changeTitle", "Change proposed by the assistant"),
+    AI_CHANGE_NEW("ai.changeNew", "&aNew file: &f%target%"),
+    AI_CHANGE_EDIT("ai.changeEdit", "&eChanged file: &f%target% &7(&a+%added% &c-%removed%&7)"),
+    AI_CHANGE_NOTE("ai.changeNote", "&7Checked with the plugin's loader. A backup is kept: you can undo it from the Hub."),
+    AI_APPLY("ai.apply", "&aApply"),
+    AI_REFUSE("ai.refuse", "&cRefuse"),
+    AI_APPLIED("ai.applied", "&a✔ Applied: &f%target%&a. Undo it from the Hub (Assistant) or with &e/score hub ai undo"),
+    AI_REFUSED("ai.refused", "&7Change refused: nothing was modified"),
+    AI_EXPIRED("ai.expired", "&7This change expired: nothing was modified"),
+    AI_UNDO("ai.undo", "&6↶ Undo the last change: &f%target%"),
+    AI_UNDONE("ai.undone", "&a↶ Restored: &f%target%"),
+    AI_UNDO_NONE("ai.undoNone", "&7No change to undo"),
+    AI_NO_WRITE("ai.noWrite", "&cYou need the permission &escore.ai.write&c to change the configurations");
 
 
     private String key;
