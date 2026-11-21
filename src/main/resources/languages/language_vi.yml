@@ -203,3 +203,8 @@ ai:
   submit: "&aXác nhận"
   refuseAll: "&cTừ chối tất cả"
   ticketOpened: "&a✔ Đã mở ticket: &f%target%"
+  newLore: "&7Cuộc trò chuyện hiện tại vẫn nằm trong lịch sử"
+  history: "&e☰ Lịch sử trò chuyện (%count%)"
+  historyLore: "&7Tiếp tục một cuộc trò chuyện trước"
+  historyRow: "&7%date% · %count% câu hỏi"
+  historyCurrent: " &a(hiện tại)"

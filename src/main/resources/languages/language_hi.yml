@@ -203,3 +203,8 @@ ai:
   submit: "&aपुष्टि करें"
   refuseAll: "&cसभी अस्वीकार करें"
   ticketOpened: "&a✔ टिकट खोला गया: &f%target%"
+  newLore: "&7वर्तमान बातचीत इतिहास में रहती है"
+  history: "&e☰ बातचीत का इतिहास (%count%)"
+  historyLore: "&7पिछली बातचीत जारी रखें"
+  historyRow: "&7%date% · %count% प्रश्न"
+  historyCurrent: " &a(वर्तमान)"

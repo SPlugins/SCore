@@ -162,7 +162,12 @@ public enum Text implements TextInterface {
     AI_COMMENT("ai.comment", "Comment for the assistant (optional)"),
     AI_SUBMIT("ai.submit", "&aValidate"),
     AI_REFUSE_ALL("ai.refuseAll", "&cRefuse all"),
-    AI_TICKET_OPENED("ai.ticketOpened", "&a✔ Ticket opened: &f%target%");
+    AI_TICKET_OPENED("ai.ticketOpened", "&a✔ Ticket opened: &f%target%"),
+    AI_NEW_LORE("ai.newLore", "&7The current conversation stays in the history"),
+    AI_HISTORY("ai.history", "&e☰ Conversation history (%count%)"),
+    AI_HISTORY_LORE("ai.historyLore", "&7Resume an earlier conversation"),
+    AI_HISTORY_ROW("ai.historyRow", "&7%date% · %count% question(s)"),
+    AI_HISTORY_CURRENT("ai.historyCurrent", " &a(current)");
 
 
     private String key;

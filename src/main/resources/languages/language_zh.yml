@@ -203,3 +203,8 @@ ai:
   submit: "&a确认"
   refuseAll: "&c全部拒绝"
   ticketOpened: "&a✔ 已提交工单：&f%target%"
+  newLore: "&7当前对话会保留在历史中"
+  history: "&e☰ 对话历史（%count%）"
+  historyLore: "&7继续之前的对话"
+  historyRow: "&7%date% · %count% 个问题"
+  historyCurrent: " &a（当前）"

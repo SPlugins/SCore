@@ -203,3 +203,8 @@ ai:
   submit: "&aValidar"
   refuseAll: "&cRechazar todo"
   ticketOpened: "&a✔ Ticket abierto: &f%target%"
+  newLore: "&7La conversación actual queda en el historial"
+  history: "&e☰ Historial de conversaciones (%count%)"
+  historyLore: "&7Retomar una conversación anterior"
+  historyRow: "&7%date% · %count% pregunta(s)"
+  historyCurrent: " &a(actual)"

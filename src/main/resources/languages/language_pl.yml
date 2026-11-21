@@ -203,3 +203,8 @@ ai:
   submit: "&aZatwierdź"
   refuseAll: "&cOdrzuć wszystko"
   ticketOpened: "&a✔ Zgłoszenie otwarte: &f%target%"
+  newLore: "&7Obecna rozmowa zostaje w historii"
+  history: "&e☰ Historia rozmów (%count%)"
+  historyLore: "&7Wznów wcześniejszą rozmowę"
+  historyRow: "&7%date% · pytań: %count%"
+  historyCurrent: " &a(bieżąca)"
