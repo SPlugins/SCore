@@ -200,3 +200,8 @@ ai:
   submit: "&aKonfirmasi"
   refuseAll: "&cTolak semua"
   ticketOpened: "&a✔ Tiket dibuka: &f%target%"
+  newLore: "&7Percakapan saat ini tetap ada di riwayat"
+  history: "&e☰ Riwayat percakapan (%count%)"
+  historyLore: "&7Lanjutkan percakapan sebelumnya"
+  historyRow: "&7%date% · %count% pertanyaan"
+  historyCurrent: " &a(saat ini)"

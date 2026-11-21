@@ -200,3 +200,8 @@ ai:
   submit: "&aПодтвердить"
   refuseAll: "&cОтклонить всё"
   ticketOpened: "&a✔ Тикет открыт: &f%target%"
+  newLore: "&7Текущий разговор останется в истории"
+  history: "&e☰ История разговоров (%count%)"
+  historyLore: "&7Продолжить прежний разговор"
+  historyRow: "&7%date% · вопросов: %count%"
+  historyCurrent: " &a(текущий)"

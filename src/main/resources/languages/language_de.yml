@@ -200,3 +200,8 @@ ai:
   submit: "&aBestätigen"
   refuseAll: "&cAlle ablehnen"
   ticketOpened: "&a✔ Ticket eröffnet: &f%target%"
+  newLore: "&7Die aktuelle Unterhaltung bleibt im Verlauf"
+  history: "&e☰ Verlauf der Unterhaltungen (%count%)"
+  historyLore: "&7Eine frühere Unterhaltung fortsetzen"
+  historyRow: "&7%date% · %count% Frage(n)"
+  historyCurrent: " &a(aktuell)"

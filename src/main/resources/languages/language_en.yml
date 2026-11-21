@@ -200,3 +200,8 @@ ai:
   submit: "&aValidate"
   refuseAll: "&cRefuse all"
   ticketOpened: "&a✔ Ticket opened: &f%target%"
+  newLore: "&7The current conversation stays in the history"
+  history: "&e☰ Conversation history (%count%)"
+  historyLore: "&7Resume an earlier conversation"
+  historyRow: "&7%date% · %count% question(s)"
+  historyCurrent: " &a(current)"

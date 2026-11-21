@@ -84,7 +84,8 @@ hub:
 # the admin sees the diff in the game and nothing is written before they click Apply; a backup is kept in
 # plugins/SCore/ai-backups/ and the change can be undone from the Hub or with /score hub ai undo.
 # Each admin's current conversation (last 10 exchanges) is kept in plugins/SCore/ai-conversations/ so it can be
-# resumed from the Hub ("Resume the conversation"), even after a restart; "New conversation" deletes it.
+# resumed from the Hub ("Resume the conversation"), even after a restart; "New conversation" keeps the previous one
+# in the history (Hub > Assistant > Conversation history, the last 20).
 ai:
   enabled: false
   url: "https://splugins.net/api/v1/server"

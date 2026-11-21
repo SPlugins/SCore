@@ -200,3 +200,8 @@ ai:
   submit: "&aConferma"
   refuseAll: "&cRifiuta tutto"
   ticketOpened: "&a✔ Ticket aperto: &f%target%"
+  newLore: "&7La conversazione attuale resta nella cronologia"
+  history: "&e☰ Cronologia delle conversazioni (%count%)"
+  historyLore: "&7Riprendi una conversazione precedente"
+  historyRow: "&7%date% · %count% domanda/e"
+  historyCurrent: " &a(attuale)"

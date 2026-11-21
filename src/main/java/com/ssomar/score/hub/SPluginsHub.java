@@ -41,7 +41,7 @@ public final class SPluginsHub {
 
     /** What a content row does when clicked. */
     static final class Action {
-        enum Type {MANAGE, LINK, RUN, ERRORS, DIAGNOSTIC, AI_LINK, AI_ASK, AI_NEW, AI_ERRORS, AI_UNLINK, AI_UNDO, AI_RESUME, AI_COPY, AI_EXIT, NONE}
+        enum Type {MANAGE, LINK, RUN, ERRORS, DIAGNOSTIC, AI_LINK, AI_ASK, AI_NEW, AI_ERRORS, AI_UNLINK, AI_UNDO, AI_RESUME, AI_COPY, AI_EXIT, AI_HISTORY, AI_OPEN, NONE}
 
         final Type type;
         final String a, b;
@@ -101,6 +101,8 @@ public final class SPluginsHub {
         boolean aiView;
         /** next build shows the page where the last question starts */
         boolean aiJump;
+        /** Assistant tab: the history of the conversations is listed */
+        boolean aiList;
     }
 
     private static final Map<UUID, State> STATES = new ConcurrentHashMap<>();
@@ -166,6 +168,7 @@ public final class SPluginsHub {
             st.tab = Tab.valueOf(id.substring(4));
             st.page = 0;
             st.aiView = false;
+            st.aiList = false;
             if (st.tab != Tab.MANAGE) st.managed = null;
             if (st.tab == Tab.NEWS) HubData.markNewsSeen(p, HubCatalog.get());
             refresh(p, st);
@@ -173,6 +176,7 @@ public final class SPluginsHub {
         }
         if (id.equals("back")) {
             st.managed = null;
+            st.aiList = false;
             st.page = 0;
             refresh(p, st);
             return;
@@ -256,6 +260,22 @@ public final class SPluginsHub {
                 st.aiView = false;
                 st.page = 0;
                 refresh(p, st);
+                break;
+            case AI_HISTORY:
+                st.aiList = true;
+                st.aiView = false;
+                st.page = 0;
+                refresh(p, st);
+                break;
+            case AI_OPEN:
+                if (!com.ssomar.score.ai.AiHistory.select(p.getUniqueId(), a.a)) break;
+                st.aiList = false;
+                st.page = 0;
+                if (s.getMode() != ScreenMode.CHEST) {
+                    st.aiView = true;
+                    st.aiJump = true;
+                    refresh(p, st);
+                } else HubAssistant.run(p, s, "AI_RESUME", null);
                 break;
             default:
                 break;
@@ -363,7 +383,7 @@ public final class SPluginsHub {
         }
 
         double barV = ROW_TOP + SCREEN_ROWS * ROW_STEP + 0.02;
-        if (st.tab == Tab.MANAGE && st.managed != null)
+        if (st.tab == Tab.MANAGE && st.managed != null || st.tab == Tab.ASSISTANT && st.aiList)
             w.add(ScreenWidget.builder("back", WidgetKind.BUTTON).at(0.04, barV).size(0.3, 0.08).text(TM.g(Text.HUB_BACK)).icon("ARROW").chestSlot(45).build());
         if (pages > 1) {
             w.add(ScreenWidget.builder("prev", WidgetKind.BUTTON).at(0.75, barV).size(0.3, 0.08).text(TM.g(Text.HUB_PREVIOUS)).icon("ARROW").enabled(st.page > 0).chestSlot(48).build());
@@ -399,7 +419,7 @@ public final class SPluginsHub {
             case HOME:
                 return homeRows(cat);
             case ASSISTANT:
-                return HubAssistant.rows(p);
+                return st.aiList ? HubAssistant.historyRows(p) : HubAssistant.rows(p);
             case MANAGE:
                 return manageRows(st, cat);
             case HELP:
