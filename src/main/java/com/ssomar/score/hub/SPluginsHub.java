@@ -193,9 +193,10 @@ public final class SPluginsHub {
                 refresh(p, st);
                 break;
             case LINK:
-                // the Hub closes (a screen left behind the window would take the click that leaves it and open the
-                // link again); the window's Back shows it again on the same tab / page / plugin
-                s.close();
+                // FLOATING / PINNED: the Hub stays behind the window (found again after the link confirmation) and
+                // ignores the click that leaves the window; a chest is closed by the window anyway
+                if (HubLinks.dialogsAvailable() && s.getMode() != ScreenMode.CHEST) s.holdClicksUntilLookAway();
+                else s.close();
                 HubLinks.send(p, a.a, a.b, st.tab.name().toLowerCase(Locale.ROOT), () -> back(p));
                 break;
             case RUN:
@@ -209,7 +210,8 @@ public final class SPluginsHub {
                 for (int i = Math.max(0, lines.size() - 15); i < lines.size(); i++) p.sendMessage(StringConverter.coloredString("&c" + lines.get(i)));
                 break;
             case DIAGNOSTIC:
-                s.close();
+                if (HubLinks.dialogsAvailable() && s.getMode() != ScreenMode.CHEST) s.holdClicksUntilLookAway();
+                else s.close();
                 String report = DiagnosticReport.build();
                 if (!HubLinks.sendCopy(p, TM.g(Text.HUB_HELP_DIAGNOSTIC_READY), report, () -> back(p))) {
                     s.close();

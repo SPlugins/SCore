@@ -46,8 +46,12 @@ public final class ScreenImages {
             CompletableFuture<BufferedImage> f = new CompletableFuture<>();
             SCore.schedulerHook.runAsyncTask(() -> {
                 try {
-                    f.complete(download(u));
+                    BufferedImage img = download(u);
+                    lut(); // build the colour table here, not on the main thread at the first image
+                    if (img == null) CACHE.remove(u); // try again at the next opening
+                    f.complete(img);
                 } catch (Throwable t) {
+                    CACHE.remove(u);
                     f.complete(null);
                 }
             }, 0);
@@ -70,7 +74,16 @@ public final class ScreenImages {
                 b.write(buf, 0, n);
                 if (b.size() > MAX_BYTES) return null;
             }
-            return ImageIO.read(new ByteArrayInputStream(b.toByteArray()));
+            long expected = c.getContentLengthLong();
+            if (expected > 0 && b.size() != expected) return null; // cut download
+            BufferedImage read = ImageIO.read(new ByteArrayInputStream(b.toByteArray()));
+            if (read == null) return null;
+            // decode every pixel now, in this async thread: a broken file fails here, not on the main thread
+            BufferedImage copy = new BufferedImage(read.getWidth(), read.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = copy.createGraphics();
+            g.drawImage(read, 0, 0, null);
+            g.dispose();
+            return copy;
         }
     }
 
@@ -98,7 +111,7 @@ public final class ScreenImages {
                 float r = clamp(((argb >> 16) & 0xFF) + err[y][(x + 1) * 3]);
                 float gr = clamp(((argb >> 8) & 0xFF) + err[y][(x + 1) * 3 + 1]);
                 float b = clamp((argb & 0xFF) + err[y][(x + 1) * 3 + 2]);
-                byte c = MapPalette.matchColor(new Color((int) r, (int) gr, (int) b));
+                byte c = nearest((int) r, (int) gr, (int) b);
                 out[(oy + y) * width + ox + x] = c;
                 Color got = MapPalette.getColor(c);
                 float[] e = {r - got.getRed(), gr - got.getGreen(), b - got.getBlue()};
@@ -111,6 +124,49 @@ public final class ScreenImages {
             }
         }
         return out;
+    }
+
+    /*
+     * Our own nearest map colour, from a 32 x 32 x 32 table built once from MapPalette.getColor: MapPalette.matchColor
+     * relies on the server's map colour cache file, which can be corrupted ("Error while reading map color cache").
+     */
+    private static byte[] lut;
+
+    private static synchronized byte[] lut() {
+        if (lut != null) return lut;
+        java.util.List<int[]> pal = new java.util.ArrayList<>();
+        for (int i = 4; i < 256; i++) {
+            try {
+                Color c = MapPalette.getColor((byte) i);
+                if (c == null || c.getAlpha() < 128) continue;
+                pal.add(new int[]{i, c.getRed(), c.getGreen(), c.getBlue()});
+            } catch (Throwable end) {
+                break;
+            }
+        }
+        byte[] t = new byte[32 * 32 * 32];
+        for (int r = 0; r < 32; r++)
+            for (int g = 0; g < 32; g++)
+                for (int b = 0; b < 32; b++) {
+                    int rr = r * 8 + 4, gg = g * 8 + 4, bb = b * 8 + 4;
+                    long best = Long.MAX_VALUE;
+                    int bi = 4;
+                    for (int[] p : pal) {
+                        long dr = rr - p[1], dg = gg - p[2], db = bb - p[3];
+                        long d = 3 * dr * dr + 4 * dg * dg + 2 * db * db;
+                        if (d < best) {
+                            best = d;
+                            bi = p[0];
+                        }
+                    }
+                    t[(r << 10) | (g << 5) | b] = (byte) bi;
+                }
+        lut = t;
+        return t;
+    }
+
+    static byte nearest(int r, int g, int b) {
+        return lut()[((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3)];
     }
 
     private static float clamp(float v) {

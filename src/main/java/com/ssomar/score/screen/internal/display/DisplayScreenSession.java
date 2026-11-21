@@ -426,8 +426,25 @@ public final class DisplayScreenSession extends AbstractScreenSession {
         if (p != null && w != null) apply(p, w, id.equals(hovered));
     }
 
+    /** {yaw, pitch} where clicks are ignored until the head moves away, null if none */
+    private float[] heldAt;
+    private long heldSince;
+
+    @Override
+    public void holdClicksUntilLookAway() {
+        Location l = player.getLocation();
+        heldAt = new float[]{l.getYaw(), l.getPitch()};
+        heldSince = System.currentTimeMillis();
+    }
+
     void click(boolean right) {
         if (!open || !built) return;
+        if (heldAt != null) {
+            Location l = player.getLocation();
+            float dy = Math.abs(((l.getYaw() - heldAt[0]) % 360 + 540) % 360 - 180), dp = Math.abs(l.getPitch() - heldAt[1]);
+            if (dy < 1.5f && dp < 1.5f || System.currentTimeMillis() - heldSince < 300) return;
+            heldAt = null;
+        }
         String id = widgetUnderCursor();
         lastClickAt = System.currentTimeMillis();
         inHandler = true;

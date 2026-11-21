@@ -49,9 +49,9 @@ final class HubDialogs {
     }
 
     /**
-     * The window stays open after its button (the client's link confirmation comes back to it), and its exit button
-     * ("Back") closes it from the server (after_action NONE also applies to it) and runs {@code back}, which shows
-     * the Hub again as it was. Escape just closes it.
+     * The window closes after its button, so the client's link confirmation leads back to the game, where a
+     * FLOATING / PINNED Hub is still open. Its exit button ("Back") runs {@code back}, which shows the Hub again
+     * as it was when it is closed (chest mode).
      */
     private static void show(Player p, String title, Component body, ActionButton button, Runnable back) {
         ActionButton exit = ActionButton.builder(Component.translatable("gui.back")).width(200)
@@ -66,7 +66,7 @@ final class HubDialogs {
         DialogBase base = DialogBase.builder(legacy(title))
                 .canCloseWithEscape(true)
                 .pause(false)
-                .afterAction(DialogBase.DialogAfterAction.NONE)
+                .afterAction(DialogBase.DialogAfterAction.CLOSE)
                 .body(body == null ? Collections.emptyList() : Collections.singletonList(DialogBody.plainMessage(body, 300)))
                 .build();
         MultiActionType type = DialogType.multiAction(Collections.singletonList(button)).exitAction(exit).columns(1).build();

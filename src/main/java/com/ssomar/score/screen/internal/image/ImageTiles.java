@@ -125,7 +125,12 @@ public final class ImageTiles {
 
     private void paint(BufferedImage img) {
         int cw = cols * 128, ch = rows * 127;
-        byte[] canvas = ScreenImages.toMapColours(img, cw, ch);
+        byte[] canvas;
+        try {
+            canvas = ScreenImages.toMapColours(img, cw, ch);
+        } catch (Throwable t) {
+            canvas = new byte[cw * ch]; // a broken image shows nothing rather than failing the screen
+        }
         ScreenLayout l = session.getLayout();
         double[] c = ScreenGeometry.centre(widget.getU(), widget.getV(), widget.getWidth(), widget.getHeight(), l.getWidth(), l.getHeight());
         double tw = widget.getWidth() / cols, th = widget.getHeight() / rows;

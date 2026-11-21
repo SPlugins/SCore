@@ -24,4 +24,12 @@ public interface ScreenSession {
 
     /** Close by code (reason PLUGIN). */
     void close();
+
+    /**
+     * Ignore clicks until the player looks elsewhere (FLOATING / PINNED; no-op in a chest). Use it before showing a
+     * window over the screen (a dialog, a link confirmation): the click that leaves the window lands on the screen
+     * with the cursor still on the element that opened it.
+     */
+    default void holdClicksUntilLookAway() {
+    }
 }
