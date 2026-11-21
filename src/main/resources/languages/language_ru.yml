@@ -190,3 +190,5 @@ ai:
   undone: "&a↶ Восстановлено: &f%target%"
   undoNone: "&7Нет изменений для отмены"
   noWrite: "&cНужно право &escore.ai.write&c, чтобы менять конфигурации"
+  resume: "&b&l↩ Продолжить разговор"
+  resumeLore: "&7Последний вопрос: &f%question%"

@@ -190,3 +190,5 @@ ai:
   undone: "&a↶ Dipulihkan: &f%target%"
   undoNone: "&7Tidak ada perubahan untuk dibatalkan"
   noWrite: "&cKamu perlu izin &escore.ai.write&c untuk mengubah konfigurasi"
+  resume: "&b&l↩ Lanjutkan percakapan"
+  resumeLore: "&7Pertanyaan terakhir: &f%question%"

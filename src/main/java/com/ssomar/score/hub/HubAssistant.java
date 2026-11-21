@@ -57,6 +57,13 @@ public final class HubAssistant {
             return rows;
         }
         rows.add(new SPluginsHub.Row(TM.g(Text.AI_LINKED_ROW).replace("%account%", AiLink.account()), "PLAYER_HEAD", new ArrayList<String>(), none, false));
+        com.ssomar.score.ai.AiHistory.Exchange lastEx = com.ssomar.score.ai.AiHistory.last(p.getUniqueId());
+        if (lastEx != null && !AiAssistant.isBusy(p)) {
+            String q = lastEx.question.replace('\n', ' ');
+            if (q.length() > 60) q = q.substring(0, 60) + "…";
+            rows.add(new SPluginsHub.Row(TM.g(Text.AI_RESUME), "KNOWLEDGE_BOOK", SPluginsHub.lore(TM.g(Text.AI_RESUME_LORE).replace("%question%", q)),
+                    SPluginsHub.action(SPluginsHub.Action.Type.AI_RESUME, null, false), true));
+        }
         rows.add(new SPluginsHub.Row(AiAssistant.isBusy(p) ? TM.g(Text.AI_THINKING) : TM.g(Text.AI_ASK), "WRITABLE_BOOK",
                 SPluginsHub.lore(TM.g(Text.AI_ASK_LORE)), SPluginsHub.action(SPluginsHub.Action.Type.AI_ASK, null, false), true));
         if (AiAssistant.hasConversation(p))
@@ -99,6 +106,9 @@ public final class HubAssistant {
                 break;
             case "AI_UNDO":
                 undo(p);
+                break;
+            case "AI_RESUME":
+                resume(p, s);
                 break;
             default:
                 break;
@@ -247,6 +257,31 @@ public final class HubAssistant {
                 p.sendMessage(l.url);
             }
         }
+    }
+
+    /* ------------------------------------------------------------------ resume */
+
+    /** the conversation shown again (window with Reply, or the chat) */
+    static void resume(Player p, ScreenSession s) {
+        List<com.ssomar.score.ai.AiHistory.Exchange> all = com.ssomar.score.ai.AiHistory.exchanges(p.getUniqueId());
+        if (all.isEmpty()) {
+            askWindow(p, s, "", null);
+            return;
+        }
+        com.ssomar.score.ai.AiHistory.Exchange last = all.get(all.size() - 1);
+        AiAnswer a = AiAnswer.parse(last.answer);
+        if (HubLinks.dialogsAvailable()) {
+            if (s != null) s.holdClicksUntilLookAway();
+            try {
+                HubDialogs.answer(p, all.subList(0, all.size() - 1), last.question, a, () -> askWindow(p, null, "", null), () -> SPluginsHub.back(p));
+                return;
+            } catch (Throwable t) {
+                SCore.plugin.getLogger().warning("[SCore AI] answer window unavailable, the chat is used: " + t);
+            }
+        }
+        if (s != null) s.close();
+        p.sendMessage("§b» §f" + last.question);
+        chatAnswer(p, a);
     }
 
     /* ------------------------------------------------------------------ changes */

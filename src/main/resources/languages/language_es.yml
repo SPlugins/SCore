@@ -190,3 +190,5 @@ ai:
   undone: "&a↶ Restaurado: &f%target%"
   undoNone: "&7No hay ningún cambio que deshacer"
   noWrite: "&cNecesitas el permiso &escore.ai.write&c para cambiar las configuraciones"
+  resume: "&b&l↩ Retomar la conversación"
+  resumeLore: "&7Última pregunta: &f%question%"

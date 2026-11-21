@@ -41,7 +41,7 @@ public final class SPluginsHub {
 
     /** What a content row does when clicked. */
     static final class Action {
-        enum Type {MANAGE, LINK, RUN, ERRORS, DIAGNOSTIC, AI_LINK, AI_ASK, AI_NEW, AI_ERRORS, AI_UNLINK, AI_UNDO, NONE}
+        enum Type {MANAGE, LINK, RUN, ERRORS, DIAGNOSTIC, AI_LINK, AI_ASK, AI_NEW, AI_ERRORS, AI_UNLINK, AI_UNDO, AI_RESUME, NONE}
 
         final Type type;
         final String a, b;
@@ -233,6 +233,7 @@ public final class SPluginsHub {
             case AI_ERRORS:
             case AI_UNLINK:
             case AI_UNDO:
+            case AI_RESUME:
                 HubAssistant.run(p, s, a.type.name(), a.a);
                 break;
             default:

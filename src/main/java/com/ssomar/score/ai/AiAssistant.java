@@ -42,7 +42,6 @@ public final class AiAssistant {
         void applied(Player p, AiChange change, JSONObject result);
     }
 
-    private static final Map<UUID, String> CONVERSATIONS = new ConcurrentHashMap<>();
     private static final Set<UUID> BUSY = ConcurrentHashMap.newKeySet();
 
     private AiAssistant() {
@@ -53,11 +52,11 @@ public final class AiAssistant {
     }
 
     public static boolean hasConversation(Player p) {
-        return CONVERSATIONS.containsKey(p.getUniqueId());
+        return AiHistory.has(p.getUniqueId());
     }
 
     public static void newConversation(Player p) {
-        CONVERSATIONS.remove(p.getUniqueId());
+        AiHistory.clear(p.getUniqueId());
     }
 
     /** the request body, built on the server thread (reads the plugins and the error lines) */
@@ -86,7 +85,7 @@ public final class AiAssistant {
         final String turnId = UUID.randomUUID().toString();
         final JSONObject body;
         try {
-            body = request(question.trim(), CONVERSATIONS.get(p.getUniqueId()), focusPlugin, turnId, p.hasPermission(WRITE_PERMISSION));
+            body = request(question.trim(), AiHistory.conversationId(p.getUniqueId()), focusPlugin, turnId, p.hasPermission(WRITE_PERMISSION));
         } catch (Throwable t) {
             BUSY.remove(p.getUniqueId());
             view.error(p, "context", String.valueOf(t.getMessage()), "");
@@ -120,8 +119,9 @@ public final class AiAssistant {
                     return;
                 }
                 String conv = res.body.optString("conversationId", "");
-                if (!conv.isEmpty()) CONVERSATIONS.put(p.getUniqueId(), conv);
-                view.answer(p, res.body.optString("answer", ""));
+                String answer = res.body.optString("answer", "");
+                AiHistory.add(p.getUniqueId(), conv, question.trim(), answer);
+                view.answer(p, answer);
             }, null, p, 0L);
         }, 0);
         return true;

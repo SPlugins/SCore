@@ -190,3 +190,5 @@ ai:
   undone: "&a↶ पुनर्स्थापित: &f%target%"
   undoNone: "&7पूर्ववत करने के लिए कोई बदलाव नहीं"
   noWrite: "&cकॉन्फ़िगरेशन बदलने के लिए अनुमति &escore.ai.write&c चाहिए"
+  resume: "&b&l↩ बातचीत जारी रखें"
+  resumeLore: "&7पिछला प्रश्न: &f%question%"

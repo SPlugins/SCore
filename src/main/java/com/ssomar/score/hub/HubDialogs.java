@@ -137,10 +137,26 @@ final class HubDialogs {
 
     /** the answer: paragraphs, configs (preview + Copy), links (Open), Reply, Back */
     static void answer(Player p, AiAnswer a, Runnable reply, Runnable back) {
+        answer(p, Collections.<com.ssomar.score.ai.AiHistory.Exchange>emptyList(), null, a, reply, back);
+    }
+
+    /**
+     * The conversation shown again: the earlier exchanges in short (question + start of the answer), then the
+     * last question and its whole answer with its buttons.
+     */
+    static void answer(Player p, List<com.ssomar.score.ai.AiHistory.Exchange> earlier, String lastQuestion, AiAnswer a, Runnable reply, Runnable back) {
         List<DialogBody> body = new ArrayList<>();
+        net.kyori.adventure.text.format.TextColor you = net.kyori.adventure.text.format.NamedTextColor.AQUA;
+        net.kyori.adventure.text.format.TextColor old = net.kyori.adventure.text.format.NamedTextColor.GRAY;
+        for (com.ssomar.score.ai.AiHistory.Exchange e : earlier.subList(Math.max(0, earlier.size() - 4), earlier.size())) {
+            body.add(DialogBody.plainMessage(Component.text("» " + cut(e.question, 200), you), 400));
+            AiAnswer pa = AiAnswer.parse(e.answer);
+            if (!pa.paragraphs.isEmpty()) body.add(DialogBody.plainMessage(Component.text(cut(pa.paragraphs.get(0), 300), old), 400));
+        }
+        if (lastQuestion != null && !lastQuestion.isEmpty()) body.add(DialogBody.plainMessage(Component.text("» " + cut(lastQuestion, 400), you), 400));
         int n = 0;
         for (String para : a.paragraphs) {
-            if (body.size() >= 40) break;
+            if (body.size() >= 48) break;
             body.add(DialogBody.plainMessage(Component.text(para), 400));
         }
         List<ActionButton> buttons = new ArrayList<>();
@@ -204,5 +220,10 @@ final class HubDialogs {
                 .body(body).build();
         MultiActionType type = DialogType.multiAction(Collections.singletonList(yes)).exitAction(no).columns(1).build();
         p.showDialog(Dialog.create(f -> f.empty().base(base).type(type)));
+    }
+
+    private static String cut(String s, int max) {
+        String t = s == null ? "" : s.replace('\n', ' ').trim();
+        return t.length() <= max ? t : t.substring(0, max) + "…";
     }
 }

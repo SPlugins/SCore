@@ -190,3 +190,5 @@ ai:
   undone: "&a↶ Đã khôi phục: &f%target%"
   undoNone: "&7Không có thay đổi để hoàn tác"
   noWrite: "&cBạn cần quyền &escore.ai.write&c để thay đổi cấu hình"
+  resume: "&b&l↩ Tiếp tục cuộc trò chuyện"
+  resumeLore: "&7Câu hỏi cuối: &f%question%"

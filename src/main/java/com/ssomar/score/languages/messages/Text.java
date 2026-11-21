@@ -149,7 +149,9 @@ public enum Text implements TextInterface {
     AI_UNDO("ai.undo", "&6↶ Undo the last change: &f%target%"),
     AI_UNDONE("ai.undone", "&a↶ Restored: &f%target%"),
     AI_UNDO_NONE("ai.undoNone", "&7No change to undo"),
-    AI_NO_WRITE("ai.noWrite", "&cYou need the permission &escore.ai.write&c to change the configurations");
+    AI_NO_WRITE("ai.noWrite", "&cYou need the permission &escore.ai.write&c to change the configurations"),
+    AI_RESUME("ai.resume", "&b&l↩ Resume the conversation"),
+    AI_RESUME_LORE("ai.resumeLore", "&7Last question: &f%question%");
 
 
     private String key;

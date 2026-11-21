@@ -190,3 +190,5 @@ ai:
   undone: "&a↶ 已恢复：&f%target%"
   undoNone: "&7没有可撤销的修改"
   noWrite: "&c需要权限 &escore.ai.write&c 才能修改配置"
+  resume: "&b&l↩ 继续对话"
+  resumeLore: "&7上一个问题：&f%question%"
