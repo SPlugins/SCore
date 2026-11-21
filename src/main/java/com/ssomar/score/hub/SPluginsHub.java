@@ -193,14 +193,10 @@ public final class SPluginsHub {
                 refresh(p, st);
                 break;
             case LINK:
-                // with a dialog window the Hub stays (screen modes) or comes back ("Back"), as it was
-                if (HubLinks.dialogsAvailable()) {
-                    if (s.getMode() == ScreenMode.CHEST) s.close();
-                    HubLinks.send(p, a.a, a.b, st.tab.name().toLowerCase(Locale.ROOT), () -> back(p));
-                } else {
-                    s.close();
-                    HubLinks.send(p, a.a, a.b, st.tab.name().toLowerCase(Locale.ROOT));
-                }
+                // the Hub closes (a screen left behind the window would take the click that leaves it and open the
+                // link again); the window's Back shows it again on the same tab / page / plugin
+                s.close();
+                HubLinks.send(p, a.a, a.b, st.tab.name().toLowerCase(Locale.ROOT), () -> back(p));
                 break;
             case RUN:
                 s.close();
@@ -213,7 +209,7 @@ public final class SPluginsHub {
                 for (int i = Math.max(0, lines.size() - 15); i < lines.size(); i++) p.sendMessage(StringConverter.coloredString("&c" + lines.get(i)));
                 break;
             case DIAGNOSTIC:
-                if (!HubLinks.dialogsAvailable() || s.getMode() == ScreenMode.CHEST) s.close();
+                s.close();
                 String report = DiagnosticReport.build();
                 if (!HubLinks.sendCopy(p, TM.g(Text.HUB_HELP_DIAGNOSTIC_READY), report, () -> back(p))) {
                     s.close();
