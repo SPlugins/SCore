@@ -76,6 +76,14 @@ public final class SPluginsHub {
             this.image = url == null || url.isEmpty() ? null : url;
             return this;
         }
+
+        /** plugin logo, drawn in place of the icon in PINNED */
+        String logo;
+
+        Row logo(String url) {
+            this.logo = url == null || url.isEmpty() ? null : url;
+            return this;
+        }
     }
 
     static final class State {
@@ -268,7 +276,7 @@ public final class SPluginsHub {
             String id = "row:" + i;
             WidgetKind kind = r.action.type == Action.Type.NONE ? WidgetKind.LABEL : WidgetKind.TILE;
             ScreenWidget.Builder b = ScreenWidget.builder(id, kind).at(0.04, ROW_TOP + idx * ROW_STEP).size(rowW, ROW_H)
-                    .text(r.text).icon(r.icon).lore(r.lore).glow(r.glow).chestSlot(9 + idx);
+                    .text(r.text).icon(r.icon).logo(r.logo).lore(r.lore).glow(r.glow).chestSlot(9 + idx);
             w.add(b.build());
             if (r.action.type != Action.Type.NONE) st.actions.put(id, r.action);
             if (r.image != null) {
@@ -332,6 +340,12 @@ public final class SPluginsHub {
         }
     }
 
+    /** logo of a plugin: the catalog icon (media.ssomar.com) if any, else the known one */
+    static String logo(KnownPlugin k, HubCatalog.Entry e) {
+        if (e != null && e.icon != null && !e.icon.isEmpty()) return e.icon;
+        return k == null ? null : k.getLogoUrl();
+    }
+
     private static Action none() {
         return new Action(Action.Type.NONE, null, null, false);
     }
@@ -369,7 +383,7 @@ public final class SPluginsHub {
             }
             lore.add(ip.getErrors() > 0 ? TM.g(Text.HUB_HOME_ERRORS).replace("%count%", "" + ip.getErrors()) : TM.g(Text.HUB_HOME_NO_ERROR));
             lore.add(TM.g(Text.HUB_HOME_CLICK_MANAGE));
-            rows.add(new Row(title.toString(), k.getIcon(), lore, new Action(Action.Type.MANAGE, k.getKey(), null, false), false));
+            rows.add(new Row(title.toString(), k.getIcon(), lore, new Action(Action.Type.MANAGE, k.getKey(), null, false), false).logo(logo(k, e)));
             if (Boolean.FALSE.equals(ip.getPremium())) {
                 HubCatalog.Entry prem = cat.pluginEntry(k, true);
                 if (prem != null && prem.url != null && !prem.url.isEmpty() && "premium".equalsIgnoreCase(prem.edition)) {
@@ -397,11 +411,11 @@ public final class SPluginsHub {
                 l.add(TM.g(Text.HUB_HOME_VERSION).replace("%version%", ip.getVersion()));
                 l.add(TM.g(Text.HUB_HOME_CLICK_MANAGE));
                 rows.add(new Row("&f&l" + ip.getKnown().getPluginName(), ip.getKnown().getIcon(), l,
-                        new Action(Action.Type.MANAGE, ip.getKnown().getKey(), null, false), false));
+                        new Action(Action.Type.MANAGE, ip.getKnown().getKey(), null, false), false).logo(logo(ip.getKnown(), cat.pluginEntry(ip.getKnown(), null))));
             }
             return rows;
         }
-        rows.add(new Row("&f&l" + k.getPluginName(), k.getIcon(), new ArrayList<String>(), none(), true));
+        rows.add(new Row("&f&l" + k.getPluginName(), k.getIcon(), new ArrayList<String>(), none(), true).logo(logo(k, cat.pluginEntry(k, null))));
         if (k.getCommand() != null) {
             rows.add(new Row(TM.g(Text.HUB_MANAGE_RELOAD) + " &8(/" + k.getCommand() + " reload)", "LIME_DYE", lore(TM.g(Text.HUB_CONFIRM)),
                     new Action(Action.Type.RUN, k.getCommand() + " reload", null, true), false));
@@ -446,6 +460,7 @@ public final class SPluginsHub {
             l.add(TM.g(Text.HUB_CLICK_LINK));
             String ed = e.edition == null || e.edition.isEmpty() ? "" : " &8(" + e.edition + ")";
             rows.add(new Row("&f&l" + e.name + ed + "  &7" + e.priceText(), k != null ? k.getIcon() : "CHEST", l, link(e.name, e.url), e.salePercent > 0)
+                    .logo(logo(k, e))
                     .image(e.banner != null && !e.banner.isEmpty() ? e.banner : e.icon));
         }
         for (HubCatalog.Entry e : cat.packs) {
@@ -455,6 +470,7 @@ public final class SPluginsHub {
             l.add(TM.g(Text.HUB_DISCOVER_PRICE).replace("%price%", e.priceText()));
             l.add(TM.g(Text.HUB_CLICK_LINK));
             rows.add(new Row("&d" + e.name + "  &7" + e.priceText(), "CHEST", l, link(e.name, e.url), e.salePercent > 0)
+                    .logo(e.icon)
                     .image(e.banner != null && !e.banner.isEmpty() ? e.banner : e.icon));
         }
         rows.add(new Row(TM.g(Text.HUB_DISCOVER_STUDIO), "ANVIL", lore(TM.g(Text.HUB_DISCOVER_STUDIO_LORE), TM.g(Text.HUB_CLICK_LINK)),

@@ -110,6 +110,19 @@ class ScreenDisplayMathTest {
     }
 
     @Test
+    void logoReplacesTheIconOnlyWhereImagesAreDrawn() {
+        ScreenWidget r = ScreenWidget.builder("row", WidgetKind.TILE).at(0.04, 0.25).size(2.32, 0.105).icon("DIAMOND_SWORD")
+                .logo("https://media.ssomar.com/m/resource-icon-900").build();
+        WidgetVisual pinned = WidgetVisual.of(r, "ExecutableItems", 2.4, 1.35, false, true);
+        assertNull(pinned.icon);
+        assertEquals("https://media.ssomar.com/m/resource-icon-900", pinned.logo);
+        assertEquals(0.04 - 1.2 + 0.105 * 0.5, pinned.iconX, EPS);
+        WidgetVisual floating = WidgetVisual.of(r, "ExecutableItems", 2.4, 1.35, false, false);
+        assertEquals("DIAMOND_SWORD", floating.icon);
+        assertNull(floating.logo);
+    }
+
+    @Test
     void longTextShrinksThenIsCut() {
         ScreenWidget b = ScreenWidget.builder("b", WidgetKind.BUTTON).at(0, 0).size(0.3, 0.09).build();
         String longText = "A very long label that never fits in a small button at all";

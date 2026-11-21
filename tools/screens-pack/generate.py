@@ -8,7 +8,7 @@ shaders of each client generation with two extra branches:
   (view.xy = -view.xy) and pulled to depth 0.1, so the glyph of a world point one block ahead moves with the head
   like a mouse pointer and is drawn over everything;
 * image tile: a 128x128 texture (a map) whose row 0 starts with the signature 0xB5A3 is placed on the camera at depth
-  0.12, at the panel position written in that row (see ScreenGeometry.mapHeader). Not on 26.3+.
+  0.12, at the panel position written in that row (see ScreenGeometry.mapHeader).
 
 GUI text (orthographic projection) is never touched.
 
@@ -177,7 +177,7 @@ def main():
             open(os.path.join(core, "rendertype_text_see_through.vsh"), "w").write(patch(see, False))
         else:
             text = read(jar, CORE + "text.vsh")
-            maps = version != "26.3"
+            maps = True  # 26.3 too: our panel is depth-tested, so the draw order of maps does not matter
             open(os.path.join(core, "text.vsh"), "w").write(
                 patch(text, maps, guard_cursor="!defined(IS_GUI)",
                       guard_map="!defined(IS_GUI) && !defined(IS_SEE_THROUGH)",

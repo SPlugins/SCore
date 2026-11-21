@@ -29,6 +29,7 @@ public final class ScreenWidget {
     private final double textScale;
     private final int chestSlot;
     private final String imageUrl;
+    private final String logoUrl;
 
     private ScreenWidget(Builder b) {
         this.id = b.id;
@@ -47,6 +48,7 @@ public final class ScreenWidget {
         this.textScale = b.textScale;
         this.chestSlot = b.chestSlot;
         this.imageUrl = b.imageUrl;
+        this.logoUrl = b.logoUrl;
     }
 
     public static Builder builder(String id, WidgetKind kind) {
@@ -69,6 +71,7 @@ public final class ScreenWidget {
         b.textScale = textScale;
         b.chestSlot = chestSlot;
         b.imageUrl = imageUrl;
+        b.logoUrl = logoUrl;
         return b;
     }
 
@@ -97,6 +100,8 @@ public final class ScreenWidget {
     public double getTextScale() { return textScale; }
     public int getChestSlot() { return chestSlot; }
     public String getImageUrl() { return imageUrl; }
+    /** picture drawn in place of the icon where images can be drawn (PINNED), else the icon material is used */
+    public String getLogoUrl() { return logoUrl; }
 
     @Override
     public boolean equals(Object o) {
@@ -106,7 +111,7 @@ public final class ScreenWidget {
         return id.equals(w.id) && kind == w.kind && u == w.u && v == w.v && width == w.width && height == w.height
                 && eq(text, w.text) && lore.equals(w.lore) && eq(icon, w.icon) && enabled == w.enabled
                 && selected == w.selected && glow == w.glow && fill == w.fill && textScale == w.textScale
-                && chestSlot == w.chestSlot && eq(imageUrl, w.imageUrl);
+                && chestSlot == w.chestSlot && eq(imageUrl, w.imageUrl) && eq(logoUrl, w.logoUrl);
     }
 
     @Override
@@ -132,6 +137,7 @@ public final class ScreenWidget {
         private double textScale = 1.0;
         private int chestSlot = -1;
         private String imageUrl;
+        private String logoUrl;
 
         private Builder(String id, WidgetKind kind) {
             if (id == null || id.isEmpty()) throw new IllegalArgumentException("widget id is empty");
@@ -155,6 +161,8 @@ public final class ScreenWidget {
         public Builder chestSlot(int slot) { this.chestSlot = slot; return this; }
         public Builder hiddenInChest() { this.chestSlot = -2; return this; }
         public Builder image(String url) { this.imageUrl = url; return this; }
+        /** a picture (URL) shown instead of the icon where images can be drawn, e.g. a plugin logo */
+        public Builder logo(String url) { this.logoUrl = url == null || url.isEmpty() ? null : url; return this; }
 
         public ScreenWidget build() {
             return new ScreenWidget(this);

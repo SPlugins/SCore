@@ -32,6 +32,8 @@ public final class WidgetVisual {
     public double textX, textY;
     /** icon material, null if none */
     public String icon;
+    /** picture drawn in the icon square instead of the material (PINNED), null if none */
+    public String logo;
     public double iconX, iconY, iconSize;
     /** true when the widget is an image drawn with map tiles */
     public boolean image;
@@ -96,6 +98,11 @@ public final class WidgetVisual {
                 textLeft = left + h;
             }
         }
+        if (images && v.icon != null && w.getLogoUrl() != null && kind != WidgetKind.ICON) {
+            v.logo = w.getLogoUrl();
+            v.icon = null;
+            v.iconSize = h * 0.82;
+        }
         if (kind == WidgetKind.FILL || kind == WidgetKind.ICON || text == null || text.isEmpty()) return v;
 
         String t = w.isEnabled() ? text : "§8" + TextMetrics.strip(text);
@@ -116,7 +123,7 @@ public final class WidgetVisual {
         }
         v.text = t;
         v.textScale = s;
-        boolean leftAlign = w.getWidth() >= 0.8 || v.icon != null && w.getWidth() >= 0.5;
+        boolean leftAlign = w.getWidth() >= 0.8 || (v.icon != null || v.logo != null) && w.getWidth() >= 0.5;
         if (leftAlign) v.textX = textLeft - (1 - px / 2.0) * TextMetrics.PX * s;
         else v.textX = (textLeft + rightEdge - PAD) / 2 - 0.5 * TextMetrics.PX * s;
         v.textY = c[1] - 0.135 * s;

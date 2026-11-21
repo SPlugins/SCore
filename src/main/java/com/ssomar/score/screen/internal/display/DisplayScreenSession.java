@@ -83,6 +83,7 @@ public final class DisplayScreenSession extends AbstractScreenSession {
         ItemDisplay icon;
         String iconMaterial;
         ImageTiles image;
+        ImageTiles logo;
     }
 
     public DisplayScreenSession(Player player, ScreenSpec spec, boolean pinned) {
@@ -283,6 +284,20 @@ public final class DisplayScreenSession extends AbstractScreenSession {
             p.iconMaterial = null;
         }
 
+        if (v.logo != null) {
+            double[] rect = {v.iconX, v.iconY, v.iconSize, v.iconSize};
+            try {
+                if (p.logo == null) p.logo = new ImageTiles(this, v.logo, rect);
+                else p.logo.update(v.logo, rect);
+            } catch (Throwable t) {
+                if (!imageWarned) SCore.plugin.getLogger().log(Level.WARNING, "[SCore Screens] image tiles unavailable", t);
+                imageWarned = true;
+            }
+        } else if (p.logo != null) {
+            p.logo.remove();
+            p.logo = null;
+        }
+
         if (v.image) {
             try {
                 if (p.image == null) p.image = new ImageTiles(this, w);
@@ -379,6 +394,8 @@ public final class DisplayScreenSession extends AbstractScreenSession {
         p.icon = remove(p.icon);
         if (p.image != null) p.image.remove();
         p.image = null;
+        if (p.logo != null) p.logo.remove();
+        p.logo = null;
     }
 
     /* ------------------------------------------------------------------ input */

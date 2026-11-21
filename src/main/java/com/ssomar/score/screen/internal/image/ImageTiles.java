@@ -29,26 +29,46 @@ public final class ImageTiles {
 
     private final DisplayScreenSession session;
     private final Player player;
-    private ScreenWidget widget;
+    /** what is drawn: image URL and rectangle in centre-origin panel units */
+    private String url;
+    private double cx, cy, w, h;
     private final List<ItemFrame> frames = new ArrayList<>();
     private final List<Integer> slots = new ArrayList<>();
     private int cols, rows;
     private int generation;
 
+    /** an image widget, drawn over the whole widget */
     public ImageTiles(DisplayScreenSession session, ScreenWidget widget) {
+        this(session, widget.getImageUrl(), rect(session, widget));
+    }
+
+    /** an image in a rectangle {centreX, centreY, width, height} (centre-origin panel units), e.g. a plugin logo */
+    public ImageTiles(DisplayScreenSession session, String url, double[] rect) {
         this.session = session;
         this.player = session.getPlayer();
-        this.widget = widget;
+        set(url, rect);
         grid();
         spawn();
         draw();
     }
 
+    private static double[] rect(DisplayScreenSession session, ScreenWidget w) {
+        ScreenLayout l = session.getLayout();
+        double[] c = ScreenGeometry.centre(w.getU(), w.getV(), w.getWidth(), w.getHeight(), l.getWidth(), l.getHeight());
+        return new double[]{c[0], c[1], w.getWidth(), w.getHeight()};
+    }
+
+    private void set(String url, double[] r) {
+        this.url = url;
+        this.cx = r[0];
+        this.cy = r[1];
+        this.w = r[2];
+        this.h = r[3];
+    }
+
     private void grid() {
-        double w = widget.getWidth(), h = widget.getHeight();
         rows = h >= 0.45 ? 2 : 1;
         cols = (int) Math.max(1, Math.min(4, Math.round(w / h * rows * 127 / 128.0)));
-        while (cols * rows > ScreenImages.POOL) cols--;
     }
 
     /** pooled map slots used by this screen's other images, so two images never share a map */
@@ -103,16 +123,21 @@ public final class ImageTiles {
         return best;
     }
 
-    public void update(ScreenWidget w) {
-        boolean urlChanged = w.getImageUrl() == null ? widget.getImageUrl() != null : !w.getImageUrl().equals(widget.getImageUrl());
-        boolean moved = w.getU() != widget.getU() || w.getV() != widget.getV() || w.getWidth() != widget.getWidth() || w.getHeight() != widget.getHeight();
-        widget = w;
+    public void update(ScreenWidget widget) {
+        update(widget.getImageUrl(), rect(session, widget));
+    }
+
+    /** redraws only when the image or its place changed (the grid is kept) */
+    public void update(String newUrl, double[] r) {
+        boolean urlChanged = newUrl == null ? url != null : !newUrl.equals(url);
+        boolean moved = r[0] != cx || r[1] != cy || r[2] != w || r[3] != h;
+        set(newUrl, r);
         if (urlChanged || moved) draw();
     }
 
     private void draw() {
         final int gen = ++generation;
-        final String url = widget.getImageUrl();
+        final String url = this.url;
         if (url == null || url.isEmpty()) {
             paint(null);
             return;
@@ -131,10 +156,8 @@ public final class ImageTiles {
         } catch (Throwable t) {
             canvas = new byte[cw * ch]; // a broken image shows nothing rather than failing the screen
         }
-        ScreenLayout l = session.getLayout();
-        double[] c = ScreenGeometry.centre(widget.getU(), widget.getV(), widget.getWidth(), widget.getHeight(), l.getWidth(), l.getHeight());
-        double tw = widget.getWidth() / cols, th = widget.getHeight() / rows;
-        double left = c[0] - widget.getWidth() / 2, top = c[1] + widget.getHeight() / 2;
+        double tw = w / cols, th = h / rows;
+        double left = cx - w / 2, top = cy + h / 2;
         for (int i = 0; i < slots.size(); i++) {
             int tx = i % cols, ty = i / cols;
             double cx = left + tw * (tx + 0.5), cy = top - th * (ty + 0.5);

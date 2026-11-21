@@ -37,6 +37,21 @@ public enum KnownPlugin {
     }
 
     public String getKey() { return key; }
+
+    /** the plugin logo on media.ssomar.com (resource icons of splugins.net), null if none */
+    public String getLogoUrl() {
+        switch (this) {
+            case SCORE: return "https://media.ssomar.com/m/docs-img-logo-score.png";
+            case EXECUTABLE_ITEMS: return "https://media.ssomar.com/m/resource-icon-900";
+            case EXECUTABLE_BLOCKS: return "https://media.ssomar.com/m/resource-icon-905";
+            case EXECUTABLE_EVENTS: return "https://media.ssomar.com/m/resource-icon-906";
+            case EXECUTABLE_CRAFTING: return "https://media.ssomar.com/m/resource-icon-907";
+            case MY_FURNITURE: return "https://media.ssomar.com/m/resource-icon-908";
+            case EXECUTABLE_LEVERS: return "https://media.ssomar.com/m/resource-icon-909";
+            case CUSTOM_PIGLINS_TRADES: return "https://media.ssomar.com/m/resource-icon-910";
+            default: return null;
+        }
+    }
     public String getPluginName() { return pluginName; }
     /** main command without the slash, or null */
     public String getCommand() { return command; }

@@ -26,11 +26,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Images of the PINNED screens: download and conversion to map colours (async, cached), and a small pool of maps
- * reused for every player (each map has a per-player renderer, so 8 maps serve all the open screens).
+ * reused for every player (each map has a per-player renderer, so 40 maps serve all the open screens).
  */
 public final class ScreenImages {
 
-    public static final int POOL = 8;
+    public static final int POOL = 40;
     static final int MAX_BYTES = 4 * 1024 * 1024;
 
     private static final Map<String, CompletableFuture<BufferedImage>> CACHE = new ConcurrentHashMap<>();

@@ -17,7 +17,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
@@ -39,8 +38,6 @@ public final class ScreenPack {
     public static final String POINTER_TEXT = "§x§f§e§f§e§f§e" + POINTER_CHAR;
 
     public static final UUID PACK_ID = UUID.nameUUIDFromBytes("score:screens-pack".getBytes(StandardCharsets.UTF_8));
-    /** first client protocol of 26.3: maps are drawn before the panel there, so no images */
-    static final int PROTOCOL_26_3 = 777;
 
     enum Status {SENT, LOADED, FAILED}
 
@@ -163,29 +160,12 @@ public final class ScreenPack {
         return null;
     }
 
-    /** images need the shader and a client before 26.3 */
+    /**
+     * images need the shader. 26.3 draws item frame maps before the see-through text, which hid maps under see-through
+     * panels; ours are depth-tested, so the 26.3 shader has the map branch too.
+     */
     public static boolean imagesAllowed(Player p) {
-        if (STATUS.get(p.getUniqueId()) != Status.LOADED) return false;
-        int protocol = clientProtocol(p);
-        if (protocol > 0) return protocol < PROTOCOL_26_3;
-        return !SCore.is26v3Plus();
-    }
-
-    /** the client protocol (ViaVersion first, then Paper), -1 if unknown */
-    static int clientProtocol(Player p) {
-        try {
-            Class<?> via = Class.forName("com.viaversion.viaversion.api.Via");
-            Object api = via.getMethod("getAPI").invoke(null);
-            Method m = api.getClass().getMethod("getPlayerVersion", UUID.class);
-            int v = (Integer) m.invoke(api, p.getUniqueId());
-            if (v > 0) return v;
-        } catch (Throwable ignored) {
-        }
-        try {
-            return (Integer) p.getClass().getMethod("getProtocolVersion").invoke(p);
-        } catch (Throwable ignored) {
-            return -1;
-        }
+        return STATUS.get(p.getUniqueId()) == Status.LOADED;
     }
 
     public static final class PackListener implements Listener {
