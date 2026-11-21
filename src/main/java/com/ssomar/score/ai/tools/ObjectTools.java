@@ -27,11 +27,11 @@ public final class ObjectTools {
         return Arrays.asList(list(), read(), search(), validate());
     }
 
-    private static final String[] PLUGIN = {"plugin", "string", "plugin name, e.g. ExecutableItems, ExecutableBlocks, ExecutableEvents, MyFurniture"};
-    private static final String[] TYPE = {"type", "string", "object type when the plugin has several (item, block, event, furniture, recipe...); optional"};
+    static final String[] PLUGIN = {"plugin", "string", "plugin name, e.g. ExecutableItems, ExecutableBlocks, ExecutableEvents, MyFurniture"};
+    static final String[] TYPE = {"type", "string", "object type when the plugin has several (item, block, event, furniture, recipe...); optional"};
 
     /** the loader of a plugin (and type), or an exception that lists the valid ones */
-    static SObjectWithFileLoader<?> loader(JSONObject a) {
+    public static SObjectWithFileLoader<?> loader(JSONObject a) {
         String plugin = a.optString("plugin", "").trim();
         String type = a.optString("type", "").trim().toLowerCase(Locale.ROOT);
         List<String> known = new ArrayList<>();
@@ -51,7 +51,7 @@ public final class ObjectTools {
         return found;
     }
 
-    static String relative(SObjectWithFileLoader<?> l, File f) {
+    public static String relative(SObjectWithFileLoader<?> l, File f) {
         String base = new File(l.getConfigsPath()).getAbsolutePath();
         String p = f.getAbsolutePath();
         return p.startsWith(base) ? p.substring(base.length()).replace('\\', '/').replaceFirst("^/", "") : f.getName();
@@ -117,21 +117,23 @@ public final class ObjectTools {
         return new ServerTools.Simple("validate_object",
                 "Load a YAML configuration with the plugin's real loader WITHOUT saving or registering it, and return the errors it prints. Always validate a configuration before proposing it.",
                 AiTools.schema(new String[][]{PLUGIN, TYPE, {"id", "string", "object id"}, {"yaml", "string", "the whole YAML of the object"}}, "plugin", "id", "yaml"),
-                a -> {
-                    SObjectWithFileLoader<?> l = loader(a);
-                    final boolean[] loaded = {false};
-                    final String[] parse = {null};
-                    List<String> lines = LoadErrorCollector.capture(() -> {
-                        try {
-                            loaded[0] = l.loadDryRun(a.getString("yaml"), a.getString("id")).isPresent();
-                        } catch (Exception e) {
-                            parse[0] = e.getMessage();
-                        }
-                    });
-                    List<String> errors = new ArrayList<>();
-                    for (String line : lines) if (line.toUpperCase(Locale.ROOT).contains("ERROR") || line.toLowerCase(Locale.ROOT).contains("couldn't")) errors.add(line);
-                    if (parse[0] != null) errors.add(0, "YAML: " + parse[0]);
-                    return new JSONObject().put("ok", loaded[0] && errors.isEmpty()).put("loaded", loaded[0]).put("errors", new JSONArray(errors));
-                });
+                a -> check(loader(a), a.getString("yaml"), a.getString("id")));
+    }
+
+    /** {ok, loaded, errors[]}: the YAML loaded with the real loader, nothing saved or registered */
+    public static JSONObject check(SObjectWithFileLoader<?> l, String yaml, String id) {
+        final boolean[] loaded = {false};
+        final String[] parse = {null};
+        List<String> lines = LoadErrorCollector.capture(() -> {
+            try {
+                loaded[0] = l.loadDryRun(yaml, id).isPresent();
+            } catch (Exception e) {
+                parse[0] = e.getMessage();
+            }
+        });
+        List<String> errors = new ArrayList<>();
+        for (String line : lines) if (line.toUpperCase(Locale.ROOT).contains("ERROR") || line.toLowerCase(Locale.ROOT).contains("couldn't")) errors.add(line);
+        if (parse[0] != null) errors.add(0, "YAML: " + parse[0]);
+        return new JSONObject().put("ok", loaded[0] && errors.isEmpty()).put("loaded", loaded[0]).put("errors", new JSONArray(errors));
     }
 }

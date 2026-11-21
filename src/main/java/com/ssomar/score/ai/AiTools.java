@@ -2,6 +2,7 @@ package com.ssomar.score.ai;
 
 import com.ssomar.score.ai.tools.ObjectTools;
 import com.ssomar.score.ai.tools.ServerTools;
+import com.ssomar.score.ai.tools.WriteTools;
 import org.bukkit.plugin.Plugin;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -43,7 +44,7 @@ public final class AiTools {
         return new ArrayList<>(TOOLS.values());
     }
 
-    /** declarations sent with a question; phase 2: read tools only */
+    /** declarations sent with a question; the write tools only for an admin allowed to confirm changes */
     public static JSONArray declarations(boolean includeWrite) {
         JSONArray a = new JSONArray();
         for (AiTool t : TOOLS.values()) {
@@ -58,6 +59,7 @@ public final class AiTools {
     public static void registerBuiltins(Plugin score) {
         for (AiTool t : ServerTools.all()) register(score, t);
         for (AiTool t : ObjectTools.all()) register(score, t);
+        for (AiTool t : WriteTools.all()) register(score, t);
     }
 
     /* small helpers for schemas */

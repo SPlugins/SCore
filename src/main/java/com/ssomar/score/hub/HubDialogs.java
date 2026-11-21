@@ -129,7 +129,7 @@ final class HubDialogs {
         ActionButton exit = serverButton(Component.translatable("gui.back"), 150, p, back == null ? () -> { } : back);
         DialogBase base = DialogBase.builder(legacy(TM.g(Text.AI_DIALOG_TITLE)))
                 .canCloseWithEscape(true).pause(false).afterAction(DialogBase.DialogAfterAction.CLOSE)
-                .body(Collections.singletonList(DialogBody.plainMessage(legacy(TM.g(Text.AI_DIALOG_CONTEXT)), 300)))
+                .body(Collections.singletonList(DialogBody.plainMessage(legacy(TM.g(p.hasPermission(com.ssomar.score.ai.AiAssistant.WRITE_PERMISSION) ? Text.AI_DIALOG_CONTEXT_WRITE : Text.AI_DIALOG_CONTEXT)), 300)))
                 .inputs(Collections.singletonList(input)).build();
         MultiActionType type = DialogType.multiAction(Collections.singletonList(send)).exitAction(exit).columns(1).build();
         p.showDialog(Dialog.create(f -> f.empty().base(base).type(type)));
@@ -161,6 +161,48 @@ final class HubDialogs {
                 .canCloseWithEscape(true).pause(false).afterAction(DialogBase.DialogAfterAction.CLOSE)
                 .body(body).build();
         MultiActionType type = DialogType.multiAction(buttons).exitAction(exit).columns(2).build();
+        p.showDialog(Dialog.create(f -> f.empty().base(base).type(type)));
+    }
+
+    /** a change proposed by the assistant: target, summary, diff, Apply / Refuse (Escape = Refuse) */
+    static void change(Player p, com.ssomar.score.ai.AiChange c, com.ssomar.score.ai.LineDiff d, Runnable apply, Runnable refuse) {
+        List<DialogBody> body = new ArrayList<>();
+        String head = c.isCreation() ? TM.g(Text.AI_CHANGE_NEW).replace("%target%", c.getTarget())
+                : TM.g(Text.AI_CHANGE_EDIT).replace("%target%", c.getTarget()).replace("%added%", "" + d.added).replace("%removed%", "" + d.removed);
+        body.add(DialogBody.plainMessage(legacy(head), 400));
+        if (!c.getSummary().isEmpty()) body.add(DialogBody.plainMessage(Component.text(c.getSummary()), 400));
+        Component block = Component.empty();
+        int n = 0;
+        for (com.ssomar.score.ai.LineDiff.Line l : d.lines) {
+            Component line;
+            switch (l.kind) {
+                case '+':
+                    line = Component.text("+ " + l.text, net.kyori.adventure.text.format.NamedTextColor.GREEN);
+                    break;
+                case '-':
+                    line = Component.text("- " + l.text, net.kyori.adventure.text.format.NamedTextColor.RED);
+                    break;
+                case '…':
+                    line = Component.text("  … " + l.text, net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY);
+                    break;
+                default:
+                    line = Component.text("  " + l.text, net.kyori.adventure.text.format.NamedTextColor.GRAY);
+            }
+            block = n == 0 ? line : block.append(Component.newline()).append(line);
+            if (++n == 20) {
+                body.add(DialogBody.plainMessage(block, 400));
+                block = Component.empty();
+                n = 0;
+            }
+        }
+        if (n > 0) body.add(DialogBody.plainMessage(block, 400));
+        body.add(DialogBody.plainMessage(legacy(TM.g(Text.AI_CHANGE_NOTE)), 400));
+        ActionButton yes = serverButton(legacy(TM.g(Text.AI_APPLY)), 150, p, apply);
+        ActionButton no = serverButton(legacy(TM.g(Text.AI_REFUSE)), 150, p, refuse);
+        DialogBase base = DialogBase.builder(legacy(TM.g(Text.AI_CHANGE_TITLE)))
+                .canCloseWithEscape(true).pause(false).afterAction(DialogBase.DialogAfterAction.CLOSE)
+                .body(body).build();
+        MultiActionType type = DialogType.multiAction(Collections.singletonList(yes)).exitAction(no).columns(1).build();
         p.showDialog(Dialog.create(f -> f.empty().base(base).type(type)));
     }
 }

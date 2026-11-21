@@ -77,10 +77,12 @@ hub:
   pause-menu-button: false
 
 # SPlugins assistant (Hub > Assistant tab, permission score.hub). Off by default. When on, an admin links this server
-# to a splugins.net account once (a code to enter on splugins.net/link); questions then use that account's plan.
-# Sent with each question: the question, the plugin versions and the load errors (shown in the question window).
-# The assistant can read the configurations of the SPlugins plugins and check them with the real loaders; it can't
-# change anything.
+# to a splugins.net account once (a code to enter on splugins.net/dashboard/servers); questions then use that
+# account's plan. Sent with each question: the question, the plugin versions and the load errors (shown in the
+# question window). The assistant can read the configurations of the SPlugins plugins and check them with the real
+# loaders. For admins with the permission score.ai.write (op by default) it can also propose a change of a file:
+# the admin sees the diff in the game and nothing is written before they click Apply; a backup is kept in
+# plugins/SCore/ai-backups/ and the change can be undone from the Hub or with /score hub ai undo.
 ai:
   enabled: false
   url: "https://splugins.net/api/v1/server"
