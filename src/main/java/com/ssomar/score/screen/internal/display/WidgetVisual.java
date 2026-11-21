@@ -88,7 +88,7 @@ public final class WidgetVisual {
                 v.iconY = c[1];
                 return v;
             }
-            if (kind != WidgetKind.FILL && h >= 0.06 && w.getWidth() >= h * 2) {
+            if (kind != WidgetKind.FILL && h >= 0.06 && w.getWidth() >= h * 5) {
                 v.icon = w.getIcon();
                 v.iconSize = h * 0.72;
                 v.iconX = left + h * 0.5;

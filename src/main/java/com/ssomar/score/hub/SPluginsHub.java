@@ -234,7 +234,9 @@ public final class SPluginsHub {
             w.add(ScreenWidget.builder("tab:" + t.name(), WidgetKind.BUTTON).at(0.04 + t.ordinal() * 0.30, 0.11).size(tabW, 0.09)
                     .text(label).icon(t.icon).selected(t == st.tab).glow(t == st.tab).chestSlot(t.ordinal()).build());
         }
-        w.add(ScreenWidget.builder("close", WidgetKind.BUTTON).at(2.17, 0.11).size(0.19, 0.09).text(TM.g(Text.HUB_CLOSE)).icon("BARRIER").chestSlot(8).build());
+        // the screen modes have no room for the word: just the cross (the chest item keeps the full name)
+        String close = st.mode == ScreenMode.CHEST ? TM.g(Text.HUB_CLOSE) : "&c&l✘";
+        w.add(ScreenWidget.builder("close", WidgetKind.BUTTON).at(2.17, 0.11).size(0.19, 0.09).text(close).icon("BARRIER").chestSlot(8).build());
 
         List<Row> rows = rows(p, st, cat);
         int perPage = st.mode == ScreenMode.CHEST ? CHEST_ROWS : SCREEN_ROWS;
@@ -292,7 +294,8 @@ public final class SPluginsHub {
     }
 
     static String defaultHint() {
-        return TM.g(Text.HUB_HINT) + "  " + TM.g(Text.HUB_SNEAK_HINT);
+        // dark grey is unreadable on the panel: light grey
+        return (TM.g(Text.HUB_HINT) + "  " + TM.g(Text.HUB_SNEAK_HINT)).replace("&8", "&7");
     }
 
     static List<Row> rows(Player p, State st, HubCatalog cat) {

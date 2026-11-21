@@ -41,6 +41,15 @@ public final class HubLinks {
     /** Sends a clickable link line in the chat. */
     public static void send(Player p, String label, String url, String campaign) {
         String tagged = tag(url, campaign);
+        // Paper 1.21.6+: a native window with an "Open in Browser" button (a server can't open the browser itself)
+        if (HubDialogs.available()) {
+            try {
+                HubDialogs.openUrl(p, label, tagged);
+                return;
+            } catch (Throwable ignored) {
+                // fall back to the chat line
+            }
+        }
         String text = StringConverter.coloredString(TM.g(Text.HUB_LINK_MESSAGE).replace("%label%", StringConverter.decoloredString(label)));
         try {
             TextComponent c = new TextComponent(TextComponent.fromLegacyText(text));
@@ -53,6 +62,14 @@ public final class HubLinks {
 
     /** Sends a line that copies {@code toCopy} to the clipboard when clicked (1.15+), else returns false. */
     public static boolean sendCopy(Player p, String line, String toCopy) {
+        if (HubDialogs.available()) {
+            try {
+                HubDialogs.copy(p, "SPlugins Hub", line, toCopy);
+                return true;
+            } catch (Throwable ignored) {
+                // fall back to the chat line
+            }
+        }
         try {
             ClickEvent.Action copy = ClickEvent.Action.valueOf("COPY_TO_CLIPBOARD");
             TextComponent c = new TextComponent(TextComponent.fromLegacyText(StringConverter.coloredString(line)));

@@ -37,7 +37,14 @@ public final class DisplayScreenSession extends AbstractScreenSession {
     /** FLOATING panel: angular size compared with PINNED (which fills a 16:9 FOV 70 screen) */
     static final double FLOATING_SIZE = 0.8;
     static final double FLOATING_DISTANCE = 2.5, FLOATING_MIN_DISTANCE = 0.45;
-    static final double PINNED_BACKDROP_DEPTH = 1.15;
+    /**
+     * PINNED: the panel sits 0.25 block from the eye and its backdrop 0.3 (on screen the size is the same, everything
+     * scales with the distance), so almost no block can stand in front of it. The blocks that can are sent as air
+     * to this player, up to the edges of a very wide screen (32:9, high FOV).
+     */
+    static final double PINNED_DISTANCE = 0.25, PINNED_BACKDROP_DEPTH = 0.3;
+    /** tan of the largest half angles a screen can show: 80 degrees across, 60 degrees up and down */
+    static final double SCREEN_TAN_X = Math.tan(Math.toRadians(80)), SCREEN_TAN_Y = Math.tan(Math.toRadians(60));
 
     private final boolean pinned;
     private final Location feet;
@@ -122,8 +129,8 @@ public final class DisplayScreenSession extends AbstractScreenSession {
             Location boxAt = eye.clone().subtract(0, 1.5, 0);
             if (box.getLocation().distanceSquared(boxAt) > 0.01) box.teleport(boxAt);
             if (pinned) {
-                dist = 1;
-                unit = 1;
+                dist = PINNED_DISTANCE;
+                unit = PINNED_DISTANCE;
                 hideHand();
                 hideNearBlocks();
             } else {
@@ -131,7 +138,8 @@ public final class DisplayScreenSession extends AbstractScreenSession {
                 unit = FLOATING_SIZE * dist;
             }
             if (pinned && spec.getBackdrop() != 0) {
-                backdrop = boxDisplay(new double[]{0, 0, 14 / unit, 8 / unit}, spec.getBackdrop(), PINNED_BACKDROP_DEPTH / dist);
+                double bw = 2 * SCREEN_TAN_X * PINNED_BACKDROP_DEPTH / unit * 1.1, bh = 2 * SCREEN_TAN_Y * PINNED_BACKDROP_DEPTH / unit * 1.1;
+                backdrop = boxDisplay(new double[]{0, 0, bw, bh}, spec.getBackdrop(), PINNED_BACKDROP_DEPTH / dist);
             }
             double m = 0.03;
             plate = boxDisplay(new double[]{0, 0, layout.getWidth() + m * 2, layout.getHeight() + m * 2}, WidgetVisual.PLATE, 1.008);
@@ -302,7 +310,8 @@ public final class DisplayScreenSession extends AbstractScreenSession {
         at.setPitch(-anchorPitch);
         float s = 0.3f;
         pointer = Spawn.spawn(player, at, TextDisplay.class, t -> {
-            t.setBillboard(Display.Billboard.FIXED);
+            // CENTER: the glyph always faces the camera, so it keeps its shape when the head turns
+            t.setBillboard(Display.Billboard.CENTER);
             t.setBrightness(new Display.Brightness(15, 15));
             t.setViewRange(2f);
             t.setDisplayWidth(4f);
@@ -487,8 +496,8 @@ public final class DisplayScreenSession extends AbstractScreenSession {
 
     /** blocks closer than the backdrop would poke through the panel: send them as air to this player only */
     private void hideNearBlocks() {
-        double corner = Math.sqrt(1 + Math.pow(layout.getWidth() / 2, 2) + Math.pow(layout.getHeight() / 2, 2));
-        double reach = Math.min(4, PINNED_BACKDROP_DEPTH * corner + 0.4);
+        double corner = Math.sqrt(1 + SCREEN_TAN_X * SCREEN_TAN_X + SCREEN_TAN_Y * SCREEN_TAN_Y);
+        double reach = Math.min(3, PINNED_BACKDROP_DEPTH * corner + 0.3);
         int r = (int) Math.ceil(reach);
         World w = eye.getWorld();
         int ex = eye.getBlockX(), ey = eye.getBlockY(), ez = eye.getBlockZ();
