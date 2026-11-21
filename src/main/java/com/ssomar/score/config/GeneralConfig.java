@@ -20,6 +20,19 @@ public class GeneralConfig extends Config {
 
     private Locale locale;
 
+    /* SCore Screens + SPlugins Hub (sections screens: and hub:, read with defaults, the file is not rewritten) */
+    private boolean screensEnabled;
+    private com.ssomar.score.screen.ScreenMode screensPreferMode;
+    private boolean screensPinnedPack;
+    private List<String> screensOff;
+    private boolean hubSpluginsAlias;
+    private boolean hubRemoteCatalog;
+    private String hubCatalogUrl;
+    private boolean hubJoinNotification;
+    private boolean hubReviewReminder;
+    private int hubReviewReminderDays;
+    private boolean hubPauseMenuButton;
+
     private boolean useMySQL;
 
     private String dbIP;
@@ -118,6 +131,18 @@ public class GeneralConfig extends Config {
         selfHostPackDebug = config.getBoolean("selfHostPackDebug", false);
         selfHostPackIp = config.getString("selfHostPackIp", "");
         hologramsPlugin = config.getString("hologramsPlugin", "NONE").toUpperCase();
+
+        screensEnabled = config.getBoolean("screens.enabled", true);
+        screensPreferMode = com.ssomar.score.screen.ScreenMode.fromString(config.getString("screens.prefer-mode", "AUTO"), com.ssomar.score.screen.ScreenMode.AUTO);
+        screensPinnedPack = config.getBoolean("screens.pinned-pack", false);
+        screensOff = config.getStringList("screens.forced-chest");
+        hubSpluginsAlias = config.getBoolean("hub.splugins-alias", true);
+        hubRemoteCatalog = config.getBoolean("hub.remote-catalog", true);
+        hubCatalogUrl = config.getString("hub.catalog-url", "https://splugins.net/api/public/catalog");
+        hubJoinNotification = config.getBoolean("hub.join-notification", false);
+        hubReviewReminder = config.getBoolean("hub.review-reminder", false);
+        hubReviewReminderDays = Math.max(1, config.getInt("hub.review-reminder-days", 14));
+        hubPauseMenuButton = config.getBoolean("hub.pause-menu-button", false);
     }
 
     public boolean isVerbosityNormal() {

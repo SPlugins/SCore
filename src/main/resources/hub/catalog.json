@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "plugins": [
+    {"key": "ExecutableItems", "edition": "premium", "name": "ExecutableItems", "pitch": "Custom items with 100+ triggers, an in-game editor and 120+ premade items", "access": "paid", "url": "https://splugins.net/resources/900-executableitems"},
+    {"key": "ExecutableBlocks", "edition": "premium", "name": "ExecutableBlocks", "pitch": "Custom blocks with activators: traps, generators, display blocks", "access": "paid", "url": "https://splugins.net/store"},
+    {"key": "ExecutableEvents", "edition": "premium", "name": "ExecutableEvents", "pitch": "Custom events: quests, abilities, boosts, 180+ triggers", "access": "paid", "url": "https://splugins.net/store"},
+    {"key": "ExecutableCrafting", "edition": "premium", "name": "ExecutableCrafting", "pitch": "Custom recipes with conditions and a recipe book", "access": "paid", "url": "https://splugins.net/store"},
+    {"key": "MyFurniture", "edition": "premium", "name": "MyFurniture", "pitch": "Add custom furniture with clean hitboxes", "access": "paid", "url": "https://splugins.net/store"},
+    {"key": "ExecutableLevers", "edition": "premium", "name": "ExecutableLevers", "pitch": "Scalable levers that run custom commands", "access": "paid", "url": "https://splugins.net/store"},
+    {"key": "CustomPiglinsTrades", "edition": "premium", "name": "CustomPiglinsTrades", "pitch": "Customize the piglin barters", "access": "paid", "url": "https://splugins.net/store"}
+  ],
+  "packs": [],
+  "news": [],
+  "promotions": [],
+  "links": [
+    {"id": "website", "label": "splugins.net", "url": "https://splugins.net"},
+    {"id": "store", "label": "Store", "url": "https://splugins.net/store"},
+    {"id": "docs", "label": "Documentation", "url": "https://splugins.net/docs"},
+    {"id": "discord", "label": "Discord", "url": "https://discord.gg/splugins"},
+    {"id": "youtube", "label": "YouTube @Ssomar", "url": "https://www.youtube.com/@Ssomar"},
+    {"id": "instagram", "label": "Instagram @ssomar.mc", "url": "https://www.instagram.com/ssomar.mc"},
+    {"id": "donate", "label": "donate.ssomar.com", "url": "https://donate.ssomar.com"},
+    {"id": "studio", "label": "Pack Studio", "url": "https://splugins.net/forge"}
+  ]
+}

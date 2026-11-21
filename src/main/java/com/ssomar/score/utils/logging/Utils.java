@@ -8,6 +8,10 @@ import org.bukkit.Bukkit;
 public class Utils {
 
     public static void sendConsoleMsg(String msg) {
+        try {
+            if (msg != null && msg.contains("ERROR")) com.ssomar.score.hub.LoadErrorCollector.record(StringConverter.decoloredString(msg));
+        } catch (Throwable ignored) {
+        }
         if (SCore.is1v16Plus())
             Bukkit.getConsoleSender().sendMessage(StringConverter.coloredString(msg));
         else

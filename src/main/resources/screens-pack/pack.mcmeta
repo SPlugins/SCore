@@ -1,0 +1,61 @@
+{
+  "pack": {
+    "pack_format": 46,
+    "supported_formats": [
+      46,
+      99
+    ],
+    "min_format": 46,
+    "max_format": 99,
+    "description": "SCore Screens: cursor of the PINNED menus (sent to admins only)"
+  },
+  "overlays": {
+    "entries": [
+      {
+        "formats": [
+          63,
+          64
+        ],
+        "min_format": 63,
+        "max_format": 64,
+        "directory": "s_1_21_6"
+      },
+      {
+        "formats": [
+          65,
+          83
+        ],
+        "min_format": 65,
+        "max_format": 83,
+        "directory": "s_1_21_9"
+      },
+      {
+        "formats": [
+          84,
+          87
+        ],
+        "min_format": 84,
+        "max_format": 87,
+        "directory": "s_26_1"
+      },
+      {
+        "formats": [
+          88,
+          96
+        ],
+        "min_format": 88,
+        "max_format": 96,
+        "directory": "s_26_2"
+      },
+      {
+        "formats": [
+          97,
+          99
+        ],
+        "min_format": 97,
+        "max_format": 99,
+        "directory": "s_26_3"
+      }
+    ]
+  }
+}
