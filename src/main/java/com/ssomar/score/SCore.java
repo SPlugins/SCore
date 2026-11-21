@@ -901,6 +901,7 @@ public class SCore extends JavaPlugin implements SPlugin {
             com.ssomar.score.hub.HubPauseMenu.install();
             com.ssomar.score.hub.HubCatalog.reset();
             com.ssomar.score.ai.AiLink.init();
+            com.ssomar.score.ai.AiHistory.reload();
         } catch (Throwable t) {
             getLogger().warning("[SCore Screens] " + t);
         }

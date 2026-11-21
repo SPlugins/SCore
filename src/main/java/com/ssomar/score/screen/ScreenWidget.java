@@ -30,6 +30,7 @@ public final class ScreenWidget {
     private final int chestSlot;
     private final String imageUrl;
     private final String logoUrl;
+    private final boolean rawText;
 
     private ScreenWidget(Builder b) {
         this.id = b.id;
@@ -49,6 +50,7 @@ public final class ScreenWidget {
         this.chestSlot = b.chestSlot;
         this.imageUrl = b.imageUrl;
         this.logoUrl = b.logoUrl;
+        this.rawText = b.rawText;
     }
 
     public static Builder builder(String id, WidgetKind kind) {
@@ -72,6 +74,7 @@ public final class ScreenWidget {
         b.chestSlot = chestSlot;
         b.imageUrl = imageUrl;
         b.logoUrl = logoUrl;
+        b.rawText = rawText;
         return b;
     }
 
@@ -102,6 +105,8 @@ public final class ScreenWidget {
     public String getImageUrl() { return imageUrl; }
     /** picture drawn in place of the icon where images can be drawn (PINNED), else the icon material is used */
     public String getLogoUrl() { return logoUrl; }
+    /** the text is shown as given (section-sign colours only): no & codes, hex or MiniMessage conversion */
+    public boolean isRawText() { return rawText; }
 
     @Override
     public boolean equals(Object o) {
@@ -111,7 +116,7 @@ public final class ScreenWidget {
         return id.equals(w.id) && kind == w.kind && u == w.u && v == w.v && width == w.width && height == w.height
                 && eq(text, w.text) && lore.equals(w.lore) && eq(icon, w.icon) && enabled == w.enabled
                 && selected == w.selected && glow == w.glow && fill == w.fill && textScale == w.textScale
-                && chestSlot == w.chestSlot && eq(imageUrl, w.imageUrl) && eq(logoUrl, w.logoUrl);
+                && chestSlot == w.chestSlot && eq(imageUrl, w.imageUrl) && eq(logoUrl, w.logoUrl) && rawText == w.rawText;
     }
 
     @Override
@@ -138,6 +143,7 @@ public final class ScreenWidget {
         private int chestSlot = -1;
         private String imageUrl;
         private String logoUrl;
+        private boolean rawText;
 
         private Builder(String id, WidgetKind kind) {
             if (id == null || id.isEmpty()) throw new IllegalArgumentException("widget id is empty");
@@ -163,6 +169,9 @@ public final class ScreenWidget {
         public Builder image(String url) { this.imageUrl = url; return this; }
         /** a picture (URL) shown instead of the icon where images can be drawn, e.g. a plugin logo */
         public Builder logo(String url) { this.logoUrl = url == null || url.isEmpty() ? null : url; return this; }
+
+        /** show the text as given (section-sign colours only), e.g. text written by players or an assistant */
+        public Builder rawText() { this.rawText = true; return this; }
 
         public ScreenWidget build() {
             return new ScreenWidget(this);

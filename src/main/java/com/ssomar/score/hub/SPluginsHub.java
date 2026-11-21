@@ -41,7 +41,7 @@ public final class SPluginsHub {
 
     /** What a content row does when clicked. */
     static final class Action {
-        enum Type {MANAGE, LINK, RUN, ERRORS, DIAGNOSTIC, AI_LINK, AI_ASK, AI_NEW, AI_ERRORS, AI_UNLINK, AI_UNDO, NONE}
+        enum Type {MANAGE, LINK, RUN, ERRORS, DIAGNOSTIC, AI_LINK, AI_ASK, AI_NEW, AI_ERRORS, AI_UNLINK, AI_UNDO, AI_RESUME, AI_COPY, AI_EXIT, NONE}
 
         final Type type;
         final String a, b;
@@ -97,6 +97,10 @@ public final class SPluginsHub {
         String confirmId;
         long confirmUntil;
         String chestNote;
+        /** Assistant tab: the conversation is shown in the panel (screen modes) instead of the rows */
+        boolean aiView;
+        /** next build shows the page where the last question starts */
+        boolean aiJump;
     }
 
     private static final Map<UUID, State> STATES = new ConcurrentHashMap<>();
@@ -161,6 +165,7 @@ public final class SPluginsHub {
         if (id.startsWith("tab:")) {
             st.tab = Tab.valueOf(id.substring(4));
             st.page = 0;
+            st.aiView = false;
             if (st.tab != Tab.MANAGE) st.managed = null;
             if (st.tab == Tab.NEWS) HubData.markNewsSeen(p, HubCatalog.get());
             refresh(p, st);
@@ -230,14 +235,61 @@ public final class SPluginsHub {
             case AI_LINK:
             case AI_ASK:
             case AI_NEW:
+                st.aiView = false;
+                st.page = 0;
+                HubAssistant.run(p, s, a.type.name(), a.a);
+                break;
             case AI_ERRORS:
             case AI_UNLINK:
             case AI_UNDO:
+            case AI_COPY:
                 HubAssistant.run(p, s, a.type.name(), a.a);
+                break;
+            case AI_RESUME:
+                if (s.getMode() != ScreenMode.CHEST) {
+                    st.aiView = true;
+                    st.aiJump = true;
+                    refresh(p, st);
+                } else HubAssistant.run(p, s, a.type.name(), a.a);
+                break;
+            case AI_EXIT:
+                st.aiView = false;
+                st.page = 0;
+                refresh(p, st);
                 break;
             default:
                 break;
         }
+    }
+
+    /**
+     * Show the conversation with the assistant in the open Hub (FLOATING / PINNED), on the page of the last question.
+     *
+     * @return false if the player has no Hub open in a screen mode (the caller uses a window or the chat)
+     */
+    static boolean showConversation(Player p) {
+        State st = STATES.get(p.getUniqueId());
+        ScreenSession s = Screens.get(p);
+        if (st == null || s == null || !SCREEN_ID.equals(s.getSpec().getId()) || !s.isOpen() || s.getMode() == ScreenMode.CHEST) return false;
+        st.tab = Tab.ASSISTANT;
+        st.aiView = true;
+        st.aiJump = true;
+        refresh(p, st);
+        return true;
+    }
+
+    /** the Hub is open in FLOATING / PINNED */
+    static boolean isScreenOpen(Player p) {
+        ScreenSession s = Screens.get(p);
+        return s != null && SCREEN_ID.equals(s.getSpec().getId()) && s.isOpen() && s.getMode() != ScreenMode.CHEST;
+    }
+
+    static double rowTop() {
+        return ROW_TOP;
+    }
+
+    static double barTop() {
+        return ROW_TOP + SCREEN_ROWS * ROW_STEP + 0.02;
     }
 
     /** refresh the Hub of a player if it is open (the Assistant tab after a link, for example) */
@@ -277,12 +329,16 @@ public final class SPluginsHub {
         String close = st.mode == ScreenMode.CHEST ? TM.g(Text.HUB_CLOSE) : "&c&l✘";
         w.add(ScreenWidget.builder("close", WidgetKind.BUTTON).at(2.17, 0.11).size(0.19, 0.09).text(close).icon("BARRIER").chestSlot(8).build());
 
+        st.previews.clear();
+        int pages;
+        if (st.tab == Tab.ASSISTANT && st.aiView && st.mode != ScreenMode.CHEST) {
+            pages = HubAssistant.conversation(p, st, w);
+        } else {
         List<Row> rows = rows(p, st, cat);
         int perPage = st.mode == ScreenMode.CHEST ? CHEST_ROWS : SCREEN_ROWS;
-        int pages = Math.max(1, (rows.size() + perPage - 1) / perPage);
+        pages = Math.max(1, (rows.size() + perPage - 1) / perPage);
         st.page = Math.max(0, Math.min(st.page, pages - 1));
         int from = st.page * perPage;
-        st.previews.clear();
         boolean preview = false;
         if (st.mode != ScreenMode.CHEST)
             for (int i = from; i < Math.min(rows.size(), from + perPage); i++) if (rows.get(i).image != null) preview = true;
@@ -304,6 +360,7 @@ public final class SPluginsHub {
             }
         }
         if (preview && first != null) w.add(preview(first));
+        }
 
         double barV = ROW_TOP + SCREEN_ROWS * ROW_STEP + 0.02;
         if (st.tab == Tab.MANAGE && st.managed != null)

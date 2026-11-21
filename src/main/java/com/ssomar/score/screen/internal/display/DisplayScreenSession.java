@@ -239,7 +239,7 @@ public final class DisplayScreenSession extends AbstractScreenSession {
     private void apply(Parts p, ScreenWidget w, boolean hover) {
         p.widget = w;
         p.hovered = hover;
-        String txt = w.getText() == null ? "" : StringConverter.coloredString(w.getText());
+        String txt = w.getText() == null ? "" : w.isRawText() ? w.getText() : StringConverter.coloredString(w.getText());
         WidgetVisual v = WidgetVisual.of(w, txt, layout.getWidth(), layout.getHeight(), hover, pinned && ScreenPack.imagesAllowed(player));
 
         if (v.box != null) {

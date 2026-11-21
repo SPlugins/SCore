@@ -27,6 +27,14 @@ public interface AiTool {
         return false;
     }
 
+    /**
+     * Permission the asking admin needs for this tool to be offered (and run); null = every admin of the Hub.
+     * Write tools need score.ai.write unless they say otherwise (a ticket, for example, changes nothing here).
+     */
+    default String permission() {
+        return isWrite() ? "score.ai.write" : null;
+    }
+
     /** @return a JSONObject, a JSONArray or a String; throw to report an error to the model */
     Object execute(JSONObject arguments) throws Exception;
 }

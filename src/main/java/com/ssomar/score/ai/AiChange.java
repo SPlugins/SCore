@@ -15,6 +15,7 @@ public final class AiChange {
 
     private final String target, summary, before, after;
     private final Apply apply;
+    private boolean plainText, offThread;
 
     /**
      * @param target  what changes, for the admin, e.g. "ExecutableItems › item › fire_sword"
@@ -28,6 +29,30 @@ public final class AiChange {
         this.before = before;
         this.after = after == null ? "" : after;
         this.apply = apply;
+    }
+
+    /**
+     * A proposal that is not a file change (a ticket, a message...): the form shows {@code text} as it is instead of
+     * a diff.
+     */
+    public static AiChange text(String target, String summary, String text, Apply apply) {
+        AiChange c = new AiChange(target, summary, null, text, apply);
+        c.plainText = true;
+        return c;
+    }
+
+    /** apply runs on the assistant's thread, not the server thread (network calls: a ticket, for example) */
+    public AiChange offThread() {
+        this.offThread = true;
+        return this;
+    }
+
+    public boolean isOffThread() {
+        return offThread;
+    }
+
+    public boolean isPlainText() {
+        return plainText;
     }
 
     public String getTarget() {

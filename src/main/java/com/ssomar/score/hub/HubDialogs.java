@@ -137,10 +137,26 @@ final class HubDialogs {
 
     /** the answer: paragraphs, configs (preview + Copy), links (Open), Reply, Back */
     static void answer(Player p, AiAnswer a, Runnable reply, Runnable back) {
+        answer(p, Collections.<com.ssomar.score.ai.AiHistory.Exchange>emptyList(), null, a, reply, back);
+    }
+
+    /**
+     * The conversation shown again: the earlier exchanges in short (question + start of the answer), then the
+     * last question and its whole answer with its buttons.
+     */
+    static void answer(Player p, List<com.ssomar.score.ai.AiHistory.Exchange> earlier, String lastQuestion, AiAnswer a, Runnable reply, Runnable back) {
         List<DialogBody> body = new ArrayList<>();
+        net.kyori.adventure.text.format.TextColor you = net.kyori.adventure.text.format.NamedTextColor.AQUA;
+        net.kyori.adventure.text.format.TextColor old = net.kyori.adventure.text.format.NamedTextColor.GRAY;
+        for (com.ssomar.score.ai.AiHistory.Exchange e : earlier.subList(Math.max(0, earlier.size() - 4), earlier.size())) {
+            body.add(DialogBody.plainMessage(Component.text("» " + cut(e.question, 200), you), 400));
+            AiAnswer pa = AiAnswer.parse(e.answer);
+            if (!pa.paragraphs.isEmpty()) body.add(DialogBody.plainMessage(Component.text(cut(pa.paragraphs.get(0), 300), old), 400));
+        }
+        if (lastQuestion != null && !lastQuestion.isEmpty()) body.add(DialogBody.plainMessage(Component.text("» " + cut(lastQuestion, 400), you), 400));
         int n = 0;
         for (String para : a.paragraphs) {
-            if (body.size() >= 40) break;
+            if (body.size() >= 48) break;
             body.add(DialogBody.plainMessage(Component.text(para), 400));
         }
         List<ActionButton> buttons = new ArrayList<>();
@@ -164,15 +180,27 @@ final class HubDialogs {
         p.showDialog(Dialog.create(f -> f.empty().base(base).type(type)));
     }
 
-    /** a change proposed by the assistant: target, summary, diff, Apply / Refuse (Escape = Refuse) */
-    static void change(Player p, com.ssomar.score.ai.AiChange c, com.ssomar.score.ai.LineDiff d, Runnable apply, Runnable refuse) {
-        List<DialogBody> body = new ArrayList<>();
-        String head = c.isCreation() ? TM.g(Text.AI_CHANGE_NEW).replace("%target%", c.getTarget())
+    /** body lines of one proposal: its head, the summary, then the diff (or the text of a ticket) */
+    private static void proposalBody(List<DialogBody> body, String number, com.ssomar.score.ai.AiChange c, com.ssomar.score.ai.LineDiff d) {
+        String head = c.isPlainText() ? "&e" + c.getTarget() : c.isCreation() ? TM.g(Text.AI_CHANGE_NEW).replace("%target%", c.getTarget())
                 : TM.g(Text.AI_CHANGE_EDIT).replace("%target%", c.getTarget()).replace("%added%", "" + d.added).replace("%removed%", "" + d.removed);
-        body.add(DialogBody.plainMessage(legacy(head), 400));
+        body.add(DialogBody.plainMessage(legacy(number + head), 400));
         if (!c.getSummary().isEmpty()) body.add(DialogBody.plainMessage(Component.text(c.getSummary()), 400));
         Component block = Component.empty();
         int n = 0;
+        if (c.isPlainText()) {
+            for (String t : c.getAfter().split("\n")) {
+                Component line = Component.text(t, net.kyori.adventure.text.format.NamedTextColor.WHITE);
+                block = n == 0 ? line : block.append(Component.newline()).append(line);
+                if (++n == 20) {
+                    body.add(DialogBody.plainMessage(block, 400));
+                    block = Component.empty();
+                    n = 0;
+                }
+            }
+            if (n > 0) body.add(DialogBody.plainMessage(block, 400));
+            return;
+        }
         for (com.ssomar.score.ai.LineDiff.Line l : d.lines) {
             Component line;
             switch (l.kind) {
@@ -196,13 +224,56 @@ final class HubDialogs {
             }
         }
         if (n > 0) body.add(DialogBody.plainMessage(block, 400));
+    }
+
+    /**
+     * The changes proposed by the assistant in one form. One change: Apply / Refuse and a comment. Several: one
+     * "Apply #n" box (ticked) and one comment per change, Validate / Refuse all. Escape = refuse all.
+     */
+    static void changes(Player p, List<com.ssomar.score.ai.AiChange> changes, List<com.ssomar.score.ai.LineDiff> diffs,
+                        Consumer<List<com.ssomar.score.ai.AiProposal.Decision>> submit, Runnable refuseAll) {
+        int count = changes.size();
+        List<DialogBody> body = new ArrayList<>();
+        for (int i = 0; i < count; i++) proposalBody(body, count > 1 ? "&7#" + (i + 1) + " " : "", changes.get(i), diffs.get(i));
         body.add(DialogBody.plainMessage(legacy(TM.g(Text.AI_CHANGE_NOTE)), 400));
-        ActionButton yes = serverButton(legacy(TM.g(Text.AI_APPLY)), 150, p, apply);
-        ActionButton no = serverButton(legacy(TM.g(Text.AI_REFUSE)), 150, p, refuse);
-        DialogBase base = DialogBase.builder(legacy(TM.g(Text.AI_CHANGE_TITLE)))
+        List<io.papermc.paper.registry.data.dialog.input.DialogInput> inputs = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            if (count > 1)
+                inputs.add(DialogInput.bool("a" + i, legacy(TM.g(Text.AI_APPLY_N).replace("%n%", "" + (i + 1)).replace("%target%", changes.get(i).getTarget()))).initial(true).build());
+            inputs.add(DialogInput.text("c" + i, legacy(count > 1 ? TM.g(Text.AI_COMMENT_N).replace("%n%", "" + (i + 1)) : TM.g(Text.AI_COMMENT))).width(300).maxLength(300).build());
+        }
+        java.util.function.BiFunction<io.papermc.paper.dialog.DialogResponseView, Boolean, List<com.ssomar.score.ai.AiProposal.Decision>> read = (r, single) -> {
+            List<com.ssomar.score.ai.AiProposal.Decision> out = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                Boolean b = count > 1 ? r.getBoolean("a" + i) : single;
+                String c = r.getText("c" + i);
+                out.add(new com.ssomar.score.ai.AiProposal.Decision(Boolean.TRUE.equals(b), c));
+            }
+            return out;
+        };
+        List<ActionButton> buttons = new ArrayList<>();
+        buttons.add(ActionButton.builder(legacy(count > 1 ? TM.g(Text.AI_SUBMIT) : TM.g(Text.AI_APPLY))).width(150)
+                .action(DialogAction.customClick((response, audience) -> {
+                    List<com.ssomar.score.ai.AiProposal.Decision> d = read.apply(response, true);
+                    SCore.schedulerHook.runEntityTask(() -> submit.accept(d), null, p, 1L);
+                }, once())).build());
+        // Refuse (one change) / Refuse all: the comments are kept, the model reads why
+        ActionButton exit = ActionButton.builder(legacy(count > 1 ? TM.g(Text.AI_REFUSE_ALL) : TM.g(Text.AI_REFUSE))).width(150)
+                .action(DialogAction.customClick((response, audience) -> {
+                    List<com.ssomar.score.ai.AiProposal.Decision> d = new ArrayList<>();
+                    for (com.ssomar.score.ai.AiProposal.Decision x : read.apply(response, false)) d.add(new com.ssomar.score.ai.AiProposal.Decision(false, x.comment));
+                    SCore.schedulerHook.runEntityTask(() -> submit.accept(d), null, p, 1L);
+                }, once())).build();
+        String title = count > 1 ? TM.g(Text.AI_CHANGES_TITLE).replace("%n%", "" + count) : TM.g(Text.AI_CHANGE_TITLE);
+        DialogBase base = DialogBase.builder(legacy(title))
                 .canCloseWithEscape(true).pause(false).afterAction(DialogBase.DialogAfterAction.CLOSE)
-                .body(body).build();
-        MultiActionType type = DialogType.multiAction(Collections.singletonList(yes)).exitAction(no).columns(1).build();
+                .body(body).inputs(inputs).build();
+        MultiActionType type = DialogType.multiAction(buttons).exitAction(exit).columns(1).build();
         p.showDialog(Dialog.create(f -> f.empty().base(base).type(type)));
+    }
+
+    private static String cut(String s, int max) {
+        String t = s == null ? "" : s.replace('\n', ' ').trim();
+        return t.length() <= max ? t : t.substring(0, max) + "…";
     }
 }
