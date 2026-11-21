@@ -200,3 +200,8 @@ ai:
   submit: "&aتأكيد"
   refuseAll: "&cرفض الكل"
   ticketOpened: "&a✔ تم فتح التذكرة: &f%target%"
+  newLore: "&7تبقى المحادثة الحالية في السجل"
+  history: "&e☰ سجل المحادثات (%count%)"
+  historyLore: "&7متابعة محادثة سابقة"
+  historyRow: "&7%date% · %count% سؤال"
+  historyCurrent: " &a(الحالية)"
