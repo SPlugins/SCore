@@ -20,7 +20,7 @@ public class EquipmentVisualCancel extends MixedCommand {
     public void run(Player p, Entity receiver, SCommandToExec sCommandToExec) {
         List<String> args = sCommandToExec.getOtherArgs();
         EquipmentSlot slot = BetterEquipmentSlot.getEquipmentSlot(args.get(0)).orElse(EquipmentSlot.HAND);
-        EquipmentVisualManager.getInstance().cancelTasks(receiver.getUniqueId(), slot);
+        EquipmentVisualManager.getInstance().cancel(receiver, slot);
     }
 
     @Override

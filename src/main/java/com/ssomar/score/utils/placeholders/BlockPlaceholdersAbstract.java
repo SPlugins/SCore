@@ -41,7 +41,8 @@ public class BlockPlaceholdersAbstract extends PlaceholdersInterface implements 
     private String blockWorldName;
     private String EB_ID;
 
-    private Biome biome;
+    /* transient: since 1.21.3 a Biome is not serializable anymore (delayed commands saved at the shutdown), read again from the block */
+    private transient Biome biome;
     private String blockDimension;
     private Material fixType;
 
@@ -99,6 +100,7 @@ public class BlockPlaceholdersAbstract extends PlaceholdersInterface implements 
             Location loc = new Location(world, blockX, blockY, blockZ);
 
             Block block = loc.getBlock();
+            if (biome == null) biome = block.getBiome();
 
             blockWorldName = world.getName();
             Material type = block.getType();

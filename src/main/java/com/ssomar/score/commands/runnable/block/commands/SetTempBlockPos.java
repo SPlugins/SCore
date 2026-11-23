@@ -64,22 +64,17 @@ public class SetTempBlockPos extends BlockCommand {
         BlockData data = block.getBlockData().clone();
 
 
-        ListDetailedMaterialFeature listDetailedMaterialFeature = new ListDetailedMaterialFeature(true);
-        if (!whitelistCurrentBlock.isEmpty()) {
-            List<String> list = new ArrayList<>();
-            if (whitelistCurrentBlock.contains(",")) list = Arrays.asList(whitelistCurrentBlock.split(","));
-            else list.add(whitelistCurrentBlock);
-            listDetailedMaterialFeature.load(SCore.plugin, list, true);
-        }
-
-        UUID uuid = p.getUniqueId();
+        /* A block command has no player when it is fired by a block activator (EB loop, redstone,
+         * ...): SafePlace places the block directly when the uuid is null, like the other block
+         * commands (ChangeBlockType, Break, SetExecutableBlock) already do. */
+        UUID uuid = p != null ? p.getUniqueId() : null;
         SsomarDev.testMsg("DEBUG place 0", true);
 
         //levelled for lights OK
         if (data instanceof Bisected || data instanceof Orientable || data instanceof Rotatable || data instanceof Slab || data instanceof Directional || verifDependentBlock(block))
             return;
 
-        if (!listDetailedMaterialFeature.verifBlock(block)) {
+        if (!com.ssomar.score.commands.runnable.player.commands.SetTempBlockPos.verifWhitelistCurrentBlock(whitelistCurrentBlock, block)) {
             //SsomarDev.testMsg("DEBUG INVALID BLOCK >> "+data.getMaterial(), true);
             return;
         }

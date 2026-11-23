@@ -221,6 +221,8 @@ public class CooldownFeature extends FeatureWithHisOwnEditor<CooldownFeature, Co
         String id = sObject.getId();
 
         if (sPlugin.isLotOfWork()) return false;
+        // A cooldown added without a player (EICOOLDOWN from a console/entity context): nobody to exempt.
+        if (p == null) return false;
 
         boolean hasNoCDPerm = p.hasPermission(sPlugin.getName() + ".nocd." + id) ||
                 p.hasPermission(sPlugin.getShortName().toLowerCase() + ".nocd." + id) ||

@@ -20,7 +20,7 @@ public class CustomConditionRequest extends ConditionRequest {
     private ItemStack itemStack;
 
     public CustomConditionRequest(@Nullable Player launcher, @Nullable ItemStack itemStack, @Nullable StringPlaceholder sp, @Nullable Event event) {
-        super(event, Optional.ofNullable(sp).orElse(new StringPlaceholder()));
+        super(event, sp != null ? sp : new StringPlaceholder());
         this.launcher = launcher;
         this.itemStack = itemStack;
     }

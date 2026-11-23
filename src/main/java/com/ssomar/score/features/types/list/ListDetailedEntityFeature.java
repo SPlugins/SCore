@@ -147,9 +147,24 @@ public class ListDetailedEntityFeature extends FeatureAbstract<List<String>, Lis
     /**
      * Return map with entitytype and tags
      **/
+    /**
+     * Custom lists (SCORE:LIST_NAME) are expanded when the config is loaded, but a value entered in the editor stays as typed until the
+     * next reload: it reached EntityType.valueOf and threw on every event (Discord 1450477246681710716). Expand them here too.
+     */
+    private List<String> expandCustomLists(List<String> values) {
+        List<String> result = new ArrayList<>(values.size());
+        for (String s : values) {
+            if (s.toUpperCase().startsWith(customListPrefix)) {
+                Optional<List<String>> customList = com.ssomar.score.features.custom.customlists.CustomListsManager.getInstance().getEntityList(s.substring(customListPrefix.length()));
+                customList.ifPresent(result::addAll);
+            } else result.add(s);
+        }
+        return result;
+    }
+
     public Map<EntityType, List<Map<String, String>>> extractCondition(List<String> values) {
         Map<EntityType, List<Map<String, String>>> conditions = new HashMap<>();
-        for (String s : values) {
+        for (String s : expandCustomLists(values)) {
             if (s.contains(mythicMobsSymbol)) continue;
             String entityTypeStr = s;
             EntityType type;
@@ -173,7 +188,11 @@ public class ListDetailedEntityFeature extends FeatureAbstract<List<String>, Lis
                 }
             }
             else {
-                type = EntityType.valueOf(entityTypeStr.toUpperCase());
+                try {
+                    type = EntityType.valueOf(entityTypeStr.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    continue;
+                }
 
                 if (conditions.containsKey(type)) {
                     conditions.get(type).add(tags);
@@ -268,6 +287,12 @@ public class ListDetailedEntityFeature extends FeatureAbstract<List<String>, Lis
                     NBTType nbtType = nbtent.getType(key);
 
                     SsomarDev.testMsg("VERIF key: " + key + " value: " + value + " type: " + entity.getType(), DEBUG);
+
+                    /* NBT-API answers null (not NBTTagEnd) for a key it cannot read on this server:
+                     * a whitelist with NBT tags then threw an NPE for EVERY entity scanned by
+                     * MOB_AROUND, thousands of stack traces per minute (report of 2026-08-14).
+                     * An unreadable tag simply does not match. */
+                    if (nbtType == null) return false;
 
                     switch (nbtType) {
                         /* The tag was not found */

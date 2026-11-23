@@ -94,6 +94,8 @@ public class PlantInSquare extends BlockCommand {
 
         // #6
         if(takeFromInventory) {
+            /* No player when the block command is fired by a block activator: nothing to take from */
+            if (p == null) return;
             int slot = 0;
             //SsomarDev.testMsg("resourcesNeeded: "+resourcesNeeded ,true);
             for (ItemStack item : p.getInventory().getContents()) {

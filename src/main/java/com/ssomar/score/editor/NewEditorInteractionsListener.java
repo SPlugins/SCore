@@ -1,5 +1,6 @@
 package com.ssomar.score.editor;
 
+import com.ssomar.score.utils.backward_compatibility.SnapshotUtils;
 import com.ssomar.score.features.custom.activators.group.ActivatorsFeatureEditor;
 import com.ssomar.score.features.custom.activators.group.ActivatorsFeatureEditorManager;
 import com.ssomar.score.features.custom.aroundblock.group.AroundBlockGroupFeatureEditor;
@@ -116,7 +117,7 @@ public class NewEditorInteractionsListener implements Listener {
         //boolean notNullItem = itemS!=null;
 
         try {
-            if (e.getInventory().getHolder() instanceof GUI)
+            if (SnapshotUtils.getHolderNoSnapshot(e.getInventory()) instanceof GUI)
                 this.manage(player, itemS, "", e);
         } catch (NullPointerException error) {
             error.printStackTrace();
@@ -141,7 +142,7 @@ public class NewEditorInteractionsListener implements Listener {
         //boolean notNullItem = itemS!=null;
 
         try {
-            if (e.getInventory().getHolder() instanceof GUI)
+            if (SnapshotUtils.getHolderNoSnapshot(e.getInventory()) instanceof GUI)
                 this.manage(player, itemS, "", e);
         } catch (NullPointerException error) {
             error.printStackTrace();
@@ -158,7 +159,7 @@ public class NewEditorInteractionsListener implements Listener {
 
         if (!GUI.hasIdentifier(itemS)) return;
 
-        InventoryHolder holder = e.getInventory().getHolder();
+        InventoryHolder holder = SnapshotUtils.getHolderNoSnapshot(e.getInventory());
 
         if (holder instanceof SObjectsEditorAbstract) {
             NewSObjectsManagerEditor.getInstance().clicked(player, itemS, e.getClick());

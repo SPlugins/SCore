@@ -12,6 +12,8 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CooldownsManager {
 
@@ -19,11 +21,18 @@ public class CooldownsManager {
 
     private static CooldownsManager instance;
 
+    /*
+     * The maps are read by the async cooldown display sweep while the main/region threads add,
+     * expire and clear cooldowns. Plain HashMap/ArrayList threw ConcurrentModificationException in
+     * that sweep, so: concurrent maps, copy-on-write lists (write-light, iterate-heavy).
+     * COW iterators do not support remove(): every mutation below goes through removeIf / remove(Object).
+     */
+
     /* CD_ID Cooldown */
-    private final Map<String, List<Cooldown>> cooldowns = new HashMap<>();
+    private final Map<String, List<Cooldown>> cooldowns = new ConcurrentHashMap<>();
 
     /* Player_UUID Cooldown */
-    private final Map<UUID, List<Cooldown>> cooldownsUUID = new HashMap<>();
+    private final Map<UUID, List<Cooldown>> cooldownsUUID = new ConcurrentHashMap<>();
 
     public static CooldownsManager getInstance() {
         if (instance == null) instance = new CooldownsManager();
@@ -110,32 +119,12 @@ public class CooldownsManager {
 
         String id = cd.getId();
         SsomarDev.testMsg("ADDDD " + cd.toString(), DEBUG);
-        if (cooldowns.containsKey(id)) {
-            List<Cooldown> cds = cooldowns.get(id);
-            if (cds == null) {
-                cds = new ArrayList<>();
-            }
-            cds.add(cd);
-            cooldowns.put(id, cds);
-        } else {
-            List<Cooldown> cds = new ArrayList<>();
-            cds.add(cd);
-            cooldowns.put(id, cds);
-        }
+        if (id == null) return;
+        cooldowns.computeIfAbsent(id, k -> new CopyOnWriteArrayList<>()).add(cd);
 
         UUID id2 = cd.getEntityUUID();
         if (id2 == null) return;
-        if (cooldownsUUID.containsKey(id2)) {
-            List<Cooldown> cds = cooldownsUUID.get(id2);
-            if (cds == null) {
-                cds = new ArrayList<>();
-            }
-            cds.add(cd);
-        } else {
-            List<Cooldown> cds = new ArrayList<>();
-            cds.add(cd);
-            cooldownsUUID.put(id2, cds);
-        }
+        cooldownsUUID.computeIfAbsent(id2, k -> new CopyOnWriteArrayList<>()).add(cd);
     }
 
     /* FROM DB */
@@ -158,11 +147,9 @@ public class CooldownsManager {
             List<Cooldown> cds = cooldowns.get(id);
             if (cds != null && !cds.isEmpty()) {
                 Cooldown cdMax = null;
-                int cptRemoved = 0;
-                int size = cds.size();
-                //SsomarDev.testMsg("CD size >> "+size, true);
-                for (int i = 0; i < size; i++) {
-                    Cooldown cd = cds.get(i - cptRemoved);
+                // Iterate a snapshot (COW iterator) and remove by object: index-based removal is not
+                // safe when another thread changes the list in between.
+                for (Cooldown cd : cds) {
                     if (cd == null) {
                         //SsomarDev.testMsg("CD NULL", true);
                         continue;
@@ -184,11 +171,12 @@ public class CooldownsManager {
                         cdMax = cd;
                     } else {
                         cd.setNull(true);
-                        cds.remove(i - cptRemoved);
-                        cptRemoved++;
-                        try {
-                            cooldownsUUID.get(uuid).remove(cd);
-                        } catch (Exception ignored) {}
+                        cds.remove(cd);
+                        UUID owner = cd.getEntityUUID() != null ? cd.getEntityUUID() : uuid;
+                        if (owner != null) {
+                            List<Cooldown> uuidCds = cooldownsUUID.get(owner);
+                            if (uuidCds != null) uuidCds.remove(cd);
+                        }
                     }
                 }
                 //if(cdMax != null) SsomarDev.testMsg("COOLDOWN "+cdMax.toString(), DEBUG);
@@ -245,24 +233,22 @@ public class CooldownsManager {
                 cooldownsIterator.remove();
                 continue;
             }
-            Iterator<Cooldown> cdIterator = cds.iterator();
-            while (cdIterator.hasNext()) {
-                Cooldown cd = cdIterator.next();
-                if (cd == null || cd.isNull() || cd.getTimeLeft() <= 0) {
-                    if (cd != null) {
-                        cd.setNull(true);
-                        // Also remove from cooldownsUUID
-                        if (cd.getEntityUUID() != null) {
-                            List<Cooldown> uuidCds = cooldownsUUID.get(cd.getEntityUUID());
-                            if (uuidCds != null) uuidCds.remove(cd);
-                        }
+            cds.removeIf(cd -> {
+                if (cd != null && !cd.isNull() && cd.getTimeLeft() > 0) return false;
+                if (cd != null) {
+                    cd.setNull(true);
+                    // Also remove from cooldownsUUID
+                    if (cd.getEntityUUID() != null) {
+                        List<Cooldown> uuidCds = cooldownsUUID.get(cd.getEntityUUID());
+                        if (uuidCds != null) uuidCds.remove(cd);
                     }
-                    cdIterator.remove();
                 }
-            }
-            // Remove empty lists from the map
+                return true;
+            });
+            // Remove empty lists from the map, atomically: a cooldown added by another thread
+            // between the check and the removal must not be dropped with its list.
             if (cds.isEmpty()) {
-                cooldownsIterator.remove();
+                cooldowns.computeIfPresent(entry.getKey(), (k, v) -> v.isEmpty() ? null : v);
             }
         }
 
@@ -271,14 +257,14 @@ public class CooldownsManager {
         while (uuidIterator.hasNext()) {
             Map.Entry<UUID, List<Cooldown>> entry = uuidIterator.next();
             List<Cooldown> cds = entry.getValue();
-            if (cds == null || cds.isEmpty()) {
+            if (cds == null) {
                 uuidIterator.remove();
                 continue;
             }
             // Also filter out null entries from UUID lists
             cds.removeIf(cd -> cd == null || cd.isNull());
             if (cds.isEmpty()) {
-                uuidIterator.remove();
+                cooldownsUUID.computeIfPresent(entry.getKey(), (k, v) -> v.isEmpty() ? null : v);
             }
         }
     }
@@ -289,14 +275,13 @@ public class CooldownsManager {
         for (String s : cooldowns.keySet()) {
             List<Cooldown> cds = cooldowns.get(s);
             if (cds == null) continue;
-            Iterator<Cooldown> iterator = cds.iterator();
-            while (iterator.hasNext()) {
-                Cooldown cd = iterator.next();
+            cds.removeIf(cd -> {
                 if (cd != null && cd.getEntityUUID() != null && cd.getEntityUUID().equals(uuid)) {
                     cd.setNull(true);
-                    iterator.remove();
+                    return true;
                 }
-            }
+                return false;
+            });
         }
     }
 
@@ -304,9 +289,7 @@ public class CooldownsManager {
         for (String s : cooldowns.keySet()) {
             List<Cooldown> cds = cooldowns.get(s);
             if (cds == null) continue;
-            Iterator<Cooldown> iterator = cds.iterator();
-            while (iterator.hasNext()) {
-                Cooldown cd = iterator.next();
+            for (Cooldown cd : cds) {
                 if (cd != null && cd.getId().equalsIgnoreCase(cooldownId)) {
                     if (uuid != null && (cd.getEntityUUID() == null || !cd.getEntityUUID().equals(uuid))) continue;
                     if (cd.getEntityUUID() != null) {
@@ -314,7 +297,7 @@ public class CooldownsManager {
                         if (uuidCds != null) uuidCds.remove(cd);
                     }
                     cd.setNull(true);
-                    iterator.remove();
+                    cds.remove(cd);
                     return;
                 }
             }

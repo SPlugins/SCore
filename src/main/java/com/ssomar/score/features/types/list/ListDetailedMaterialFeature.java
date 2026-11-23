@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
@@ -60,6 +61,28 @@ public class ListDetailedMaterialFeature extends ListFeatureAbstract<String, Lis
         //if(SCore.hasOraxen) listOfCustomBlocksPluginSupported.add("ORAXEN");
         this.forBlocks = forBlocks;
         reset();
+    }
+
+    private static final Map<String, ListDetailedMaterialFeature> RAW_LIST_CACHE = new ConcurrentHashMap<>();
+
+    /**
+     * Parses a raw comma separated list (as written in a command argument) once and caches it:
+     * the callers run on every command execution. The returned feature is read-only afterwards.
+     * The cache is cleared by SCore#onReload, after the custom lists it may reference.
+     */
+    public static ListDetailedMaterialFeature getCachedForBlocks(@NotNull String rawList) {
+        return RAW_LIST_CACHE.computeIfAbsent(rawList, raw -> {
+            ListDetailedMaterialFeature feature = new ListDetailedMaterialFeature(true);
+            List<String> list = new ArrayList<>();
+            if (raw.contains(",")) list = Arrays.asList(raw.split(","));
+            else list.add(raw);
+            feature.load(SCore.plugin, list, true);
+            return feature;
+        });
+    }
+
+    public static void clearRawListCache() {
+        RAW_LIST_CACHE.clear();
     }
 
     public ListDetailedMaterialFeature(boolean forBlocks) {
@@ -340,13 +363,32 @@ public class ListDetailedMaterialFeature extends ListFeatureAbstract<String, Lis
         return tags;
     }
 
+    /**
+     * Flat list of the plain materials described by this feature: raw materials, and the
+     * content of SCore groups (ALL_ORES, ALL_LOGS, ...). Custom lists (SCORE:name) are already
+     * expanded at load time. Block-state suffixes ({lit:true}) are ignored, negated entries (!X),
+     * #minecraft tags and custom-plugin blocks (ITEMSADDER:...) are skipped: they can't be
+     * expressed as a Material.
+     */
     public List<Material> asMaterialList() {
         List<Material> materials = new ArrayList<>();
         for (String s : getValues()) {
+            if (s == null || s.isEmpty() || s.startsWith("!") || s.startsWith(symbolStartMaterialTag)) continue;
             String materialStr = s;
-            try{
-                Material mat = Material.valueOf(materialStr.toUpperCase());
-                materials.add(mat);
+            if (materialStr.contains(symbolStart)) materialStr = materialStr.split("\\" + symbolStart)[0];
+            materialStr = materialStr.trim().toUpperCase();
+            if (materialStr.isEmpty()) continue;
+
+            Optional<MaterialWithGroups> group = MaterialWithGroups.getGroup(materialStr);
+            if (group.isPresent()) {
+                for (Material mat : group.get().getMaterials()) {
+                    if (mat != null && !materials.contains(mat)) materials.add(mat);
+                }
+                continue;
+            }
+            try {
+                Material mat = Material.valueOf(materialStr);
+                if (!materials.contains(mat)) materials.add(mat);
             } catch (Exception e) {
                 SsomarDev.testMsg(">> verif material not found: " + materialStr, DEBUG);
             }

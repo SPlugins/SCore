@@ -5,13 +5,10 @@ import com.ssomar.score.features.FeatureSettingsSCore;
 import com.ssomar.score.features.custom.conditions.item.ItemConditionFeature;
 import com.ssomar.score.features.custom.conditions.item.ItemConditionRequest;
 import com.ssomar.score.features.types.list.ListEnchantAndLevelFeature;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 public class IfHasEnchant extends ItemConditionFeature<ListEnchantAndLevelFeature, IfHasEnchant> {
 
@@ -32,13 +29,10 @@ public class IfHasEnchant extends ItemConditionFeature<ListEnchantAndLevelFeatur
                 runInvalidCondition(request);
                 return false;
             }
-            Map<Enchantment, Integer> enchants = itemMeta.getEnchants();
-            Map<Enchantment, Integer> condition = getCondition().getValue();
-            for (Enchantment enchant : condition.keySet()) {
-                if (!enchants.containsKey(enchant) || !Objects.equals(condition.get(enchant), enchants.get(enchant))) {
-                    runInvalidCondition(request);
-                    return false;
-                }
+            /* Each enchantment at one of the levels written for it, at any level if written without level */
+            if (!ListEnchantAndLevelFeature.hasAll(itemMeta.getEnchants(), getCondition().getLevels())) {
+                runInvalidCondition(request);
+                return false;
             }
         }
 
@@ -57,7 +51,7 @@ public class IfHasEnchant extends ItemConditionFeature<ListEnchantAndLevelFeatur
 
     @Override
     public boolean hasCondition() {
-        return getCondition().getValue().size() > 0;
+        return !getCondition().getLevels().isEmpty();
     }
 
     @Override

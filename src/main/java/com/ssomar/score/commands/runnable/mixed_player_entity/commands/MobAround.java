@@ -203,7 +203,7 @@ public class MobAround extends MixedCommand implements FeatureParentInterface {
                         entities = entities.subList(0, limit);
                     }
 
-                    boolean hit = CommmandThatRunsCommand.runEntityCommands(entities, sCommandToExec.getOtherArgs(), sCommandToExec.getActionInfo());
+                    boolean hit = CommmandThatRunsCommand.runEntityCommands(entities, sCommandToExec.getOtherArgs(), sCommandToExec.getActionInfo(), entities.size());
 
                     if (!hit && displayMsgIfNoEntity && receiver instanceof Player)
                         sm.sendMessage(receiver, MessageMain.getInstance().getMessage(SCore.plugin, Message.NO_ENTITY_HIT));

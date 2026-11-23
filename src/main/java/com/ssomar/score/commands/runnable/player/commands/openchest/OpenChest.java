@@ -3,6 +3,7 @@ package com.ssomar.score.commands.runnable.player.commands.openchest;
 import com.ssomar.score.commands.runnable.ArgumentChecker;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.player.PlayerCommand;
+import com.ssomar.score.utils.backward_compatibility.SnapshotUtils;
 import com.ssomar.score.utils.numbers.NTools;
 import lombok.Getter;
 import org.bukkit.*;
@@ -44,18 +45,18 @@ public class OpenChest extends PlayerCommand {
         Location location = new Location(world, x, y, z);
         Chunk chunk = location.getChunk();
 
-        BlockState state = location.getBlock().getState();
+        BlockState state = SnapshotUtils.getStateNoSnapshot(location.getBlock());
 
         if (state instanceof Chest) {
-            Chest chest = (Chest) location.getBlock().getState();
-            InventoryHolder holder = chest.getInventory().getHolder();
+            Chest chest = (Chest) state;
+            InventoryHolder holder = SnapshotUtils.getHolderNoSnapshot(chest.getInventory());
             Inventory chestInventory = chest.getInventory();
             if (holder instanceof DoubleChest) chestInventory = ((DoubleChest) holder).getInventory();
             if (bypassProtections) bypassChests.put(receiver, chestInventory);
             receiver.openInventory(chestInventory);
             //SsomarDev.testMsg("OPEN CHEST", true);
         } else if (state instanceof Barrel) {
-            Barrel barrel = (Barrel) location.getBlock().getState();
+            Barrel barrel = (Barrel) state;
             Inventory barrelInventory = barrel.getInventory();
             if (bypassProtections) bypassChests.put(receiver, barrelInventory);
             receiver.openInventory(barrelInventory);

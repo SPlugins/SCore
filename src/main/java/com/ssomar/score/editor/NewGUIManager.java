@@ -59,6 +59,11 @@ public abstract class NewGUIManager<T extends GUI> {
         activeTextEditor = new HashMap<>();
     }
 
+    @SuppressWarnings("unchecked")
+    public void restoreInCache(Player player, GUI gui) {
+        cache.put(player, (T) gui);
+    }
+
     public void enableTextEditor(Player player) {
         activeTextEditor.put(player, true);
         suggestionPage.put(player, 0);

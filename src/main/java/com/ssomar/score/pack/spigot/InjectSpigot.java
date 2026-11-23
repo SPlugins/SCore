@@ -11,7 +11,8 @@ import java.util.List;
 
 public class InjectSpigot implements InjectPlatform {
     public static InjectSpigot INSTANCE = new InjectSpigot();
-    private final List<Injector> injectors = new ArrayList<>();
+    // Read by the netty threads for each new connection while plugins register / unregister on the main thread
+    private final List<Injector> injectors = new java.util.concurrent.CopyOnWriteArrayList<>();
     private boolean hasInitialized = false;
 
     private ClientConnectionInterceptor connectionInterceptor = new ClientConnectionInterceptor();
@@ -70,12 +71,10 @@ public class InjectSpigot implements InjectPlatform {
         boolean removed = injectors.remove(injector);
 
         if (removed && connectionInterceptor != null) {
-            // Remove the injector from all active channel pipelines
-            connectionInterceptor.install((channel) -> {
-                if (channel.pipeline().get(injector.getClass().getName()) != null) {
-                    channel.pipeline().remove(injector.getClass().getName());
-                }
-            });
+            // New connections read the injectors list, so removing it from the list is enough for them.
+            // (It used to install() a second server handler here, which threw at shutdown on servers with
+            // several listening channels, e.g. with Geyser.)
+            if (injectors.isEmpty()) connectionInterceptor.uninstall();
             Utils.sendConsoleMsg("Injector &e" + injector.getClass().getName() + " &7unregistered (TPack selfhosting)");
         }
 

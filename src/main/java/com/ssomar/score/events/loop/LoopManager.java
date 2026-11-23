@@ -8,10 +8,13 @@ import com.ssomar.score.sobject.sactivator.EventInfo;
 import com.ssomar.score.sobject.sactivator.OptionGlobal;
 import com.ssomar.score.splugin.SPlugin;
 import com.ssomar.score.usedapi.Dependency;
+import com.ssomar.score.utils.scheduler.ScheduledTask;
 import lombok.Getter;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class LoopManager {
@@ -23,6 +26,10 @@ public class LoopManager {
     private final Map<SActivator, Integer> loopActivators;
     private final List<SActivator> loopActivatorsToAdd;
     private final List<SActivator> loopActivatorsToRemove;
+    private ScheduledTask loopTask;
+    /* Ticks counted by the loop task (DELAY per cycle). Plugins that keep a countdown per object
+     * (SActivator#isLoopTimerPerObject) compare their next run to it, so they follow the same clock as the shared countdown */
+    private volatile long loopTicks = 0;
 
     public LoopManager(Plugin plugin) {
         // If SCore is installed, use it as the plugin otherwise use the provided plugin (probably a plugin that shades SCore)
@@ -31,9 +38,9 @@ public class LoopManager {
         DELAY = 5;
         if(GeneralConfig.getInstance().isLoopKillMode()) DELAY = 1;
 
-        loopActivators = new HashMap<>();
-        loopActivatorsToAdd = new ArrayList<>();
-        loopActivatorsToRemove = new ArrayList<>();
+        loopActivators = new ConcurrentHashMap<>();
+        loopActivatorsToAdd = new CopyOnWriteArrayList<>();
+        loopActivatorsToRemove = new CopyOnWriteArrayList<>();
         this.runLoop();
     }
 
@@ -42,9 +49,9 @@ public class LoopManager {
         DELAY = 5;
         if(GeneralConfig.getInstance().isLoopKillMode()) DELAY = 1;
 
-        loopActivators = new HashMap<>();
-        loopActivatorsToAdd = new ArrayList<>();
-        loopActivatorsToRemove = new ArrayList<>();
+        loopActivators = new ConcurrentHashMap<>();
+        loopActivatorsToAdd = new CopyOnWriteArrayList<>();
+        loopActivatorsToRemove = new CopyOnWriteArrayList<>();
         this.runLoop();
     }
 
@@ -65,6 +72,7 @@ public class LoopManager {
             @Override
             public void run() {
                 //SsomarDev.testMsg("loop activatores registered: " + loopActivators.size());
+                loopTicks += DELAY;
                 /* List of activators that we need to activate for this cycle */
                 List<SActivator> toActivate = new ArrayList<>();
 
@@ -97,6 +105,13 @@ public class LoopManager {
                     LoopFeatures loop;
                     if ((loop = activator.getLoopFeatures()) == null) continue;
 
+                    /* Countdown kept per object by the plugin (EB loopTimerPerBlock): offered on every cycle,
+                     * the plugin only runs it for the objects whose own countdown is over */
+                    if (activator.isLoopTimerPerObject()) {
+                        toActivate.add(activator);
+                        continue;
+                    }
+
                     int delay;
                     if ((delay = loopActivators.get(activator)) > DELAY) {
                         int toRemove = DELAY;
@@ -125,6 +140,10 @@ public class LoopManager {
                     List<SActivator> loopActivators = new ArrayList<>();
 
                     for (SActivator sActivator : toActivate) {
+                        // Skip activators whose owning plugin got disabled/reloaded since they were
+                        // scheduled: their classloader may already be closed (IllegalStateException:
+                        // zip file closed), and resetLoopActivators() only runs on the next enable.
+                        if (!sActivator.getSPlugin().getPlugin().isEnabled()) continue;
                         if (sActivator.getOption().isLoopOption())
                             loopActivators.add(sActivator);
                     }
@@ -147,7 +166,22 @@ public class LoopManager {
                 }
             }
         };
-        SCore.getSchedulerHook(plugin).runRepeatingTask(runnable, 0L, DELAY);
+        loopTask = SCore.getSchedulerHook(plugin).runRepeatingTask(runnable, 0L, DELAY);
+    }
+
+    /**
+     * Stops the repeating loop task. Called from SCore#onDisable so the task doesn't keep
+     * invoking activators from plugins whose classloader/jar just got closed.
+     */
+    public void shutdown() {
+        if (loopTask != null && !loopTask.isCancelled()) loopTask.cancel();
+    }
+
+    /**
+     * @return the ticks counted by the loop task since it started, the clock of the per object countdowns
+     */
+    public long getLoopTicks() {
+        return loopTicks;
     }
 
     public void addLoopActivator(SActivator activator) {

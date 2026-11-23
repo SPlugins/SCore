@@ -20,10 +20,12 @@ public class SetBlock extends PlayerCommand {
         CommandSetting blockFace = new CommandSetting("blockface", 0, BlockFace.class, null);
         CommandSetting material = new CommandSetting("material", 1, String.class, "STONE");
         CommandSetting bypassProtection = new CommandSetting("bypassProtection", -1, Boolean.class, true);
+        CommandSetting whitelistCurrentBlock = new CommandSetting("whitelistCurrentBlock", -1, String.class, "");
         List<CommandSetting> settings = getSettings();
         settings.add(material);
         settings.add(blockFace);
         settings.add(bypassProtection);
+        settings.add(whitelistCurrentBlock);
         setNewSettingsMode(true);
     }
 
@@ -32,6 +34,7 @@ public class SetBlock extends PlayerCommand {
 
         String materialStr = (String) sCommandToExec.getSettingValue("material");
         boolean bypassProtection = (boolean) sCommandToExec.getSettingValue("bypassProtection");
+        String whitelistCurrentBlock = (String) sCommandToExec.getSettingValue("whitelistCurrentBlock");
 
         Material material = null;
         try {
@@ -59,6 +62,9 @@ public class SetBlock extends PlayerCommand {
             if(blockFace == null) return;
             block = block.getRelative(blockFace);
 
+            // Same filter as SET_TEMP_BLOCK_POS: only replace the current block if it is whitelisted
+            if (!SetTempBlockPos.verifWhitelistCurrentBlock(whitelistCurrentBlock, block)) return;
+
             UUID uuid = receiver.getUniqueId();
             if (!bypassProtection && !SafePlace.verifSafePlace(uuid, block)) return;
 
@@ -84,7 +90,7 @@ public class SetBlock extends PlayerCommand {
 
     @Override
     public String getTemplate() {
-        return "SET_BLOCK material:STONE blockface:UP bypassProtection:true";
+        return "SET_BLOCK material:STONE blockface:UP bypassProtection:true whitelistCurrentBlock:SAND,DIRT";
     }
 
     @Override

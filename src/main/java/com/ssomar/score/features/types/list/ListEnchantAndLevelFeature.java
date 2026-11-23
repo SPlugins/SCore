@@ -20,14 +20,21 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.function.Function;
 
 @Getter
 @Setter
 public class ListEnchantAndLevelFeature extends FeatureAbstract<Map<Enchantment, Integer>, ListEnchantAndLevelFeature> implements FeatureRequireSubTextEditorInEditor {
 
+    /** Written instead of the level (LOYALTY:*), like no level at all (LOYALTY): every level of the enchantment */
+    public static final String ALL_LEVELS = "*";
+
+    /* One level per enchantment, the last one written */
     private Map<Enchantment, Integer> value;
     private Map<Enchantment, Integer> defaultValue;
     private boolean notSaveIfEqualsToDefaultValue;
+    /* Every level written for each enchantment, in the written order, an empty set means every level */
+    private Map<Enchantment, Set<Integer>> levels;
 
     public ListEnchantAndLevelFeature(FeatureParentInterface parent, Map<Enchantment, Integer> defaultValue, FeatureSettingsInterface featureSettings, boolean notSaveIfEqualsToDefaultValue) {
         super(parent, featureSettings);
@@ -40,44 +47,126 @@ public class ListEnchantAndLevelFeature extends FeatureAbstract<Map<Enchantment,
     @Override
     public List<String> load(SPlugin plugin, ConfigurationSection config, boolean isPremiumLoading) {
         List<String> errors = new ArrayList<>();
-        value = transformEnchants(config.getStringList(this.getName()), errors);
+        setEnchants(config.getStringList(this.getName()), errors);
         return errors;
     }
 
+    /** One level per enchantment (the last one written), see getLevels() for all the levels */
     public Map<Enchantment, Integer> transformEnchants(List<String> enchantsConfig, List<String> errorList) {
         Map<Enchantment, Integer> result = new HashMap<>();
-        for (String s : enchantsConfig) {
-            Enchantment enchant;
-            int level;
-            String[] decomp;
+        transformEnchants(enchantsConfig, errorList, new LinkedHashMap<>(), result);
+        return result;
+    }
 
-            boolean error = false;
-            if (s.contains(":")) {
-                decomp = s.split(":");
-                String namespaceEnchant = "";
-                String levelStr = "";
-                if (decomp.length >= 3) {
-                    namespaceEnchant = decomp[0] + ":" + decomp[1];
-                    levelStr = decomp[2];
-                    //System.out.println(namespaceEnchant + " / " + levelStr);
+    public void transformEnchants(List<String> enchantsConfig, List<String> errorList, Map<Enchantment, Set<Integer>> levels, Map<Enchantment, Integer> lastLevels) {
+        for (String s : enchantsConfig) {
+            if (!readEntry(s, ListEnchantAndLevelFeature::getEnchantment, levels, lastLevels))
+                errorList.add("&cERROR, Couldn't load the Enchant with level value of " + this.getName() + " from config, value: " + s + " &7&o" + getParent().getParentInfo() + " &6>> correct form > ENCHANTMENT:LEVEL or ENCHANTMENT (all its levels)  example> POWER:1 !");
+        }
+    }
+
+    private void setEnchants(List<String> enchantsConfig, List<String> errorList) {
+        Map<Enchantment, Set<Integer>> newLevels = new LinkedHashMap<>();
+        Map<Enchantment, Integer> newValue = new HashMap<>();
+        transformEnchants(enchantsConfig, errorList, newLevels, newValue);
+        this.levels = newLevels;
+        this.value = newValue;
+    }
+
+    private static Enchantment getEnchantment(String name) {
+        try {
+            return Enchantment.getByName(name);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Reads one entry: ENCHANTMENT:LEVEL, or ENCHANTMENT / ENCHANTMENT:* for all its levels.
+     * The enchantment can have a namespace: minecraft:loyalty:2, minecraft:loyalty
+     *
+     * @param levels     receives every level written for each enchantment (an empty set = all the levels)
+     * @param lastLevels receives the last level written for each enchantment
+     * @return false if the entry is not valid
+     */
+    public static <E> boolean readEntry(String entry, Function<String, E> getEnchantment, Map<E, Set<Integer>> levels, Map<E, Integer> lastLevels) {
+        String name = entry;
+        String levelStr = ALL_LEVELS;
+        boolean canBeNamespace = false;
+        if (entry.contains(":")) {
+            String[] decomp = entry.split(":");
+            if (decomp.length >= 3) {
+                name = decomp[0] + ":" + decomp[1];
+                levelStr = decomp[2];
+            } else if (decomp.length == 2) {
+                name = decomp[0];
+                levelStr = decomp[1];
+                canBeNamespace = true;
+            } else return false;
+        }
+
+        E enchant = getEnchantment.apply(name);
+        Integer level = null;
+        if (enchant != null && !ALL_LEVELS.equals(levelStr)) {
+            try {
+                level = Integer.parseInt(levelStr);
+            } catch (NumberFormatException e) {
+                enchant = null;
+            }
+        }
+        if (enchant == null && canBeNamespace) {
+            enchant = getEnchantment.apply(entry);
+            level = null;
+        }
+        if (enchant == null) return false;
+
+        Set<Integer> written = levels.get(enchant);
+        if (level == null) {
+            if (written == null) levels.put(enchant, new LinkedHashSet<>());
+            else written.clear();
+        } else {
+            if (written == null) {
+                written = new LinkedHashSet<>();
+                written.add(level);
+                levels.put(enchant, written);
+            } else if (!written.isEmpty()) written.add(level);
+            lastLevels.put(enchant, level);
+        }
+        return true;
+    }
+
+    public static boolean hasLevel(Set<Integer> written, int level) {
+        return written.isEmpty() || written.contains(level);
+    }
+
+    /** True if every enchantment of the list is in the enchants, at one of the levels written for it */
+    public static <E> boolean hasAll(Map<E, Integer> enchants, Map<E, Set<Integer>> levels) {
+        for (Map.Entry<E, Set<Integer>> entry : levels.entrySet()) {
+            Integer level = enchants.get(entry.getKey());
+            if (level == null || !hasLevel(entry.getValue(), level)) return false;
+        }
+        return true;
+    }
+
+    /** True if one enchantment of the list is in the enchants, at one of the levels written for it */
+    public static <E> boolean hasOne(Map<E, Integer> enchants, Map<E, Set<Integer>> levels) {
+        for (Map.Entry<E, Set<Integer>> entry : levels.entrySet()) {
+            Integer level = enchants.get(entry.getKey());
+            if (level != null && hasLevel(entry.getValue(), level)) return true;
+        }
+        return false;
+    }
+
+    /** ENCHANTMENT:LEVEL for each level written, ENCHANTMENT alone for all the levels */
+    public static <E> List<String> toStrings(Map<E, Set<Integer>> levels, Function<E, String> getName) {
+        List<String> result = new ArrayList<>();
+        for (Map.Entry<E, Set<Integer>> entry : levels.entrySet()) {
+            String name = getName.apply(entry.getKey());
+            if (entry.getValue().isEmpty()) result.add(name);
+            else {
+                for (Integer level : entry.getValue()) {
+                    result.add(name + ":" + level);
                 }
-                else {
-                    namespaceEnchant = decomp[0];
-                    levelStr = decomp[1];
-                }
-                try {
-                    enchant = Enchantment.getByName(namespaceEnchant);
-                    if (enchant == null) {
-                        error = true;
-                    } else {
-                        level = Integer.parseInt(levelStr);
-                        result.put(enchant, level);
-                    }
-                } catch (Exception e) {
-                    error = true;
-                }
-                if (error)
-                    errorList.add("&cERROR, Couldn't load the Enchant with level value of " + this.getName() + " from config, value: " + s + " &7&o" + getParent().getParentInfo() + " &6>> correct form > ENCHANTMENT:LEVEL  example> POWER:1 !");
             }
         }
         return result;
@@ -86,12 +175,23 @@ public class ListEnchantAndLevelFeature extends FeatureAbstract<Map<Enchantment,
     @Override
     public void save(ConfigurationSection config) {
         config.set(this.getName(), null);
-        if (notSaveIfEqualsToDefaultValue && value.isEmpty()) return;
+        if (notSaveIfEqualsToDefaultValue && levels.isEmpty()) return;
         config.set(this.getName(), this.getCurrentValues());
     }
 
     public Map<Enchantment, Integer> getValues() {
         return value;
+    }
+
+    /** One level per enchantment */
+    public void setValue(Map<Enchantment, Integer> value) {
+        this.value = value;
+        this.levels = new LinkedHashMap<>();
+        for (Map.Entry<Enchantment, Integer> entry : value.entrySet()) {
+            Set<Integer> level = new LinkedHashSet<>();
+            level.add(entry.getValue());
+            this.levels.put(entry.getKey(), level);
+        }
     }
 
     @Override
@@ -113,59 +213,27 @@ public class ListEnchantAndLevelFeature extends FeatureAbstract<Map<Enchantment,
     @Override
     public ListEnchantAndLevelFeature clone(FeatureParentInterface newParent) {
         ListEnchantAndLevelFeature clone = new ListEnchantAndLevelFeature(newParent, getDefaultValue(), getFeatureSettings(), isNotSaveIfEqualsToDefaultValue());
-        clone.setValue(getValues());
+        clone.value = value;
+        clone.levels = levels;
         return clone;
     }
 
     @Override
     public void reset() {
-        this.value = new HashMap<>(defaultValue);
+        setValue(new HashMap<>(defaultValue));
     }
 
     @Override
     public Optional<String> verifyMessageReceived(String message) {
         String s = StringConverter.decoloredString(message);
-        String[] decomp;
-        Enchantment enchant;
-        int level;
-        boolean error = false;
-        if (s.contains(":")) {
-            decomp = s.split(":");
-            String namespaceEnchant = "";
-            String levelStr = "";
-            if (decomp.length >= 3) {
-                namespaceEnchant = decomp[0] + ":" + decomp[1];
-                levelStr = decomp[2];
-                System.out.println(namespaceEnchant + " / " + levelStr);
-            }
-            else {
-                namespaceEnchant = decomp[0];
-                levelStr = decomp[1];
-            }
-
-            try {
-                enchant = Enchantment.getByName(namespaceEnchant);
-                if (enchant == null) {
-                    error = true;
-                } else {
-                    Integer.parseInt(levelStr);
-                }
-            } catch (Exception e) {
-                error = true;
-            }
-            if (error)
-                return Optional.of("&4&l[ERROR] &cThe message you entered &8(&7" + s + "&8)&c is not an enchant with level &6>> correct form > ENCHANTMENT:LEVEL  example> POWER:1 !");
-        }
+        if (!readEntry(s, ListEnchantAndLevelFeature::getEnchantment, new HashMap<>(), new HashMap<>()))
+            return Optional.of("&4&l[ERROR] &cThe message you entered &8(&7" + s + "&8)&c is not an enchant with level &6>> correct form > ENCHANTMENT:LEVEL or ENCHANTMENT (all its levels)  example> POWER:1 !");
         return Optional.empty();
     }
 
     @Override
     public List<String> getCurrentValues() {
-        List<String> result = new ArrayList<>();
-        for (Map.Entry<Enchantment, Integer> entry : value.entrySet()) {
-            result.add(entry.getKey().getName() + ":" + entry.getValue());
-        }
-        return result;
+        return toStrings(levels, Enchantment::getName);
     }
 
     @Override
@@ -184,7 +252,7 @@ public class ListEnchantAndLevelFeature extends FeatureAbstract<Map<Enchantment,
 
     @Override
     public String getTips() {
-        return "&8Example &7&oPOWER:1";
+        return "&8Example &7&oPOWER:1 &8or &7&oPOWER &8(all its levels)";
     }
 
     @Override
@@ -193,7 +261,7 @@ public class ListEnchantAndLevelFeature extends FeatureAbstract<Map<Enchantment,
         for (int i = 0; i < preResult.size(); i++) {
             preResult.set(i, StringConverter.decoloredString(preResult.get(i)));
         }
-        value = transformEnchants(preResult, new ArrayList<>());
+        setEnchants(preResult, new ArrayList<>());
         manager.requestWriting.remove(editor);
         manager.activeTextEditor.remove(editor);
         updateItemParentEditor((GUI) manager.getCache().get(editor));

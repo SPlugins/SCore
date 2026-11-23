@@ -6,6 +6,7 @@ import com.ssomar.score.features.FeatureParentInterface;
 import com.ssomar.score.features.FeatureSettingsSCore;
 import com.ssomar.score.features.FeatureWithHisOwnEditor;
 import com.ssomar.score.features.custom.loop.LoopFeatures;
+import com.ssomar.score.features.types.SOptionFeature;
 import com.ssomar.score.menu.GUI;
 import com.ssomar.score.scheduler.ScheduleFeatures;
 import com.ssomar.score.sobject.sactivator.EventInfo;
@@ -33,9 +34,34 @@ public abstract class SActivator<X extends FeatureInterface<X, X>, Y extends GUI
 
     public abstract SOption getOption();
 
+    /**
+     * True when the config named an option that does not exist (see SOptionFeature#isInvalidInConfig):
+     * the activator is then never triggered instead of running on the default option. Generic: it looks
+     * for the option feature among getFeatures(), so every plugin's activator gets it without a change.
+     */
+    public boolean isDisabledByInvalidOption() {
+        List<FeatureInterface> features = getFeatures();
+        if (features == null) return false;
+        for (FeatureInterface feature : features) {
+            if (feature instanceof SOptionFeature) return ((SOptionFeature) feature).isInvalidInConfig();
+        }
+        return false;
+    }
+
     public abstract List<FeatureInterface> getFeatures();
 
     public abstract LoopFeatures getLoopFeatures();
+
+    /**
+     * True when the plugin keeps the LOOP countdown of this activator per placed object
+     * (ExecutableBlocks: loopTimerPerBlock) instead of one countdown shared by every object of the config.
+     * The LoopManager then offers the activator on every cycle and the plugin checks, object by object,
+     * whether its own countdown is over (see LoopManager#getLoopTicks). False by default: EI, EE and the
+     * other plugins keep the shared countdown.
+     */
+    public boolean isLoopTimerPerObject() {
+        return false;
+    }
 
     public abstract ScheduleFeatures getScheduleFeatures();
 

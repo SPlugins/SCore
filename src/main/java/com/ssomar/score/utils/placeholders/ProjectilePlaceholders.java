@@ -22,7 +22,8 @@ public class ProjectilePlaceholders extends PlaceholdersInterface implements Ser
 
     /* placeholders of the target projectile */
 
-    private Projectile projectile;
+    /* transient: not serializable (delayed commands saved at the shutdown), found again by its UUID */
+    private transient Projectile projectile;
     private UUID projectileUUID;
 
     private String projectileType = "";

@@ -57,6 +57,14 @@ public class LoopFeatures extends FeatureWithHisOwnEditor<LoopFeatures, LoopFeat
         delayInTick.save(config);
     }
 
+    /**
+     * The delay between two activations, in ticks (delay is in seconds unless delayInTick is true)
+     */
+    public int getDelayInTicks() {
+        int value = delay.getValue().orElse(1);
+        return delayInTick.getValue() ? value : value * 20;
+    }
+
     @Override
     public LoopFeatures getValue() {
         return this;

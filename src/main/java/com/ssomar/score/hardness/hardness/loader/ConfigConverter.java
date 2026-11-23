@@ -1,6 +1,6 @@
 package com.ssomar.score.hardness.hardness.loader;
 
-import com.google.common.base.Charsets;
+import java.nio.charset.StandardCharsets;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -21,7 +21,7 @@ public class ConfigConverter {
 
 
         try {
-            Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
+            Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
 
             try {
                 writer.write(config.saveToString());

@@ -11,12 +11,15 @@ silenceOutputs: # You can blacklist sentences that are sent to the console by Th
 globalSilenceOutputs: # You can blacklist sentences that are sent to the console by any plugin
   - "blacklist the sentence here"
 disableCustomMetadataOnEntities: false # to disable the metadata fromSpawner and bowForce to be added to entities
+beforeDeathIgnoreCancelledDamage: false # true: PLAYER_BEFORE_DEATH and ENTITY_BEFORE_DEATH are checked after the other plugins and don't run when one of them cancelled the damage (a damage cap, a protected region...)
 
 #MIN : it will save only the modified settings
 #NORMAL : it will save modified settings + frequently used settings
 #MAX : it will save all settings (its very verbose)
 configVerbosity: "NORMAL" # "NORMAL" or "MIN" or "MAX"
 enableCommentsInConfig: true # It will add a description of each setting in comment in the yaml config file.
+editorIconPreview: true # Shows the name, lore, enchantments and attributes of each object on its icon in the list editors (/ei editor ...). Bounded, display only.
+breakChains: true # A block broken by a command (score run-block-command ... BREAK) runs the activators of the item again, which can break other blocks, and so on (stopped at 64 levels / 512 blocks). false: only the blocks broken by the commands of the activator itself, like BREAK
 selfHostPackDebug : false
 selfHostPackIp: "" # The IP of your server to self-hosted your textures pack. If you leave it empty, it will try to get your IP automatically.
 hologramsPlugin: "NONE" # The holograms plugin you want to use. By default None , it uses the vanilla holograms. You can use CMI, HOLOGRAPHIC_DISPLAYS or DECENT_HOLOGRAMS

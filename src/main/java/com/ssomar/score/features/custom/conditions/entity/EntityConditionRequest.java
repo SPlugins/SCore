@@ -21,7 +21,7 @@ public class EntityConditionRequest extends ConditionRequest {
     private Optional<Player> playerOpt;
 
     public EntityConditionRequest(@NotNull Entity entity, @NotNull Optional<Player> playerOpt, @Nullable StringPlaceholder sp, @Nullable Event event) {
-        super(event, Optional.ofNullable(sp).orElse(new StringPlaceholder()));
+        super(event, sp != null ? sp : new StringPlaceholder());
         this.entity = entity;
         this.playerOpt = playerOpt;
     }

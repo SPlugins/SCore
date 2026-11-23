@@ -1,5 +1,6 @@
 package com.ssomar.score.features.custom.conditions.block.condition;
 
+import com.ssomar.score.utils.backward_compatibility.SnapshotUtils;
 import com.ssomar.score.features.FeatureParentInterface;
 import com.ssomar.score.features.FeatureSettingsSCore;
 import com.ssomar.score.features.custom.conditions.block.BlockConditionFeature;
@@ -24,7 +25,7 @@ public class IfContainerContains extends BlockConditionFeature<RequiredItemGroup
         if (!hasCondition()) return true;
 
         Block b = request.getBlock();
-        BlockState state = b.getState();
+        BlockState state = SnapshotUtils.getStateNoSnapshot(b);
         if (state instanceof Container) {
             Container container = (Container) state;
             Inventory inv = container.getInventory();

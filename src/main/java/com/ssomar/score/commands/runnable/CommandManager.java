@@ -14,26 +14,69 @@ public abstract class CommandManager<T extends SCommand> {
     @Setter
     private List<T> commands;
 
-    /** Get the associated custom command of the entry if there is one **/
+    /** Get the associated custom command of the entry if there is one.
+     * The name must end on a word boundary and the longest matching name wins, so the result no longer
+     * depends on registration order (SETBLOCK vs SETBLOCKPOS, TELEPORT vs TELEPORT POSITION) and another
+     * plugin's command that merely starts with an SCore name (launchprojectile, breakinradius) is left alone. **/
     public Optional<T> getCommand(String entry) {
-        for (T command : this.commands) {
-            for (String name : command.getNames()) {
-                if (entry.regionMatches(true, 0, name, 0, name.length())) {
-                    return Optional.of(command);
+        if (entry == null) return Optional.empty();
+        NameIndex<T> index = nameIndex;
+        if (index == null || index.commands != commands || index.size != commands.size()) nameIndex = index = new NameIndex<>(commands);
+        T best = null;
+        int bestLen = -1;
+        List<Map.Entry<String, T>> candidates = index.byFirstWord.get(firstWord(entry));
+        if (candidates != null) {
+            /* Same order as the commands list: the first command with the longest name wins, as before */
+            for (Map.Entry<String, T> candidate : candidates) {
+                String name = candidate.getKey();
+                if (name.length() > bestLen && SCommand.startsWithName(entry, name)) {
+                    bestLen = name.length();
+                    best = candidate.getValue();
                 }
             }
         }
-        return Optional.empty();
+        return Optional.ofNullable(best);
+    }
+
+    /* getCommand runs for each command line: it asked every command (several hundreds) to match the entry, and each getNames()
+     * builds a new list. A name can only match an entry that starts with the same first word, so the names are indexed by it. */
+    private volatile NameIndex<T> nameIndex;
+
+    private static final class NameIndex<T extends SCommand> {
+        private final List<T> commands;
+        private final int size;
+        private final Map<String, List<Map.Entry<String, T>>> byFirstWord = new HashMap<>();
+
+        private NameIndex(List<T> commands) {
+            this.commands = commands;
+            this.size = commands.size();
+            for (T command : commands) {
+                for (String name : command.getNames()) {
+                    if (name == null || name.isEmpty()) continue;
+                    byFirstWord.computeIfAbsent(firstWord(name), k -> new ArrayList<>()).add(new AbstractMap.SimpleImmutableEntry<>(name, command));
+                }
+            }
+        }
+    }
+
+    /** The leading letters, digits and '_' (the boundary of SCommand.startsWithName), each char folded the way
+     * String.regionMatches(true, ...) compares them: there 'İ' matches 'i' and the Kelvin sign 'k' (MİNEİNCUBE typed with a
+     * Turkish caps lock), which String.toUpperCase keeps apart. */
+    static String firstWord(String s) {
+        StringBuilder word = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (!Character.isLetterOrDigit(c) && c != '_') break;
+            word.append(Character.toLowerCase(Character.toUpperCase(c)));
+        }
+        return word.toString();
     }
 
     /** Extract the arguments of the entry for a specific custom command **/
     public List<String> getArgs(T command, String entry) {
-        for (String name : command.getNames()) {
-            if (entry.startsWith(name)) {
-                entry = entry.substring(name.length());
-                break;
-            }
-        }
+        // Same (case-insensitive, boundary-aware) comparison as getCommand: a case-sensitive strip here
+        // left the command word in the arguments for lower-case entries.
+        entry = command.stripName(entry);
         if(entry.trim().equals("")) return new ArrayList<>();
         return Arrays.asList(entry.trim().split(" "));
     }

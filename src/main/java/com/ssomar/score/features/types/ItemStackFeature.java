@@ -200,6 +200,13 @@ public class ItemStackFeature extends FeatureAbstract<Optional<ItemStack>, ItemS
         item = value.orElseGet(() -> new ItemStack(Material.BARRIER));
 
         ItemMeta meta = item.getItemMeta();
+        // AIR carries no ItemMeta, and a feature can legitimately hold it (an ExecutableCrafting
+        // recipe used to disable a vanilla one). Show the same placeholder as an unset value
+        // instead of throwing and killing the whole editor. The stored value is untouched.
+        if (meta == null) {
+            item = new ItemStack(Material.BARRIER);
+            meta = item.getItemMeta();
+        }
         List<String> lore = meta.hasLore()? meta.getLore() : new ArrayList<>();
 
         assert lore != null;
@@ -258,7 +265,7 @@ public class ItemStackFeature extends FeatureAbstract<Optional<ItemStack>, ItemS
     @Override
     public boolean noShiftLeftclicked(Player editor, NewGUIManager manager) {
         ItemStack stack = editor.getItemOnCursor().clone();
-        if(stack.getType().isAir()) editor.sendMessage(StringConverter.coloredString("&cYou must have an item in your hand to set it as the value"));
+        if(stack.getType().isAir()) editor.sendMessage(StringConverter.coloredString("&cPick up the item with your mouse (it must be on your cursor), then left click this button to set it as the value"));
         else {
             ((GUI)manager.getCache().get(editor)).updateCurrently(getEditorName(), itemStackToString(stack));
             value = Optional.of(stack);

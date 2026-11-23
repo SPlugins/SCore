@@ -97,7 +97,8 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
     private String blockface = "";
     /* placeholders of the cooldown */
     private String cooldown = "";
-    private List<VariableReal> variables = new ArrayList<>();
+    /* transient: not serializable, a delayed command saved at the shutdown keeps their value through getBrutCommandToSave() */
+    private transient List<VariableReal> variables = new ArrayList<>();
     private Map<String, String> extraPlaceholders = new HashMap<>();
 
     /* OLD */
@@ -173,6 +174,12 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
     public StringPlaceholder setShooterPlcHldr(UUID uuid) {
         shooterPlch.setPlayerPlcHldr(uuid);
         return this;
+    }
+
+    /* playerPlch has no generated getter, but the player it holds is needed to pass the player
+     * context on to a placeholder holder built for a sub-command. */
+    public UUID getPlayerUUIDPlcHldr() {
+        return playerPlch.getPlayerUUID();
     }
 
     public StringPlaceholder setProjectilePlcHldr(Projectile proj, String blockFace) {
@@ -367,9 +374,7 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
 
         /* there are replace with calcul */
         if (withVariables && variables != null) {
-            for (VariableReal var : variables) {
-                s = var.replaceVariablePlaceholder(s);
-            }
+            s = replaceVariablesUntilStable(s);
         }
 
         placeholders.putAll(playerPlch.getPlaceholders());
@@ -439,10 +444,44 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
         return s;
     }
 
-    public String replacePlaceholderOfSCore(String s) {
-        String replace = s;
+    /** Upper bound of the variable passes: a variable whose value contains its own placeholder must not loop. */
+    static final int MAX_VARIABLE_PASSES = 5;
 
-        Pattern SCORE_REGEX = Pattern.compile("%score_*");
+    /** Replaces only the variable placeholders (current values). */
+    public String replaceVariablePlaceholders(String s) {
+        if (variables == null || variables.isEmpty() || s == null) return s;
+        return replaceVariablesUntilStable(s);
+    }
+
+    /**
+     * Replaces the variable placeholders until nothing changes (bounded by {@link #MAX_VARIABLE_PASSES}).
+     * A single pass only resolved a dynamic variable name such as {@code %var_world%var_selection_int%%} when the
+     * inner variable was declared before the outer one. Otherwise the text still read {@code %var_world2%} when
+     * PlaceholderAPI ran, and a PAPI wrapper around it ({@code %stringutils_executein_%var_world%var_selection_int%%%})
+     * was destroyed.
+     */
+    String replaceVariablesUntilStable(String s) {
+        for (int pass = 0; pass < MAX_VARIABLE_PASSES; pass++) {
+            String before = s;
+            for (VariableReal var : variables) {
+                s = var.replaceVariablePlaceholder(s);
+            }
+            if (s.equals(before) || s.indexOf('%') < 0) break;
+        }
+        return s;
+    }
+
+    /* compiled once: compiling it on every call was 1 % of the server thread on requeim's server (block titles, 2026-10-01) */
+    private static final Pattern SCORE_REGEX = Pattern.compile("%score_*");
+
+    public String replacePlaceholderOfSCore(String s) {
+        if (s.indexOf("%score_") == -1) return s;
+        String replace = s;
+        // Placeholder occurrences that couldn't be resolved get marked with this sentinel so
+        // lastIndexOf("%score_") stops picking them and the loop can move on to other occurrences,
+        // then it's restored to "%score_" before returning.
+        String unresolvedMarker = " score_";
+
         Matcher countSCoreMatcher = SCORE_REGEX.matcher(replace);
         int maxReplace = 0;
         while (countSCoreMatcher.find()) {
@@ -462,29 +501,45 @@ public class StringPlaceholder extends PlaceholdersInterface implements Serializ
             OfflinePlayer p = null;
             if (uuid != null) p = Bukkit.getOfflinePlayer(uuid);
             try {
-                String[] split = replace.split("%score_");
-                String[] split2 = split[1].split("%");
-                String params = split2[0];
+                // Resolve the innermost placeholder first: the last "%score_" occurrence in the
+                // string can't have another "%score_" nested inside it before its closing '%',
+                // unlike the first occurrence which a nested placeholder like
+                // %score_variables_X_%score_variables_Y%% would wrongly pick.
+                int start = replace.lastIndexOf("%score_");
+                if (start == -1) break;
+                int paramStart = start + "%score_".length();
+                int end = replace.indexOf('%', paramStart);
+                if (end == -1) break;
+                String params = replace.substring(paramStart, end);
+
+                String resolvedValue = null;
 
                 Optional<String> placeholder = VariablesManager.getInstance().onRequestPlaceholder(p, params);
-                if (placeholder.isPresent()) replace = replace.replace("%score_" + params + "%", placeholder.get());
+                if (placeholder.isPresent()) resolvedValue = placeholder.get();
 
                 if (p != null) {
+                    if (resolvedValue == null) {
+                        Optional<String> dmgBoosterPlaceHolder = DamageBoost.getInstance().onRequestPlaceholder(p, params);
+                        if (dmgBoosterPlaceHolder.isPresent()) resolvedValue = dmgBoosterPlaceHolder.get();
+                    }
 
-                    Optional<String> dmgBoosterPlaceHolder = DamageBoost.getInstance().onRequestPlaceholder(p, params);
-                    if (dmgBoosterPlaceHolder.isPresent())
-                        replace = replace.replace("%score_" + params + "%", dmgBoosterPlaceHolder.get());
+                    if (resolvedValue == null) {
+                        Optional<String> dmgResistancePlaceHolder = DamageResistance.getInstance().onRequestPlaceholder(p, params);
+                        if (dmgResistancePlaceHolder.isPresent()) resolvedValue = dmgResistancePlaceHolder.get();
+                    }
+                }
 
-                    Optional<String> dmgResistancePlaceHolder = DamageResistance.getInstance().onRequestPlaceholder(p, params);
-                    if (dmgResistancePlaceHolder.isPresent())
-                        replace = replace.replace("%score_" + params + "%", dmgResistancePlaceHolder.get());
+                if (resolvedValue != null) {
+                    replace = replace.substring(0, start) + resolvedValue + replace.substring(end + 1);
+                } else {
+                    replace = replace.substring(0, start) + unresolvedMarker + replace.substring(start + "%score_".length());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 break;
             }
         }
-        return replace;
+        return replace.replace(unresolvedMarker, "%score_");
     }
 
     public String replacePlaceholderOfPAPI(String s) {

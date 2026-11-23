@@ -22,16 +22,17 @@ public class IfUsage extends ItemConditionFeature<NumberConditionFeature, IfUsag
     @Override
     public boolean verifCondition(ItemConditionRequest request) {
 
+        /* Checked first: reading the ExecutableItem of the stack copies its meta, for every activator of every item */
+        if (!hasCondition()) return true;
+
         ItemStack itemStack = request.getItemStack();
         Optional<Player> playerOpt = request.getPlayerOpt();
         ExecutableItemObject executableItem = new ExecutableItemObject(itemStack);
         if (executableItem.isValid()) {
             executableItem.loadExecutableItemInfos();
-            if (hasCondition()) {
-                if (!StringCalculation.calculation(getCondition().getValue(playerOpt, request.getSp()).get(), executableItem.getUsage())) {
-                   runInvalidCondition(request);
-                    return false;
-                }
+            if (!StringCalculation.calculation(getCondition().getValue(playerOpt, request.getSp()).get(), executableItem.getUsage())) {
+                runInvalidCondition(request);
+                return false;
             }
         }
 

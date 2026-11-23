@@ -29,6 +29,7 @@ import java.util.UUID;
 public class FarmInCube extends BlockCommand {
 
     private static final boolean DEBUG = false;
+    private static final String RUN_ACTIVATOR_ON_BLOCKS = "runActivatorOnBlocks:";
 
     /**
      * Process a single block for destruction and optional replanting.
@@ -83,9 +84,25 @@ public class FarmInCube extends BlockCommand {
         }
     }
 
+    /** The positional arguments, without runActivatorOnBlocks:... (read by ExecutableItems: the crops broken by the command also run its activator) */
+    static List<String> positionalArgs(List<String> args) {
+        List<String> result = new ArrayList<>();
+        for (String arg : args) {
+            if (!arg.startsWith(RUN_ACTIVATOR_ON_BLOCKS)) result.add(arg);
+        }
+        return result;
+    }
+
+    static boolean runActivatorOnBlocks(List<String> args) {
+        for (String arg : args) {
+            if (arg.startsWith(RUN_ACTIVATOR_ON_BLOCKS)) return Boolean.parseBoolean(arg.substring(RUN_ACTIVATOR_ON_BLOCKS.length()));
+        }
+        return false;
+    }
+
     @Override
     public void run(Player p, @NotNull Block block, SCommandToExec sCommandToExec) {
-        List<String> args = sCommandToExec.getOtherArgs();
+        List<String> args = positionalArgs(sCommandToExec.getOtherArgs());
         ActionInfo aInfo = sCommandToExec.getActionInfo();
         Material oldMaterial = aInfo.getOldBlockMaterial();
 
@@ -106,7 +123,8 @@ public class FarmInCube extends BlockCommand {
             boolean replant = false;
             if (args.size() >= 4) replant = Boolean.parseBoolean(args.get(3));
 
-            boolean event = false;
+            /* The activator can only see the crops through their break events */
+            boolean event = runActivatorOnBlocks(sCommandToExec.getOtherArgs());
             if (args.size() >= 5) event = Boolean.parseBoolean(args.get(4));
 
             if (radius >= 10) radius = 9;
@@ -200,7 +218,7 @@ public class FarmInCube extends BlockCommand {
 
     @Override
     public String getTemplate() {
-        return "FARMINCUBE {radius} [ActiveDrop true or false] [onlyMaxAge true or false] [replant true or false] [event true or false]";
+        return "FARMINCUBE {radius} [ActiveDrop true or false] [onlyMaxAge true or false] [replant true or false] [event true or false] [runActivatorOnBlocks:false]";
     }
 
     @Override

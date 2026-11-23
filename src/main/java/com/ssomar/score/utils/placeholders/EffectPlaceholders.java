@@ -19,8 +19,9 @@ public class EffectPlaceholders extends PlaceholdersInterface implements Seriali
     private Map<String, String> placeholders;
 
     /* placeholders of the player */
+    /* transient: not serializable (delayed commands saved at the shutdown), its placeholders are already in the map */
     @Getter
-    private PotionEffect effect;
+    private transient PotionEffect effect;
 
     public EffectPlaceholders() {
         this.placeholders = new HashMap<>();

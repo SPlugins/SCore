@@ -28,6 +28,9 @@ public abstract class PlaceholdersInterface {
 
     public static String replaceCalculPlaceholder(String s, String placeholder, String value, String optionalTagSurroundValue, String optionalTagEndBeforeSurround, boolean isInteger, boolean convertToRoman) {
 
+        /* Most calls are for a placeholder the string doesn't contain: return before isNumeric, which parses the value (and throws for a word) */
+        if (!s.contains(placeholder)) return s;
+
         String result = s;
         if(optionalTagSurroundValue == null) optionalTagSurroundValue = "";
         if(optionalTagEndBeforeSurround == null) optionalTagEndBeforeSurround = "";

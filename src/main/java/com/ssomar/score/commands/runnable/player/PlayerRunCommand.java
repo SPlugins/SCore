@@ -60,6 +60,15 @@ public class PlayerRunCommand extends RunCommand {
         } else clearIfDisconnect = false;
     }
 
+    /* The tags were removed from the command by initRunOffline / initClearIfDisconnect: saved again with it, the command loaded after a restart keeps them */
+    @Override
+    public String getBrutCommandToSave() {
+        String command = super.getBrutCommandToSave();
+        if (clearIfDisconnect) command = "[<CLEAR_IF_DISCONNECT>] " + command;
+        if (runOffline) command = "[<OFFLINE>] " + command;
+        return command;
+    }
+
     @Override
     public void pickupInfo() {
         ActionInfo aInfo = this.getaInfo();

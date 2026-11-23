@@ -5,6 +5,7 @@ import com.ssomar.score.configs.messages.MessageMain;
 import com.ssomar.score.features.FeatureSettingsSCore;
 import com.ssomar.score.languages.messages.TM;
 import com.ssomar.score.utils.logging.Utils;
+import com.ssomar.sevents.events.BeforeDeathSettings;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -47,7 +48,14 @@ public class GeneralConfig extends Config {
 
     private boolean disableCustomMetadataOnEntities;
 
+    private boolean beforeDeathIgnoreCancelledDamage;
+
     private boolean enableCommentsInConfig;
+
+    private boolean editorIconPreview;
+
+    /* false: a block broken by a command no longer lets the activators it runs break other blocks by command (like BREAK) */
+    private boolean breakChains;
 
     private boolean selfHostPackDebug;
 
@@ -95,13 +103,18 @@ public class GeneralConfig extends Config {
         //SsomarDev.testMsg("configVerbosity: " + configVerbosity, true);
         reduceDamageIndicatorWithProtolcolLib = config.getBoolean("reduceDamageIndicatorWithProtolcolLib", false);
        // jetMinionsGenerateBreakActivator = config.getBoolean("jetMinionsGenerateBreakActivator", false);
-        silenceOutputs = config.getStringList("silenceOutputs");
-        globalSilenceOutputs = config.getStringList("globalSilenceOutputs");
+        silenceOutputs = loadSilenceOutputs(config, "silenceOutputs");
+        globalSilenceOutputs = loadSilenceOutputs(config, "globalSilenceOutputs");
         debugCheckDamages = config.getBoolean("debugCheckDamages", false);
         enableDetectionEntitiesFromSpawner = config.getBoolean("enableDetectionEntitiesFromSpawner", true);
         loopKillMode = config.getBoolean("loopKillMode", false);
         disableCustomMetadataOnEntities = config.getBoolean("disableCustomMetadataOnEntities", false);
+        /* PLAYER_BEFORE_DEATH / ENTITY_BEFORE_DEATH checked after the other plugins, never for a damage they cancelled (SEvents) */
+        beforeDeathIgnoreCancelledDamage = config.getBoolean("beforeDeathIgnoreCancelledDamage", false);
+        BeforeDeathSettings.setIgnoreCancelledDamage(beforeDeathIgnoreCancelledDamage);
         enableCommentsInConfig = config.getBoolean("enableCommentsInConfig", true) && SCore.is1v19Plus();
+        editorIconPreview = config.getBoolean("editorIconPreview", true);
+        breakChains = config.getBoolean("breakChains", true);
         selfHostPackDebug = config.getBoolean("selfHostPackDebug", false);
         selfHostPackIp = config.getString("selfHostPackIp", "");
         hologramsPlugin = config.getString("hologramsPlugin", "NONE").toUpperCase();
@@ -146,5 +159,18 @@ public class GeneralConfig extends Config {
             else locales.add("&2➤ &7&o"+locale.name()+ " &a- &7&o"+locale.getName());
         }
         return locales.toArray(new String[0]);
+    }
+
+    /* An empty entry matches every console line: the whole console would be silenced */
+    private static List<String> loadSilenceOutputs(FileConfiguration config, String key) {
+        List<String> result = new ArrayList<>();
+        for (String s : config.getStringList(key)) {
+            if (s == null || s.trim().isEmpty()) {
+                Utils.sendConsoleMsg(SCore.NAME_COLOR + " &cAn empty entry of &6" + key + " &cin config.yml is ignored (it would hide every console line).");
+                continue;
+            }
+            result.add(s);
+        }
+        return result;
     }
 }

@@ -73,6 +73,7 @@ public enum FeatureSettingsSCoreFR implements FeatureSettingsInterface {
     cancelLectern("cancel-lectern", "Annuler Pupitre", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé sur un pupitre"}, FixedMaterial.getMaterial(Collections.singletonList("LECTERN"))),
     cancelLoom("cancel-loom", "Annuler Métier à Tisser", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé dans un métier à tisser"}, FixedMaterial.getMaterial(Collections.singletonList("LOOM"))),
     cancelDecoratedPot("cancel-decorated-pot", "Annuler Pot Décoré", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé dans un pot décoré"}, FixedMaterial.getMaterial(Collections.singletonList("DECORATED_POT"))),
+    cancelShelf("cancel-shelf", "Annuler Étagère", new String[]{"&7&oL'objet ne peut pas être", "&7&oposé sur une étagère"}, FixedMaterial.getMaterial(Arrays.asList("OAK_SHELF", "BOOKSHELF"))),
     cancelCrafter("cancel-crafter", "Annuler Établi", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé dans un établi"}, FixedMaterial.getMaterial(Collections.singletonList("CRAFTER"))),
     cancelPlaceInBundle("cancel-place-in-bundle", "Annuler Placement dans Bundle", new String[]{"&7&oL'objet ne peut pas être", "&7&oplacé dans un bundle"}, FixedMaterial.getMaterial(Collections.singletonList("BUNDLE"))),
     cancelMerchant("cancel-merchant", "Annuler Marchand", new String[]{"&7&oL'objet ne peut pas être", "&7&oéchangé avec un villageois"}, FixedMaterial.getMaterial(Arrays.asList("VILLAGER_SPAWN_EGG", "EMERALD"))),
@@ -306,6 +307,7 @@ public enum FeatureSettingsSCoreFR implements FeatureSettingsInterface {
 
     lockedInventory("locked-in-inventory", "Inventaire Verrouillé", new String[]{"&7&oL'item ne peut pas être", "&7&odéplacé de l'inventaire"}, Material.BARRIER),
     loop("loop", "Fonctionnalités de boucle", new String[]{"&7&oParamètres spécifiques", "&7&opour l'activateur en boucle"}, Material.ANVIL),
+    loopTimerPerBlock("loopTimerPerBlock", "Compte à rebours par bloc", new String[]{"&7&oChaque bloc posé a son propre", "&7&ocompte à rebours, lancé à la pose"}, null),
     magicID("magicID", "ID Magique", new String[]{"&7&oL'ID magique"}, Material.STONE),
     material("material", "Matériau", new String[]{"&7&oLe matériau"}, Material.STONE),
     materialAndTags("materialAndTags", "Matériau et Tags", new String[]{"&7&oLe matériau et les tags"}, Material.STONE),
@@ -444,6 +446,7 @@ public enum FeatureSettingsSCoreFR implements FeatureSettingsInterface {
 
     noActivatorRunIfTheEventIsCancelled("noActivatorRunIfTheEventIsCancelled", "Pas d'Activateur si l'Événement est Annulé", new String[]{"&7&oSi un autre plugin annule l'événement qui", "&7&odéclenche l'activateur et que vous activez cette fonction", "&7&ol'activateur ne sera pas activé"}, null),
     silenceOutput("silenceOutput", "Silence Sortie", new String[]{"&7&oSilence la sortie de la commande", "&7&o(Uniquement dans la console)"}, null),
+    registerCommand("registerCommand", "Enregistrer la Commande", new String[]{"&7&oEnregistre les commandes de", "&7&odetailedCommands sur le serveur :", "&7&oplus de Unknown command,", "&7&ocomplétion Tab"}, null),
     mustBeAProjectileLaunchWithTheSameEI("mustBeAProjectileLaunchWithTheSameEI", "Doit Être un Lancement de Projectile avec le Même EI", new String[]{"&7&oDoit être un projectile", "&7&olancé avec le même EI"}, Material.ARROW),
     desactiveDrops("desactiveDrops", "Supprimer les Drops", new String[]{"&7&oSupprimer les drops"}, null),
     option("option", "Option", new String[]{"&7&oOption"}, Material.COMPASS),

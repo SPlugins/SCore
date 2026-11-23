@@ -74,23 +74,27 @@ public class PlayerCommandsQuery {
         try {
             pstmt = conn.prepareStatement(sql);
             for (PlayerRunCommand command : commands) {
-                pstmt.setString(1, command.getLauncherUUID().toString());
-                pstmt.setString(2, command.getReceiverUUID().toString());
-                pstmt.setString(3, command.getBrutCommand());
-                pstmt.setLong(4, command.getRunTime());
+                /* No receiver (server loop): nobody to wait for */
+                if (command.getReceiverUUID() == null) continue;
                 try {
+                    /* No launcher when the activator has no owner (EB placed by a command...), the column is not read back */
+                    pstmt.setString(1, command.getLauncherUUID() == null ? "" : command.getLauncherUUID().toString());
+                    pstmt.setString(2, command.getReceiverUUID().toString());
+                    pstmt.setString(3, command.getBrutCommandToSave());
+                    pstmt.setLong(4, command.getRunTime());
                     pstmt.setString(5, ActionInfoSerializer.toString(command.getaInfo()));
-                } catch (IOException err) {
-                    SCore.plugin.getLogger().severe(SCore.NAME_COLOR_WITH_BRACKETS + " Couldn't save the delayed command: "+command.getBrutCommand()+" >>" + err.getMessage());
-                    //err.printStackTrace();
+                } catch (IOException | RuntimeException err) {
+                    /* Only this command is lost, not the others */
+                    SCore.plugin.getLogger().severe(SCore.NAME_COLOR_WITH_BRACKETS + " Couldn't save the delayed command: "+command.getBrutCommand()+" >>" + err);
                     continue;
                 }
                 pstmt.addBatch();
                 i++;
-                if (i % 1000 == 0 || i == commands.size()) {
+                if (i % 1000 == 0) {
                     pstmt.executeBatch(); // Execute every 1000 items.
                 }
             }
+            if (i % 1000 != 0) pstmt.executeBatch();
         } catch (SQLException e) {
             Utils.sendConsoleMsg(SCore.NAME_COLOR_WITH_BRACKETS + " " + e.getMessage());
             e.printStackTrace();

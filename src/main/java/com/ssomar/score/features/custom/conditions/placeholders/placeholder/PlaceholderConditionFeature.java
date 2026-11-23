@@ -92,8 +92,10 @@ public class PlaceholderConditionFeature extends FeatureWithHisOwnEditor<Placeho
        // SsomarDev.testMsg(" part1 base: "+part1.getValue().get()+ " sp != null "+sp, true);
         if (sp != null) {
             aPart1 = sp.replacePlaceholder(part1.getValue().get(), false);
-            if(t == PlaceholdersCdtType.PLAYER_TARGET || t == PlaceholdersCdtType.PLAYER_PLAYER || t == PlaceholdersCdtType.TARGET_TARGET) aPart2 = sp.replacePlaceholder(part2.getValue().get(), false);
-            else aPart2 = part2.getValue().get();
+            // SCore placeholders (%var_x%, %player_...%) of part2 are resolved for every type: on the STRING /
+            // NUMBER types they used to be compared as a literal, so `%var_owner% EQUALS %player%` never matched.
+            // PlaceholderAPI placeholders of part2 still need the PLAYER_PLAYER / PLAYER_TARGET / TARGET_TARGET types.
+            aPart2 = sp.replacePlaceholder(part2.getValue().get(), false);
         } else {
             aPart1 = part1.getValue().get();
             aPart2 = part2.getValue().get();
@@ -122,7 +124,7 @@ public class PlaceholderConditionFeature extends FeatureWithHisOwnEditor<Placeho
             /* Second time for the variables contains with papi placeholder in*/
             if (sp != null) {
                 aPart1 = sp.replacePlaceholder(aPart1, false);
-                if(t == PlaceholdersCdtType.PLAYER_TARGET || t == PlaceholdersCdtType.PLAYER_PLAYER || t == PlaceholdersCdtType.TARGET_TARGET) aPart2 = sp.replacePlaceholder(aPart2, false);
+                aPart2 = sp.replacePlaceholder(aPart2, false);
             }
 
             /* For IF block */
@@ -143,17 +145,16 @@ public class PlaceholderConditionFeature extends FeatureWithHisOwnEditor<Placeho
 
             case PLAYER_NUMBER:
             case TARGET_NUMBER:
-                try {
-                    if (NTools.isNumber(aPart1)) {
-                        double nPart1 = Double.parseDouble(aPart1);
-                        double nPart2 = Double.parseDouble(aPart2);
-                        if (!comparator.getValue().get().verify(nPart1, nPart2)){
-                            SsomarDev.testMsg("false because> "+nPart1+" ?? "+nPart2, DEBUG);
-                            return false;
-                        }
-                    } else return false;
-                } catch (Exception e) {
-                    Utils.sendConsoleMsg("&cSCore, error with the placeholder condition of the object &6&l"+getParentInfo()+" &ccondition: &7" + e.getMessage());
+                // A part may be a plain arithmetic expression ('%player_y%-0.2'): NTools.toNumber evaluates it.
+                Optional<Double> nPart1Opt = NTools.toNumber(aPart1);
+                if (!nPart1Opt.isPresent()) return false;
+                Optional<Double> nPart2Opt = NTools.toNumber(aPart2);
+                if (!nPart2Opt.isPresent()) {
+                    Utils.sendConsoleMsg("&cSCore, error with the placeholder condition of the object &6&l"+getParentInfo()+" &ccondition: &7part2 is not a number or an arithmetic expression: \"" + aPart2 + "\"");
+                    return false;
+                }
+                if (!comparator.getValue().get().verify(nPart1Opt.get(), nPart2Opt.get())){
+                    SsomarDev.testMsg("false because> "+nPart1Opt.get()+" ?? "+nPart2Opt.get(), DEBUG);
                     return false;
                 }
                 break;
@@ -179,11 +180,11 @@ public class PlaceholderConditionFeature extends FeatureWithHisOwnEditor<Placeho
             case TARGET_TARGET:
             case PLAYER_TARGET:
                 SsomarDev.testMsg(">>>>>>>>>> aPart1: "+aPart1+" aPart2: "+aPart2, DEBUG);
-                if (NTools.isNumber(aPart1) && NTools.isNumber(aPart2)) {
+                Optional<Double> n1 = NTools.toNumber(aPart1);
+                Optional<Double> n2 = n1.isPresent() ? NTools.toNumber(aPart2) : Optional.empty();
+                if (n1.isPresent() && n2.isPresent()) {
                     SsomarDev.testMsg("aPart1: "+aPart1+" aPart2: "+aPart2, DEBUG);
-                    double nPart1 = Double.parseDouble(aPart1);
-                    double nPart2 = Double.parseDouble(aPart2);
-                    if (!comparator.getValue().get().verify(nPart1, nPart2)) return false;
+                    if (!comparator.getValue().get().verify(n1.get(), n2.get())) return false;
                 } else if (!comparator.getValue().get().verify(aPart1, aPart2)) return false;
                 break;
             default:
@@ -206,10 +207,14 @@ public class PlaceholderConditionFeature extends FeatureWithHisOwnEditor<Placeho
             if (PlaceholdersCdtType.getpCdtTypeWithNumber().contains(this.type.getValue().get())) {
                 String verifNumber = part2.getValue().get();
                 if (!verifNumber.contains("%")) {
-                    if (!NTools.isNumber(verifNumber)) {
+                    if (!NTools.toNumber(verifNumber).isPresent()) {
                         part2.setValue("0");
-                        errors.add("&cERROR, Couldn't load the Part2 Number value of " + this.getName() + " from config, value: " + verifNumber + " &7&o" + getParent().getParentInfo() + " &6>> It must be a placeholder or a number !");
+                        errors.add("&cERROR, Couldn't load the Part2 Number value of " + this.getName() + " from config, value: " + verifNumber + " &7&o" + getParent().getParentInfo() + " &6>> It must be a placeholder, a number or an arithmetic expression !");
                     }
+                } else if (this.type.getValue().get() == PlaceholdersCdtType.PLAYER_NUMBER || this.type.getValue().get() == PlaceholdersCdtType.TARGET_NUMBER) {
+                    // Information only, printed directly: a condition returned with errors is discarded by the group
+                    // loader, and a placeholder in part2 is valid here (SCore placeholders are resolved on every type).
+                    Utils.sendConsoleMsg("&6INFO, Part2 of " + this.getName() + " contains a placeholder: " + verifNumber + " &7&o" + getParent().getParentInfo() + " &6>> On the type " + this.type.getValue().get() + " only SCore placeholders (%var_...%, %player_...%) are resolved there; use PLAYER_PLAYER / PLAYER_TARGET / TARGET_TARGET for PlaceholderAPI placeholders in part2.");
                 }
             }
             errors.addAll(this.messageIfNotValid.load(plugin, enchantmentConfig, isPremiumLoading));

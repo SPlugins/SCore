@@ -7,6 +7,7 @@ import com.ssomar.score.commands.runnable.CommandSetting;
 import com.ssomar.score.commands.runnable.block.BlockCommand;
 import com.ssomar.score.events.BlockBreakEventExtension;
 import com.ssomar.score.features.custom.detailedblocks.DetailedBlocks;
+import com.ssomar.score.usedapi.AuraSkillsSmeltTracker;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
 import com.ssomar.score.utils.safebreak.SafeBreak;
 import org.bukkit.ChatColor;
@@ -31,12 +32,15 @@ public class MineInCube extends BlockCommand {
         CommandSetting createEvent = new CommandSetting("createEvent", 2, Boolean.class, true);
         CommandSetting offsetBreak = new CommandSetting("offsetBreak", 3, Boolean.class, false);
         CommandSetting smelt = new CommandSetting("smelt", 4, Boolean.class, false);
+        /* Read by ExecutableItems: the blocks broken by the command also run the activator that launched it */
+        CommandSetting runActivatorOnBlocks = new CommandSetting("runActivatorOnBlocks", -1, Boolean.class, false);
         List<CommandSetting> settings = getSettings();
         settings.add(radius);
         settings.add(droploot);
         settings.add(createEvent);
         settings.add(offsetBreak);
         settings.add(smelt);
+        settings.add(runActivatorOnBlocks);
         setNewSettingsMode(true);
     }
 
@@ -97,6 +101,8 @@ public class MineInCube extends BlockCommand {
                     int offsetz = 0;
 
                     if(offset) {
+                        /* offset is computed from where the player looks: no player, no offset */
+                        if (p == null) return;
                         Set<Material> transparent = new HashSet<>();
                         transparent.add(Material.WATER);
                         transparent.add(Material.AIR);
@@ -158,6 +164,7 @@ public class MineInCube extends BlockCommand {
 
                                         ItemStack smeltItem = Smelt.getSmeltedItem(toBreak.getType());
                                         if (smelt && drop && smeltItem != null) {
+                                            AuraSkillsSmeltTracker.recordSmelt(pUUID, toBreak);
                                             boolean safeBreakStatus = SafeBreak.breakBlockWithEvent(toBreak, pUUID, aInfo.getSlot(), false, createBBEvent, true, BlockBreakEventExtension.BreakCause.MINE_IN_CUBE);
                                             if (safeBreakStatus) dropItemWithFortune(toBreak, p, smeltItem.getType());
                                         } else {
@@ -190,7 +197,7 @@ public class MineInCube extends BlockCommand {
 
     @Override
     public String getTemplate() {
-        return "MINEINCUBE {radius} {ActiveDrop true or false} {create blockBreakEvent true or false} {offset default false}";
+        return "MINEINCUBE {radius} {ActiveDrop true or false} {create blockBreakEvent true or false} {offset default false} [runActivatorOnBlocks:false]";
     }
 
     @Override

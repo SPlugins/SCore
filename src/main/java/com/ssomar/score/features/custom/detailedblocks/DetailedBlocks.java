@@ -83,7 +83,13 @@ public class DetailedBlocks extends FeatureWithHisOwnEditor<DetailedBlocks, Deta
     @Override
     public List<String> load(SPlugin plugin, ConfigurationSection config, boolean isPremiumLoading) {
         List<String> errors = new ArrayList<>();
-        if (config.isConfigurationSection(getName())) {
+        if (config.isList(getName())) {
+            /* Old format, a plain list (e.g. ifIsInTheBlock: [COBWEB]) as written before the conditions used DetailedBlocks (SCore 2025-08):
+             * it was ignored, so the condition was empty and always true (Discord 1410160093139304499). Read it as the blocks list. */
+            org.bukkit.configuration.MemoryConfiguration legacy = new org.bukkit.configuration.MemoryConfiguration();
+            legacy.set(blocks.getName(), config.getStringList(getName()));
+            errors.addAll(blocks.load(plugin, legacy, isPremiumLoading));
+        } else if (config.isConfigurationSection(getName())) {
             ConfigurationSection section = config.getConfigurationSection(getName());
             errors.addAll(blocks.load(plugin, section, isPremiumLoading));
             if(!disableCancelEventIfNotValid) errors.addAll(cancelEventIfNotValid.load(plugin, section, isPremiumLoading));

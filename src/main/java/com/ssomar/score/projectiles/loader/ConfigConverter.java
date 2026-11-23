@@ -1,6 +1,6 @@
 package com.ssomar.score.projectiles.loader;
 
-import com.google.common.base.Charsets;
+import java.nio.charset.StandardCharsets;
 
 import java.io.*;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class ConfigConverter {
         }
 
         try {
-            Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
+            Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
 
             try {
                 for (Map.Entry<String, String> entry : getWordsToReplace().entrySet()) {

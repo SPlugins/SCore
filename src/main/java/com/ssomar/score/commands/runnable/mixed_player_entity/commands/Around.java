@@ -131,7 +131,7 @@ public class Around extends MixedCommand {
                     targets = targets.subList(0, limit);
                 }
 
-                boolean hit = CommmandThatRunsCommand.runPlayerCommands(targets, sCommandToExec.getOtherArgs(),sCommandToExec.getActionInfo());
+                boolean hit = CommmandThatRunsCommand.runPlayerCommands(targets, sCommandToExec.getOtherArgs(),sCommandToExec.getActionInfo(), targets.size());
 
                 if (!hit && displayMsgIfNoTargetHit && receiver instanceof Player)
                     sm.sendMessage(receiver, MessageMain.getInstance().getMessage(SCore.plugin, Message.NO_PLAYER_HIT));

@@ -9,6 +9,7 @@ import com.ssomar.score.commands.runnable.block.commands.inline_mineincube.Bound
 import com.ssomar.score.commands.runnable.block.commands.inline_mineincube.RayTraceResult;
 import com.ssomar.score.events.BlockBreakEventExtension;
 import com.ssomar.score.features.custom.detailedblocks.DetailedBlocks;
+import com.ssomar.score.usedapi.AuraSkillsSmeltTracker;
 import com.ssomar.score.utils.placeholders.StringPlaceholder;
 import com.ssomar.score.utils.safebreak.SafeBreak;
 import org.bukkit.ChatColor;
@@ -145,6 +146,9 @@ public class InlineMineInCube extends BlockCommand {
                     int maxZ = radius;
                     int maxY = radius;
 
+                    /* The direction is raytraced from the player's eyes: without a player (block
+                     * activator) there is nothing to aim from. */
+                    if (p == null) return;
                     BoundingBox bb = new BoundingBox(block.getX(), block.getY(), block.getZ(), block.getX()+1, block.getY()+1, block.getZ()+1);
                     RayTraceResult rayTraceResult = bb.rayTrace(p.getEyeLocation().toVector(), p.getEyeLocation().getDirection(), 10);
                     //SsomarDev.testMsg("rayTraceResult: " + rayTraceResult.getHitBlockFace(), true);
@@ -188,9 +192,6 @@ public class InlineMineInCube extends BlockCommand {
 
                     //SsomarDev.testMsg("initX: " + initX + " initY: " + initY + " initZ: " + initZ, true);
 
-                    final boolean fDrop = drop;
-                    final boolean fCreateBBEvent = createBBEvent;
-
                     if (radius < 10) {
                         for (int y = initY; y < maxY + 1; y++) {
                             for (int x = initX; x < maxX + 1; x++) {
@@ -215,10 +216,11 @@ public class InlineMineInCube extends BlockCommand {
                                                 UUID pUUID = p.getUniqueId();
                                                 ItemStack smeltItem = Smelt.getSmeltedItem(toBreak.getType());
                                                 if (smelt && smeltItem != null) {
+                                                    AuraSkillsSmeltTracker.recordSmelt(pUUID, toBreak);
                                                     boolean safeBreakStatus = SafeBreak.breakBlockWithEvent(toBreak, pUUID, aInfo.getSlot(), false, createBBEvent, true, BlockBreakEventExtension.BreakCause.INLINE_MINEINCUBE);
                                                     if (safeBreakStatus) dropItemWithFortune(toBreak, p, smeltItem.getType());
                                                 } else {
-                                                    SafeBreak.breakBlockWithEvent(toBreak, pUUID, aInfo.getSlot(), true, createBBEvent, true, BlockBreakEventExtension.BreakCause.INLINE_MINEINCUBE);
+                                                    SafeBreak.breakBlockWithEvent(toBreak, pUUID, aInfo.getSlot(), drop, createBBEvent, true, BlockBreakEventExtension.BreakCause.INLINE_MINEINCUBE);
                                                 }
                                             }
                                         }

@@ -5,6 +5,7 @@ import com.ssomar.score.commands.runnable.ActionInfo;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.block.BlockCommand;
 import com.ssomar.score.events.BlockBreakEventExtension;
+import com.ssomar.score.usedapi.AuraSkillsSmeltTracker;
 import com.ssomar.score.utils.safebreak.SafeBreak;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -46,6 +47,9 @@ public class Smelt extends BlockCommand {
             ItemStack smelted = getSmeltedItem(block.getType());
             if (smelted == null) return;
 
+            /* Record before the break, AuraSkills rolls its luck extra drops during the BlockBreakEvent */
+            AuraSkillsSmeltTracker.recordSmelt(pUUID, block);
+
             // Determine the amount of smelted item to drop
             int amountToDrop = 1;
             Enchantment fortune = SCore.is1v20v5Plus() ? Enchantment.FORTUNE : Enchantment.getByName("LOOT_BONUS_BLOCKS");
@@ -53,8 +57,8 @@ public class Smelt extends BlockCommand {
                 int fortuneLevel = itemInHand.getEnchantmentLevel(fortune);
                 amountToDrop = ThreadLocalRandom.current().nextInt(fortuneLevel + 1) + 1;
             }
-            // BREAK
-            SafeBreak.breakBlockWithEvent(block, pUUID, aInfo.getSlot(), false, event, false, BlockBreakEventExtension.BreakCause.SMELT);
+            // BREAK (a cancelled break keeps the block: no smelted item then)
+            if (!SafeBreak.breakBlockWithEvent(block, pUUID, aInfo.getSlot(), false, event, false, BlockBreakEventExtension.BreakCause.SMELT)) return;
 
             // Drop the smelted item
             Location dropLocation = block.getLocation();
@@ -217,6 +221,7 @@ public class Smelt extends BlockCommand {
                 result = new ItemStack(Material.WARPED_WART_BLOCK);
                 break;
             case COPPER_ORE:
+            case RAW_COPPER:
             case DEEPSLATE_COPPER_ORE:
                 result = new ItemStack(Material.COPPER_INGOT);
                 break;
