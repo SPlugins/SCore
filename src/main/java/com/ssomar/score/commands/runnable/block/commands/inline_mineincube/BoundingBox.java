@@ -1,11 +1,7 @@
 package com.ssomar.score.commands.runnable.block.commands.inline_mineincube;
 
 import com.google.common.base.Preconditions;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.bukkit.block.BlockFace;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.util.NumberConversions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
  * Ripped from org.bukkit.util.BoundingBox. This was made to deal with INLINE_MINEINCUBE's issue in lower versions
  * due to BoundingBox being missing in those lower versions.
  */
-@SerializableAs("BoundingBox")
 public class BoundingBox implements Cloneable {
 
     private double minX;
