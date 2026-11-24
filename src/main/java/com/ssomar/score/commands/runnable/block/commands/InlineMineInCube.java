@@ -156,7 +156,7 @@ public class InlineMineInCube extends BlockCommand {
                     BlockFace face = null;
                     if(directionWritten == null){
                         if(rayTraceResult != null &&  rayTraceResult.getHitBlockFace() != null)  face = rayTraceResult.getHitBlockFace().getOppositeFace();
-                        else face = p.getFacing().getOppositeFace();
+                        else face = getPlayerFacing(p).getOppositeFace();
                     }else{
                         face = directionWritten;
                     }
@@ -267,6 +267,24 @@ public class InlineMineInCube extends BlockCommand {
         }
 
         return BlockFace.UP;
+    }
+
+    /**
+     * Replacement for Entity#getFacing(), which doesn't exist in 1.12 and lower.
+     * Only returns the horizontal direction (pitch is ignored), like getFacing().
+     * @param player
+     * @return
+     */
+    private static BlockFace getPlayerFacing(Player player) {
+        float yaw = (player.getLocation().getYaw() % 360 + 360) % 360;
+        if (yaw < 45 || yaw >= 315) {
+            return BlockFace.SOUTH;
+        } else if (yaw < 135) {
+            return BlockFace.WEST;
+        } else if (yaw < 225) {
+            return BlockFace.NORTH;
+        }
+        return BlockFace.EAST;
     }
 
     @Override

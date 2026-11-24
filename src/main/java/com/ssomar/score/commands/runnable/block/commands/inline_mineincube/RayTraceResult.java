@@ -1,7 +1,6 @@
 package com.ssomar.score.commands.runnable.block.commands.inline_mineincube;
 
 import com.google.common.base.Preconditions;
-import java.util.Objects;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;

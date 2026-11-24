@@ -1,14 +1,13 @@
 package com.ssomar.score.commands.runnable.block.commands.inline_mineincube;
 
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.util.NumberConversions;
 import org.jetbrains.annotations.NotNull;
 
-
-public class Vector implements Cloneable, ConfigurationSerializable {
+/**
+ * Ripped from org.bukkit.util.Vector. This was made to deal with INLINE_MINEINCUBE's issue in lower versions
+ * due to BoundingBox being missing in those lower versions.
+ */
+public class Vector implements Cloneable {
 
     protected double x;
     protected double y;
@@ -123,10 +122,4 @@ public class Vector implements Cloneable, ConfigurationSerializable {
     }
 
 
-    @Override
-    @NotNull
-    public Map<String, Object> serialize() {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
-        return result;
-    }
 }

@@ -15,8 +15,7 @@ import org.jetbrains.annotations.Nullable;
  * due to BoundingBox being missing in those lower versions.
  */
 @SerializableAs("BoundingBox")
-public class BoundingBox implements Cloneable, ConfigurationSerializable {
-
+public class BoundingBox implements Cloneable {
 
     private double minX;
     private double minY;
@@ -261,19 +260,6 @@ public class BoundingBox implements Cloneable, ConfigurationSerializable {
         } catch (CloneNotSupportedException e) {
             throw new Error(e);
         }
-    }
-
-    @NotNull
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
-        result.put("minX", minX);
-        result.put("minY", minY);
-        result.put("minZ", minZ);
-        result.put("maxX", maxX);
-        result.put("maxY", maxY);
-        result.put("maxZ", maxZ);
-        return result;
     }
 
 }

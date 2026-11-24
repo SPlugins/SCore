@@ -6,6 +6,7 @@ import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.block.BlockCommand;
 import com.ssomar.score.events.BlockBreakEventExtension;
 import com.ssomar.score.usedapi.AuraSkillsSmeltTracker;
+import com.ssomar.score.utils.FixedMaterial;
 import com.ssomar.score.utils.safebreak.SafeBreak;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -177,7 +178,7 @@ public class Smelt extends BlockCommand {
                 result = new ItemStack(Material.STONE);
                 break;
             case CLAY:
-                result = new ItemStack(Material.TERRACOTTA);
+                result = new ItemStack(FixedMaterial.getMaterial(Arrays.asList("TERRACOTTA", "HARD_CLAY")));
                 break;
             case GOLD_ORE:
             case RAW_GOLD:
@@ -212,7 +213,7 @@ public class Smelt extends BlockCommand {
                 result = new ItemStack(Material.FLINT);
                 break;
             case SNOW_BLOCK:
-                result = new ItemStack(Material.SNOWBALL);
+                result = new ItemStack(FixedMaterial.getMaterial(Arrays.asList("SNOWBALL", "SNOW_BALL")));
                 break;
             case WARPED_STEM:
             case STRIPPED_WARPED_STEM:
