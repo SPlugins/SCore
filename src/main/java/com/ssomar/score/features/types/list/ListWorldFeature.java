@@ -95,7 +95,13 @@ public class ListWorldFeature extends ListFeatureAbstract<String, ListWorldFeatu
 
     @Override
     public String getTips() {
-        return "&8Example &7&oworld &7(&awhitelisted&7) &8- &7&o!world &7(&cblacklisted&7)";
+        // Custom tips for disabled worlds
+        if (getFeatureSettings().getName().equals("disabledWorlds")) {
+            return "&8Example &7&oworld &7(&cblacklist&7) &8- &7&o!world &7(&awhitelist&7)";
+        } else {
+            return "&8Example &7&oworld &7(&awhitelisted&7) &8- &7&o!world &7(&cblacklisted&7)";
+        }
+
     }
 
 

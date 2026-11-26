@@ -173,6 +173,7 @@ public enum FeatureSettingsSCoreFR implements FeatureSettingsInterface {
     ifBlockLocationX("ifBlockLocationX", "Si position X du bloc", new String[]{}, Material.ANVIL),
     ifBlockLocationY("ifBlockLocationY", "Si position Y du bloc", new String[]{}, Material.ANVIL),
     ifBlockLocationZ("ifBlockLocationZ", "Si position Z du bloc", new String[]{}, Material.ANVIL),
+    ifBlockWorld("ifBlockWorld", "Si monde du bloc", new String[]{}, Material.ANVIL),
     ifBlocking("ifBlocking", "Si en parade", new String[]{}, null),
     ifCanBreakTargetedBlock("ifCanBreakTargetedBlock", "Si peut casser le bloc ciblé", new String[]{}, Material.ANVIL),
     ifContainerContains("ifContainerContains", "Si le conteneur contient", new String[]{}, Material.ANVIL),
@@ -622,7 +623,7 @@ public enum FeatureSettingsSCoreFR implements FeatureSettingsInterface {
 
     enabled("enabled", "Activé", new String[]{"&7&oSi l'événement est activé"}, null),
     editorIcon("editorIcon", "Icône Éditeur", new String[]{}, Material.LEVER),
-    disabledWorlds("disabledWorlds", "Mondes Désactivés", new String[]{"&7&oMondes désactivés"}, FixedMaterial.getMaterial(Arrays.asList("GRASS_BLOCK", "GRASS"))),
+    disabledWorlds("disabledWorlds", "Mondes Désactivés/Blacklistés", new String[]{"&7&oMondes désactivés/blacklistés", "", "&7&oPour une whitelist, ajoutez \"!\" au", "&7&odébut du nom du monde"}, FixedMaterial.getMaterial(Arrays.asList("GRASS_BLOCK", "GRASS"))),
 
     displayFeatures("displayFeatures", "Fonctionnalités d'Affichage", new String[]{"&7&oFonctionnalités d'affichage"}, Material.ITEM_FRAME),
     blockLight("blockLight", "Lumière de Bloc", new String[]{"&7&oLe niveau de lumière émis"}, FixedMaterial.getMaterial(Arrays.asList("LIGHT"))),

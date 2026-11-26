@@ -251,6 +251,7 @@ public enum FeatureSettingsSCoreZH implements FeatureSettingsInterface {
     ifBlockLocationX("ifBlockLocationX", "若方块X坐标条件", new String[]{}, Material.ANVIL),
     ifBlockLocationY("ifBlockLocationY", "若方块Y坐标条件", new String[]{}, Material.ANVIL),
     ifBlockLocationZ("ifBlockLocationZ", "若方块Z坐标条件", new String[]{}, Material.ANVIL),
+    ifBlockWorld("ifBlockWorld", "若方块所在世界条件", new String[]{}, Material.ANVIL),
     ifBlocking("ifBlocking", "若格挡中", new String[]{}, null),
     ifCanBreakTargetedBlock("ifCanBreakTargetedBlock", "若能破坏目标方块", new String[]{}, Material.ANVIL),
     ifContainerContains("ifContainerContains", "若容器包含指定物品", new String[]{}, Material.ANVIL),
@@ -663,7 +664,7 @@ public enum FeatureSettingsSCoreZH implements FeatureSettingsInterface {
 
     enabled("enabled", "已启用", new String[]{"&7&o事件是否已启用"}, null),
     editorIcon("editorIcon", "编辑器图标", new String[]{}, Material.LEVER),
-    disabledWorlds("disabledWorlds", "禁用的世界", new String[]{"&7&o在这些世界中禁用"}, FixedMaterial.getMaterial(Arrays.asList("GRASS_BLOCK", "GRASS"))),
+    disabledWorlds("disabledWorlds", "禁用/黑名单世界", new String[]{"&7&o在这些世界中禁用（黑名单）", "", "&7&o如需白名单，请在世界名称", "&7&o前加上 \"!\""}, FixedMaterial.getMaterial(Arrays.asList("GRASS_BLOCK", "GRASS"))),
 
     displayFeatures("displayFeatures", "显示特性", new String[]{"&7&o显示相关特性"}, Material.ITEM_FRAME),
     blockLight("blockLight", "方块光源等级", new String[]{""}, FixedMaterial.getMaterial(Arrays.asList("LIGHT"))),
