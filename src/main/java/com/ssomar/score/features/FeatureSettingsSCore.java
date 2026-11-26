@@ -765,6 +765,32 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
     }
 
 
+    /**
+     * Looks up the settings of a feature (editor name, description, material...) in the language set in SCore's
+     * config, and sets how the feature is loaded and saved.
+     * <p>
+     * If the current language has no translation for {@code identifier}, a warning is logged in the console and
+     * the English settings are used instead.
+     * <p>
+     * The other {@code getFeatureSettings} overloads all call this one. The parameters they leave out default to
+     * {@code configName = identifier}, {@code requirePremium = false} and {@link SavingVerbosityLevel#SAVE_ALWAYS}.
+     * <p>
+     * Note: the returned object is the shared constant of the language enum. This call sets its config name,
+     * premium flag and saving level.
+     *
+     * @param identifier           the name of the entry in the language enums ({@code FeatureSettingsSCoreEN}, ...),
+     *                             which is also the name of the matching constant in this enum
+     * @param configName           the key used in the config file, or {@code null} to use {@code identifier}.
+     *                             Use it when the key must differ from the identifier, for example
+     *                             {@code aroundBlock} is saved as {@code AroundBlock}
+     * @param requirePremium       {@code true} if only the premium version of the plugin can change the value. In the
+     *                             free version, a value different from the default is reset to the default when it
+     *                             is loaded, and an error is reported
+     * @param savingVerbosityLevel whether the value is written to the config when it equals its default,
+     *                             see {@link SavingVerbosityLevel}
+     * @return the settings of the feature
+     * @throws IllegalArgumentException if {@code identifier} has no English settings either
+     */
     public static FeatureSettingsInterface getFeatureSettings(String identifier, @Nullable String configName, boolean requirePremium, SavingVerbosityLevel savingVerbosityLevel) {
         if (configName == null) configName = identifier;
         FeatureSettingsInterface[] values = getValues();
@@ -864,26 +890,73 @@ public enum FeatureSettingsSCore implements FeatureSettingsInterface {
         this.settingsInterface = featureSettingsInterface;
     }
 
+    /**
+     * Same as {@link #getFeatureSettings(String, String, boolean, SavingVerbosityLevel)}, with the identifier as the config key,
+     * no premium requirement and {@link SavingVerbosityLevel#SAVE_ALWAYS}.
+     *
+     * @param identifier the name of the entry in the language enums, also used as the config key
+     * @return the settings of the feature
+     */
     public static FeatureSettingsInterface getFeatureSettings(String identifier) {
         return getFeatureSettings(identifier, null, false, SavingVerbosityLevel.SAVE_ALWAYS);
     }
 
+    /**
+     * Same as {@link #getFeatureSettings(String, String, boolean, SavingVerbosityLevel)}, with the identifier as the config key
+     * and no premium requirement.
+     *
+     * @param identifier the name of the entry in the language enums, also used as the config key
+     * @param savingVerbosityLevel whether the value is written when it equals its default, see {@link SavingVerbosityLevel}
+     * @return the settings of the feature
+     */
     public static FeatureSettingsInterface getFeatureSettings(String identifier, SavingVerbosityLevel savingVerbosityLevel) {
         return getFeatureSettings(identifier, null, false, savingVerbosityLevel);
     }
 
+    /**
+     * Same as {@link #getFeatureSettings(String, String, boolean, SavingVerbosityLevel)}, with no premium requirement
+     * and {@link SavingVerbosityLevel#SAVE_ALWAYS}. Use it when the config key differs from the identifier.
+     *
+     * @param identifier the name of the entry in the language enums
+     * @param configName the key used in the config file, or {@code null} to use {@code identifier}
+     * @return the settings of the feature
+     */
     public static FeatureSettingsInterface getFeatureSettings(String identifier, @Nullable String configName) {
         return getFeatureSettings(identifier, configName, false, SavingVerbosityLevel.SAVE_ALWAYS);
     }
 
+    /**
+     * Same as {@link #getFeatureSettings(String, String, boolean, SavingVerbosityLevel)}, with no premium requirement.
+     *
+     * @param identifier the name of the entry in the language enums
+     * @param configName the key used in the config file, or {@code null} to use {@code identifier}
+     * @param savingVerbosityLevel whether the value is written when it equals its default, see {@link SavingVerbosityLevel}
+     * @return the settings of the feature
+     */
     public static FeatureSettingsInterface getFeatureSettings(String identifier, @Nullable String configName, SavingVerbosityLevel savingVerbosityLevel) {
         return getFeatureSettings(identifier, configName, false, savingVerbosityLevel);
     }
 
+    /**
+     * Same as {@link #getFeatureSettings(String, String, boolean, SavingVerbosityLevel)}, with the identifier as the config key
+     * and {@link SavingVerbosityLevel#SAVE_ALWAYS}.
+     *
+     * @param identifier the name of the entry in the language enums, also used as the config key
+     * @param requirePremium {@code true} if only the premium version of the plugin can change the value
+     * @return the settings of the feature
+     */
     public static FeatureSettingsInterface getFeatureSettings(String identifier, boolean requirePremium) {
         return getFeatureSettings(identifier, null, requirePremium, SavingVerbosityLevel.SAVE_ALWAYS);
     }
 
+    /**
+     * Same as {@link #getFeatureSettings(String, String, boolean, SavingVerbosityLevel)}, with the identifier as the config key.
+     *
+     * @param identifier the name of the entry in the language enums, also used as the config key
+     * @param requirePremium {@code true} if only the premium version of the plugin can change the value
+     * @param savingVerbosityLevel whether the value is written when it equals its default, see {@link SavingVerbosityLevel}
+     * @return the settings of the feature
+     */
     public static FeatureSettingsInterface getFeatureSettings(String identifier, boolean requirePremium, SavingVerbosityLevel savingVerbosityLevel) {
         return getFeatureSettings(identifier, null, requirePremium, savingVerbosityLevel);
     }
