@@ -159,7 +159,7 @@ hub:
 ai:
   tab: "&dसहायक"
   intro: "&fSPlugins सहायक आपके सवालों के जवाब देता है और मदद के लिए आपकी कॉन्फ़िगरेशन पढ़ता है"
-  off: "&7बंद: SCore के config.yml में &eai.enabled: true&7 सेट करें"
+  disabled: "&7बंद: SCore के config.yml में &eai.enabled: true&7 सेट करें"
   link: "&a&lइस सर्वर को अपने splugins.net खाते से जोड़ें"
   linkLore: "&7हर सर्वर के लिए एक बार। सवाल आपके splugins.net प्लान से चलते हैं"
   linkWait: "&esplugins.net पर कोड डाले जाने का इंतज़ार..."

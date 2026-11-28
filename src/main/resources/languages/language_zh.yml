@@ -159,7 +159,7 @@ hub:
 ai:
   tab: "&d助手"
   intro: "&fSPlugins 助手会回答你的问题并读取你的配置来帮助你"
-  off: "&7已关闭：在 SCore 的 config.yml 中设置 &eai.enabled: true"
+  disabled: "&7已关闭：在 SCore 的 config.yml 中设置 &eai.enabled: true"
   link: "&a&l将此服务器绑定到你的 splugins.net 账户"
   linkLore: "&7每个服务器一次。提问使用你的 splugins.net 套餐"
   linkWait: "&e等待在 splugins.net 输入代码..."

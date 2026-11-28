@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GlowDropManager {
 
-    private static GlowDropManager instance;
+    private static volatile GlowDropManager instance;
     private final Map<ChatColor, Team> teams;
 
     private Map<UUID, ChatColor> links = new ConcurrentHashMap<>();
@@ -43,7 +43,7 @@ public class GlowDropManager {
         }
     }
 
-    public static GlowDropManager getInstance() {
+    public static synchronized GlowDropManager getInstance() {
         if (instance == null) {
             instance = new GlowDropManager();
         }
@@ -53,8 +53,20 @@ public class GlowDropManager {
     /* Folia only lets the global region thread touch the scoreboard, the drop event runs on the region of the item.
      * The tasks are queued in order, so the teams are registered before the first glow is added. */
     private static void runOnScoreboardThread(Runnable runnable) {
-        if (isRegionized && !isGlobalTickThread()) SCore.schedulerHook.runTask(runnable, 0);
+        if (isRegionized) {
+            if (!isGlobalTickThread()) SCore.schedulerHook.runTask(runnable, 0);
+            else runnable.run();
+        }
+        // the scoreboard is main thread only (darkchroma, 21/11: teams registered from a placeholder thread, no more logins)
+        else if (!Bukkit.isPrimaryThread()) Bukkit.getScheduler().runTask(SCore.plugin, runnable);
         else runnable.run();
+    }
+
+    /** %score_cmd-glow...% without creating the manager (placeholders are often asked from other threads, e.g. TAB) */
+    public static Optional<String> requestPlaceholder(OfflinePlayer player, String params) {
+        GlowDropManager current = instance;
+        if (current != null) return current.onRequestPlaceholder(player, params);
+        return params.startsWith("cmd-glow") ? Optional.of("") : Optional.empty();
     }
 
     private static final boolean isRegionized = SCore.hasClass("io.papermc.paper.threadedregions.RegionizedServer");

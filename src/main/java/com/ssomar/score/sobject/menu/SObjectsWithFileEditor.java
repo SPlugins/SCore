@@ -37,6 +37,9 @@ public abstract class SObjectsWithFileEditor<T extends SObject & SObjectEditable
     private boolean dontShowDirectory = false;
     private List<String> cachedFiles;
     private String cachedFilesKey;
+    // the list is reused only for a page flip; any other load (back from an editor, after a creation / deletion, folder)
+    // reads the folder again, else a new object was missing from the list (special70, 26/11)
+    private boolean reuseFiles;
 
     public SObjectsWithFileEditor(SPlugin sPlugin, FeatureSettingsInterface settings, String path, SObjectManager manager, SObjectWithFileLoader loader) {
         super(sPlugin, settings, manager);
@@ -78,7 +81,9 @@ public abstract class SObjectsWithFileEditor<T extends SObject & SObjectEditable
         // The recursive directory walk is only redone when the folder (or the flatten option) changes,
         // not on every page flip.
         String filesKey = plugin.getDataFolder() + path + "|" + dontShowDirectory;
-        if (cachedFiles == null || !filesKey.equals(cachedFilesKey)) {
+        boolean reuse = reuseFiles;
+        reuseFiles = false;
+        if (!reuse || cachedFiles == null || !filesKey.equals(cachedFilesKey)) {
             cachedFiles = getFilesInFolder(plugin.getDataFolder() + path);
             cachedFilesKey = filesKey;
         }
@@ -203,6 +208,18 @@ public abstract class SObjectsWithFileEditor<T extends SObject & SObjectEditable
     }
 
 
+
+    @Override
+    public void goNextPage() {
+        reuseFiles = true;
+        super.goNextPage();
+    }
+
+    @Override
+    public void goPreviousPage() {
+        reuseFiles = true;
+        super.goPreviousPage();
+    }
 
     public void goToFolder(String folder) {
         index = 1;

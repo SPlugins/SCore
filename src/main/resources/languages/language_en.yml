@@ -159,7 +159,7 @@ hub:
 ai:
   tab: "&dAssistant"
   intro: "&fThe SPlugins assistant answers your questions and reads your configurations to help you"
-  off: "&7Off: set &eai.enabled: true&7 in SCore's config.yml"
+  disabled: "&7Off: set &eai.enabled: true&7 in SCore's config.yml"
   link: "&a&lLink this server to your splugins.net account"
   linkLore: "&7Once per server. Questions use your splugins.net plan"
   linkWait: "&eWaiting for the code to be entered on splugins.net..."

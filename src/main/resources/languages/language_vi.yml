@@ -159,7 +159,7 @@ hub:
 ai:
   tab: "&dTrợ lý"
   intro: "&fTrợ lý SPlugins trả lời câu hỏi và đọc cấu hình của bạn để giúp đỡ"
-  off: "&7Đang tắt: đặt &eai.enabled: true&7 trong config.yml của SCore"
+  disabled: "&7Đang tắt: đặt &eai.enabled: true&7 trong config.yml của SCore"
   link: "&a&lLiên kết máy chủ này với tài khoản splugins.net"
   linkLore: "&7Một lần cho mỗi máy chủ. Câu hỏi dùng gói splugins.net của bạn"
   linkWait: "&eĐang chờ nhập mã trên splugins.net..."

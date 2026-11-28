@@ -159,7 +159,7 @@ hub:
 ai:
   tab: "&dAsisten"
   intro: "&fAsisten SPlugins menjawab pertanyaanmu dan membaca konfigurasimu untuk membantu"
-  off: "&7Nonaktif: atur &eai.enabled: true&7 di config.yml SCore"
+  disabled: "&7Nonaktif: atur &eai.enabled: true&7 di config.yml SCore"
   link: "&a&lHubungkan server ini ke akun splugins.net"
   linkLore: "&7Sekali per server. Pertanyaan memakai paket splugins.net kamu"
   linkWait: "&eMenunggu kode dimasukkan di splugins.net..."
