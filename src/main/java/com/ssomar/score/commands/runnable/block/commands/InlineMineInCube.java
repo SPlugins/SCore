@@ -5,6 +5,8 @@ import com.ssomar.score.commands.runnable.ActionInfo;
 import com.ssomar.score.commands.runnable.CommandSetting;
 import com.ssomar.score.commands.runnable.SCommandToExec;
 import com.ssomar.score.commands.runnable.block.BlockCommand;
+import com.ssomar.score.commands.runnable.block.commands.inline_mineincube.BoundingBox;
+import com.ssomar.score.commands.runnable.block.commands.inline_mineincube.RayTraceResult;
 import com.ssomar.score.events.BlockBreakEventExtension;
 import com.ssomar.score.features.custom.detailedblocks.DetailedBlocks;
 import com.ssomar.score.usedapi.AuraSkillsSmeltTracker;
@@ -17,8 +19,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.BoundingBox;
-import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -156,7 +156,7 @@ public class InlineMineInCube extends BlockCommand {
                     BlockFace face = null;
                     if(directionWritten == null){
                         if(rayTraceResult != null &&  rayTraceResult.getHitBlockFace() != null)  face = rayTraceResult.getHitBlockFace().getOppositeFace();
-                        else face = p.getFacing().getOppositeFace();
+                        else face = getPlayerFacing(p).getOppositeFace();
                     }else{
                         face = directionWritten;
                     }
@@ -267,6 +267,24 @@ public class InlineMineInCube extends BlockCommand {
         }
 
         return BlockFace.UP;
+    }
+
+    /**
+     * Replacement for Entity#getFacing(), which doesn't exist in 1.12 and lower.
+     * Only returns the horizontal direction (pitch is ignored), like getFacing().
+     * @param player
+     * @return
+     */
+    private static BlockFace getPlayerFacing(Player player) {
+        float yaw = (player.getLocation().getYaw() % 360 + 360) % 360;
+        if (yaw < 45 || yaw >= 315) {
+            return BlockFace.SOUTH;
+        } else if (yaw < 135) {
+            return BlockFace.WEST;
+        } else if (yaw < 225) {
+            return BlockFace.NORTH;
+        }
+        return BlockFace.EAST;
     }
 
     @Override
