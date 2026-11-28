@@ -119,7 +119,7 @@ public enum Text implements TextInterface {
     HUB_PAUSE_DENIED("hub.pauseDenied", "&cThe SPlugins Hub is for the server admins (permission score.hub)"),
     HUB_TAB_ASSISTANT("ai.tab", "&dAssistant"),
     AI_INTRO("ai.intro", "&fThe SPlugins assistant answers your questions and reads your configurations to help you"),
-    AI_OFF("ai.off", "&7Off: set &eai.enabled: true&7 in SCore's config.yml"),
+    AI_OFF("ai.disabled", "&7Off: set &eai.enabled: true&7 in SCore's config.yml"),
     AI_LINK("ai.link", "&a&lLink this server to your splugins.net account"),
     AI_LINK_LORE("ai.linkLore", "&7Once per server. Questions use your splugins.net plan"),
     AI_LINK_WAIT("ai.linkWait", "&eWaiting for the code to be entered on splugins.net..."),

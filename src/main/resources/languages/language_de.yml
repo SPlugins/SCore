@@ -159,7 +159,7 @@ hub:
 ai:
   tab: "&dAssistent"
   intro: "&fDer SPlugins-Assistent beantwortet deine Fragen und liest deine Konfigurationen, um dir zu helfen"
-  off: "&7Aus: setze &eai.enabled: true&7 in der config.yml von SCore"
+  disabled: "&7Aus: setze &eai.enabled: true&7 in der config.yml von SCore"
   link: "&a&lDiesen Server mit deinem splugins.net-Konto verbinden"
   linkLore: "&7Einmal pro Server. Fragen nutzen deinen splugins.net-Plan"
   linkWait: "&eWarte auf die Eingabe des Codes auf splugins.net..."

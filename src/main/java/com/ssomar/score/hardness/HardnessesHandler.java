@@ -32,14 +32,15 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class HardnessesHandler {
 
     //public static final List<HardnessModifier> MODIFIERS = new ArrayList<>();
-    private final Map<Location, BukkitScheduler> breakerPerLocation = new HashMap<>();
+    // filled from the Netty thread (packet listener), read by the scheduler tasks
+    private final Map<Location, BukkitScheduler> breakerPerLocation = new ConcurrentHashMap<>();
     private final ProtocolManager protocolManager;
     private final PacketAdapter listener = new PacketAdapter(SCore.plugin, ListenerPriority.LOW, PacketType.Play.Client.BLOCK_DIG) {
         @Override
@@ -64,8 +65,18 @@ public class HardnessesHandler {
                 type = EnumWrappers.PlayerDigType.SWAP_HELD_ITEMS;
             }
 
+            /*
+             * BLOCK_DIG also carries drop item / drop stack / swap hands / release use item, with the position 0,0,0. Reading that
+             * block from the Netty thread loads its chunk when it is not loaded (1.21.9+: spawn chunks are no longer kept), the
+             * Netty thread waits for the main thread, which can wait for Netty: the server freezes (qvazzar, 28/11). Only the
+             * digging types are about a block, and a block is only read if its chunk is already loaded.
+             */
+            if (type != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK && type != EnumWrappers.PlayerDigType.ABORT_DESTROY_BLOCK
+                    && type != EnumWrappers.PlayerDigType.STOP_DESTROY_BLOCK) return;
+
             final BlockPosition pos = dataTemp.getValues().get(0);
             final World world = player.getWorld();
+            if (!world.isChunkLoaded(pos.getX() >> 4, pos.getZ() >> 4)) return;
             final Block block = world.getBlockAt(pos.getX(), pos.getY(), pos.getZ());
             final BlockFace blockFace = dataDirection.size() > 0 ? BlockFace.valueOf(dataDirection.read(0).name()) : BlockFace.UP;
 

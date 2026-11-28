@@ -57,7 +57,7 @@ public class PlaceholderAPISCoreExpansion extends PlaceholderExpansion {
         Optional<String> dmgResistancePlaceHolder = DamageResistance.getInstance().onRequestPlaceholder(player, params);
         if (dmgResistancePlaceHolder.isPresent()) return dmgResistancePlaceHolder.get();
 
-        Optional<String> glowColorPlaceHolder = GlowDropManager.getInstance().onRequestPlaceholder(player, params);
+        Optional<String> glowColorPlaceHolder = GlowDropManager.requestPlaceholder(player, params);
         if (glowColorPlaceHolder.isPresent()) return glowColorPlaceHolder.get();
 
         Optional<String> cooldownPlaceHolder = CooldownsManager.getInstance().onRequestPlaceholder(player, params);

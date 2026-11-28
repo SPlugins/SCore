@@ -159,7 +159,7 @@ hub:
 ai:
   tab: "&dالمساعد"
   intro: "&fيجيب مساعد SPlugins عن أسئلتك ويقرأ إعداداتك لمساعدتك"
-  off: "&7معطّل: اضبط &eai.enabled: true&7 في config.yml الخاص بـ SCore"
+  disabled: "&7معطّل: اضبط &eai.enabled: true&7 في config.yml الخاص بـ SCore"
   link: "&a&lاربط هذا الخادم بحسابك على splugins.net"
   linkLore: "&7مرة واحدة لكل خادم. تستخدم الأسئلة خطتك على splugins.net"
   linkWait: "&eبانتظار إدخال الرمز على splugins.net..."
