@@ -82,7 +82,7 @@ public class CommandSetting {
 
     public Object getValue(String value) {
         SsomarDev.testMsg("CommandSetting getValue value: "+value+" >> type:"+type+" >> defaultValue: "+defaultValue, DEBUG);
-        if(value == null) return defaultValue;
+        if(value == null) return defaultOfType();
         if(type == Double.class) return Double.parseDouble(value);
         else if(type == Integer.class) return Double.valueOf(value).intValue();
         else if(type == Float.class) return Float.parseFloat(value);
@@ -140,6 +140,20 @@ public class CommandSetting {
             return new EntityBuilder(value);
         }
         return replaceUnderscoresOutsideTags(value, acceptUnderScoreForLongText);
+    }
+
+    /*
+     * Un défaut numérique écrit dans le mauvais type (ex. 0 pour un Double) faisait planter la commande quand
+     * l'argument manque : SPAWN_ENTITY sans offsetDistance -> ClassCastException Integer -> Double (Kriptic, 2026-11-20).
+     */
+    private Object defaultOfType() {
+        if (defaultValue instanceof Number) {
+            Number n = (Number) defaultValue;
+            if (type == Double.class) return n.doubleValue();
+            if (type == Integer.class) return n.intValue();
+            if (type == Float.class) return n.floatValue();
+        }
+        return defaultValue;
     }
 
     // To support minimessage color tags, ex <dark_gray>Test</dark_gray> <green>Test</green>
