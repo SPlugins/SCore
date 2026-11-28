@@ -92,7 +92,8 @@ public class ItemsAdderAPI {
                         // The getNearbyEntities() has the chance to select nearby furniture, and we do not want that.
                         // Instead, we will compare their XYZ location to check if their position is also at the dead center
                         // of the broken block.
-                        if (e.getX() == block.getX()+0.5 && e.getY() == block.getY() && e.getZ() == block.getZ()+0.5) {
+                        Location el = e.getLocation(); // Entity#getX() is Paper only
+                        if (el.getX() == block.getX()+0.5 && el.getY() == block.getY() && el.getZ() == block.getZ()+0.5) {
                             SsomarDev.testMsg("> > > [#s0027] Block finally removed", true);
 
                             CustomFurniture furniture = CustomFurniture.byAlreadySpawned(armorStand);
@@ -115,7 +116,7 @@ public class ItemsAdderAPI {
 
                             return true;
                         } else {
-                            SsomarDev.testMsg(ChatColor.RED+"> > [#s0028] FAIL: "+(e.getX() == block.getX()+0.5)+" "+(e.getY() == block.getY())+" "+(e.getZ() == block.getZ()+0.5), false);
+                            SsomarDev.testMsg(ChatColor.RED+"> > [#s0028] FAIL: "+(el.getX() == block.getX()+0.5)+" "+(el.getY() == block.getY())+" "+(el.getZ() == block.getZ()+0.5), false);
                         }
                     } else {
                         if (armorStand.getCustomName() == null) {

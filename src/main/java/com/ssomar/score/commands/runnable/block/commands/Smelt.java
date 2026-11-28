@@ -76,7 +76,7 @@ public class Smelt extends BlockCommand {
             Enchantment fortune = SCore.is1v20v5Plus() ? Enchantment.FORTUNE : Enchantment.getByName("LOOT_BONUS_BLOCKS");
 
             ItemStack itemInHand = p != null ? p.getInventory().getItemInMainHand() : null;
-            if (itemInHand != null && !itemInHand.isEmpty() && itemInHand.containsEnchantment(fortune)) {
+            if (itemInHand != null && itemInHand.getType() != Material.AIR && itemInHand.containsEnchantment(fortune)) {
                 int fortuneLevel = itemInHand.getEnchantmentLevel(fortune);
                 amountToDrop = ThreadLocalRandom.current().nextInt(fortuneLevel + 1) + 1;
             }
