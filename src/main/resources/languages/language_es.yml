@@ -128,6 +128,10 @@ hub:
     community: "&7Hecho por la comunidad"
     upgrade: "&eUsas la edición Free: Premium quita los límites"
     studio: "&d★ Pack Studio"
+    sub: "&b&l★ Suscripción SPlugins"
+    subPlugins: "&7Plugins Premium incluidos"
+    subPacks: "&7Un nuevo pack de ítems cada semana"
+    subChat: "&7Chat IA premium y el rol Subscriber en Discord"
     studioLore: "&7Encarga un pack a medida para tu servidor"
     price: "&7Precio: &f%price%"
   news:

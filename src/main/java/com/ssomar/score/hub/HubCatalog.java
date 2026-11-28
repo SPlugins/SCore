@@ -36,6 +36,8 @@ public final class HubCatalog {
         public String key, edition, name, pitch, access, currency, url, icon, banner, kind, saleLabel, latestVersion;
         /** a bundle: the names of what it contains */
         public final List<String> items = new ArrayList<>();
+        /** a bundle: its id on splugins.net */
+        public int id;
         /** a pack sold by a member (the community section of the store) */
         public boolean official = true;
         public double price, salePrice;
@@ -66,7 +68,7 @@ public final class HubCatalog {
     }
 
     public static final class Link {
-        public String id, label, url, icon;
+        public String id, label, url, icon, image;
     }
 
     /** The best catalog we have now (never null). Starts a refresh in the background if it is old. */
@@ -184,7 +186,8 @@ public final class HubCatalog {
             l.id = o.optString("id", "");
             l.label = o.optString("label", l.id);
             l.url = o.optString("url", "");
-            l.icon = o.optString("icon", "");
+            l.icon = o.isNull("icon") ? "" : o.optString("icon", "");
+            l.image = o.isNull("image") ? "" : o.optString("image", "");
             if (!l.url.isEmpty()) c.links.add(l);
         }
         c.plugins.removeIf(Objects::isNull);
@@ -199,6 +202,7 @@ public final class HubCatalog {
         if (o == null || o.optString("url", "").isEmpty()) return null;
         Entry e = new Entry();
         e.kind = "bundle";
+        e.id = o.optInt("id", 0);
         e.name = o.optString("title", "Bundle");
         e.pitch = o.optString("pitch", "");
         e.access = "paid";
@@ -208,14 +212,16 @@ public final class HubCatalog {
         e.price = full > 0 ? full : price;
         e.salePercent = o.optInt("discountPercent", 0);
         e.salePrice = e.salePercent > 0 ? price : 0;
-        e.icon = "";
-        e.banner = "";
+        // the bundle's own pictures (content/hub.json on splugins.net), else the first icon of what it contains
+        e.icon = o.isNull("icon") ? "" : o.optString("icon", "");
+        e.banner = o.isNull("banner") ? "" : o.optString("banner", "");
+        boolean ownIcon = !e.icon.isEmpty();
         JSONArray r = o.optJSONArray("resources");
         if (r != null) for (int i = 0; i < r.length(); i++) {
             JSONObject x = r.optJSONObject(i);
             if (x == null) continue;
             e.items.add(x.optString("name", ""));
-            if (e.icon.isEmpty() && !x.isNull("icon")) e.icon = x.optString("icon", "");
+            if (!ownIcon && e.icon.isEmpty() && !x.isNull("icon")) e.icon = x.optString("icon", "");
         }
         return e;
     }

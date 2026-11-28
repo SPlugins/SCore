@@ -128,6 +128,10 @@ hub:
     community: "&7Do cộng đồng tạo"
     upgrade: "&eBạn đang dùng bản Free: Premium bỏ mọi giới hạn"
     studio: "&d★ Pack Studio"
+    sub: "&b&l★ Gói đăng ký SPlugins"
+    subPlugins: "&7Bao gồm plugin Premium"
+    subPacks: "&7Mỗi tuần một gói vật phẩm mới"
+    subChat: "&7Chat AI premium và vai trò Subscriber trên Discord"
     studioLore: "&7Đặt một gói làm riêng cho máy chủ của bạn"
     price: "&7Giá: &f%price%"
   news:

@@ -132,6 +132,10 @@ hub:
     community: "&7Créé par la communauté"
     upgrade: "&eTu utilises l'édition Free : Premium enlève les limites"
     studio: "&d★ Pack Studio"
+    sub: "&b&l★ Abonnement SPlugins"
+    subPlugins: "&7Plugins Premium inclus"
+    subPacks: "&7Un nouveau pack d'items chaque semaine"
+    subChat: "&7Chat IA premium et rôle Subscriber sur Discord"
     studioLore: "&7Commande un pack sur mesure pour ton serveur"
     price: "&7Prix : &f%price%"
   news:
